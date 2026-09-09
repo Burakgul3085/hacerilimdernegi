@@ -271,6 +271,34 @@
                 @endif
             </div>
         </div>
+
+        @if (filled($settings['developer_name']))
+            <div class="border-t border-white/10">
+                <div class="shell flex flex-wrap items-center justify-center gap-x-4 gap-y-2 py-4 text-[11px] text-cream/40">
+                    <span>
+                        {{ $settings['developer_label'] ?: 'Tasarım ve yazılım' }}:
+                        @if (filled($settings['developer_url']))
+                            <a href="{{ $settings['developer_url'] }}" target="_blank" rel="noopener noreferrer author"
+                               class="inline-flex items-center gap-1.5 align-middle font-medium text-cream/70 transition hover:text-gold">
+                                <x-ui.icon name="linkedin" class="h-3.5 w-3.5" />
+                                {{ $settings['developer_name'] }}
+                            </a>
+                        @else
+                            <span class="font-medium text-cream/70">{{ $settings['developer_name'] }}</span>
+                        @endif
+                    </span>
+
+                    @if (filled($settings['developer_email']))
+                        <a href="mailto:{{ $settings['developer_email'] }}"
+                           aria-label="{{ $settings['developer_name'] }} ile e-posta üzerinden iletişime geçin"
+                           class="inline-flex items-center gap-1.5 transition hover:text-gold">
+                            <x-ui.icon name="mail" class="h-3.5 w-3.5" />
+                            <span>E-posta</span>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @endif
     </footer>
 
     <div x-show="cookies" x-cloak x-transition.opacity class="fixed inset-x-0 bottom-0 z-50 px-4 pb-4">

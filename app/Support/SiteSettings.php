@@ -121,6 +121,11 @@ class SiteSettings
             'newsletter_title' => 'E-bülten',
             'newsletter_text' => 'Gelişmelerden haberdar olun.',
             'footer_note' => 'Kişisel veriler Almanya (Frankfurt) sunucusunda işlenir.',
+
+            'developer_label' => 'Tasarım ve yazılım',
+            'developer_name' => 'Burak Gül',
+            'developer_url' => 'https://www.linkedin.com/in/burakgul100',
+            'developer_email' => 'burakgul3085@gmail.com',
         ];
     }
 

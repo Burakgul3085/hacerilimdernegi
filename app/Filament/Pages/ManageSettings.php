@@ -279,6 +279,19 @@ class ManageSettings extends Page
                         TextInput::make('newsletter_text')->label('E-bülten açıklaması')->maxLength(160),
                         TextInput::make('footer_note')->label('Alt bilgi notu')->maxLength(200)->columnSpanFull(),
                     ]),
+
+                Section::make('Yazılım künyesi')
+                    ->description('Sayfanın en altındaki geliştirici satırı. İsim boş bırakılırsa satır tamamen gizlenir.')
+                    ->columns(2)
+                    ->collapsed()
+                    ->schema([
+                        TextInput::make('developer_label')->label('Künye etiketi')->maxLength(40)
+                            ->placeholder('Tasarım ve yazılım'),
+                        TextInput::make('developer_name')->label('Geliştirici adı')->maxLength(80),
+                        TextInput::make('developer_url')->label('Profil bağlantısı')->url()->maxLength(255)
+                            ->helperText('LinkedIn veya kişisel site adresi.'),
+                        TextInput::make('developer_email')->label('Geliştirici e-postası')->email()->maxLength(180),
+                    ]),
             ]);
     }
 

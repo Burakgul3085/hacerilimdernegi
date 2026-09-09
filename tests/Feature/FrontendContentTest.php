@@ -87,6 +87,31 @@ class FrontendContentTest extends TestCase
             ->assertDontSee('>Programlar<', false);
     }
 
+    public function test_footer_credits_the_developer_from_settings(): void
+    {
+        SiteSettings::put('developer_label', 'Tasarım ve yazılım');
+        SiteSettings::put('developer_name', 'Burak Gül');
+        SiteSettings::put('developer_url', 'https://www.linkedin.com/in/burakgul100');
+        SiteSettings::put('developer_email', 'burakgul3085@gmail.com');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Tasarım ve yazılım')
+            ->assertSee('Burak Gül')
+            ->assertSee('https://www.linkedin.com/in/burakgul100', false)
+            ->assertSee('mailto:burakgul3085@gmail.com', false);
+    }
+
+    public function test_footer_credit_disappears_when_the_developer_name_is_cleared(): void
+    {
+        SiteSettings::put('developer_name', '');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertDontSee('Tasarım ve yazılım')
+            ->assertDontSee('mailto:burakgul3085@gmail.com', false);
+    }
+
     public function test_program_list_filters_by_type_and_search_term(): void
     {
         $this->makeProgram([
