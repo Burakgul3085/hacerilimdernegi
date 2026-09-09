@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Hacer 0lim ve Kültür Dernei">
+  <rect width="120" height="120" rx="18" fill="#143D2C"/>
+  <rect x="8" y="8" width="104" height="104" rx="12" fill="none" stroke="#C4A35A" stroke-width="1.5"/>
+  <path d="M28 82 V38 h10 v18 h16 V38 h10 v44 H54 V62 H38 v20z" fill="#F6F1E7"/>
+  <path d="M78 36c12 0 20 9 20 20 0 14-12 24-24 28 8-4 14-12 14-22 0-10-7-16-14-16-2 0-4 .4-6 1.2V36c3.2-1.2 6.6-2 10-2z" fill="#C4A35A"/>
+  <circle cx="72" cy="78" r="3" fill="#C4A35A"/>
+</svg>
