@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -12,7 +13,7 @@ class PostController extends Controller
     {
         $posts = Post::query()
             ->published()
-            ->when($request->filled('tur'), fn ($query) => $query->where('type', $request->string('tur')))
+            ->when($request->filled('tur'), fn (Builder $query) => $query->where('type', $request->string('tur')))
             ->latest('published_at')
             ->latest()
             ->paginate(9)
@@ -28,6 +29,16 @@ class PostController extends Controller
     {
         abort_unless($post->is_published, 404);
 
-        return view('pages.posts.show', compact('post'));
+        $post->load(['author', 'category']);
+
+        $related = Post::query()
+            ->published()
+            ->whereKeyNot($post->getKey())
+            ->latest('published_at')
+            ->latest()
+            ->limit(3)
+            ->get();
+
+        return view('pages.posts.show', compact('post', 'related'));
     }
 }

@@ -5,6 +5,7 @@ namespace App\Providers;
 use Carbon\Carbon;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Carbon::setLocale('tr');
+
+        Paginator::defaultView('pagination.hacer');
+        Paginator::defaultSimpleView('pagination.hacer');
 
         RateLimiter::for('forms', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());

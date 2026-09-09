@@ -10,7 +10,7 @@ class MediaController extends Controller
     public function index(): View
     {
         return view('pages.media.index', [
-            'albums' => MediaAlbum::query()->published()->latest()->paginate(9),
+            'albums' => MediaAlbum::query()->published()->withCount('items')->latest()->paginate(9),
         ]);
     }
 

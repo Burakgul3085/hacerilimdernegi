@@ -1,27 +1,107 @@
 @extends('layouts.app')
+
 @section('title', $event->title)
+@section('description', \Illuminate\Support\Str::limit(strip_tags($event->description ?? ''), 160))
 
 @section('content')
-<article class="mx-auto max-w-3xl px-4 py-16">
-    <h1 class="font-display text-5xl text-forest">{{ $event->title }}</h1>
-    <p class="mt-4 text-muted">{{ optional($event->starts_at)->translatedFormat('d F Y H:i') }} · {{ $event->location }}</p>
-    <div class="prose-hacer mt-8">{!! $event->description !!}</div>
+
+<x-page-header
+    eyebrow="Etkinlik"
+    :title="$event->title"
+    :breadcrumbs="[['label' => 'Etkinlikler', 'url' => route('events.index')], ['label' => $event->title]]">
+    <div class="flex flex-col gap-2">
+        <x-meta icon="calendar">{{ $event->starts_at?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
+        @if ($event->location)
+            <x-meta icon="pin">{{ $event->location }}</x-meta>
+        @endif
+    </div>
+</x-page-header>
+
+<section class="shell py-14 lg:py-20">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-14">
+        <div class="reveal">
+            <x-cover :src="$event->image" :alt="$event->title" ratio="aspect-[16/10]" rounded="rounded-2xl" />
+        </div>
+
+        <aside class="reveal space-y-4">
+            <div class="card p-7">
+                <p class="eyebrow">Etkinlik hakkında</p>
+                <div class="prose-hacer mt-4 text-[15px]">{!! $event->description !!}</div>
+
+                <div class="mt-6 space-y-3 border-t border-line pt-5">
+                    <x-meta icon="calendar">{{ $event->starts_at?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
+                    @if ($event->ends_at)
+                        <x-meta icon="clock">Bitiş: {{ $event->ends_at->translatedFormat('d F Y, H:i') }}</x-meta>
+                    @endif
+                    @if ($event->location)
+                        <x-meta icon="pin">{{ $event->location }}</x-meta>
+                    @endif
+                    @if ($event->capacity)
+                        <x-meta icon="users">Kontenjan: {{ $event->capacity }}</x-meta>
+                    @endif
+                </div>
+
+                @if ($calendarUrl)
+                    <a href="{{ $calendarUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-solid btn-sm mt-6 w-full">
+                        <x-ui.icon name="calendar" class="h-4 w-4" />
+                        Takvime ekle
+                    </a>
+                @endif
+            </div>
+
+            @if ($related->isNotEmpty())
+                <div class="card p-6">
+                    <p class="eyebrow">Diğer etkinlikler</p>
+                    <ul class="mt-4 divide-y divide-line">
+                        @foreach ($related as $item)
+                            <li>
+                                <a href="{{ route('events.show', $item) }}" class="group flex items-center justify-between gap-3 py-3">
+                                    <span>
+                                        <span class="block font-display text-lg leading-snug text-forest">{{ $item->title }}</span>
+                                        <span class="mt-0.5 block text-[13px] text-muted">{{ $item->starts_at?->translatedFormat('d.m.Y') }}</span>
+                                    </span>
+                                    <x-ui.icon name="chevron-right" class="h-4 w-4 shrink-0 text-line transition group-hover:text-gold" />
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        </aside>
+    </div>
 
     @if ($event->registration_open)
-        <form method="POST" action="{{ route('events.register', $event) }}" class="mt-12 space-y-4 rounded-2xl border border-line bg-paper p-6">
-            @csrf
-            <h2 class="font-display text-2xl text-forest">Katılım başvurusu</h2>
-            @include('partials.form-errors')
-            <input name="name" required placeholder="Ad soyad" class="w-full rounded-lg border-line px-3 py-2" value="{{ old('name') }}">
-            <input type="email" name="email" required placeholder="E-posta" class="w-full rounded-lg border-line px-3 py-2" value="{{ old('email') }}">
-            <input name="phone" placeholder="Telefon" class="w-full rounded-lg border-line px-3 py-2" value="{{ old('phone') }}">
-            <textarea name="notes" rows="4" placeholder="Not" class="w-full rounded-lg border-line px-3 py-2">{{ old('notes') }}</textarea>
-            <label class="flex items-start gap-2 text-sm text-muted">
-                <input type="checkbox" name="kvkk_accepted" value="1" required>
-                <span><a class="underline" href="{{ route('legal', 'kvkk') }}">KVKK aydınlatma metnini</a> okudum, kişisel verilerimin Almanya’daki sunucuda işlenmesini kabul ediyorum.</span>
-            </label>
-            <button class="rounded-full bg-forest px-5 py-2 text-cream">Başvur</button>
-        </form>
+        <div class="reveal mt-16 overflow-hidden rounded-2xl border border-line bg-paper">
+            <div class="grid lg:grid-cols-[20rem_minmax(0,1fr)]">
+                <div class="grain flex flex-col justify-center bg-cream p-8 lg:p-10">
+                    <span class="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-paper text-gold">
+                        <x-ui.icon name="hand" class="h-6 w-6" />
+                    </span>
+                    <p class="mt-5 font-display text-3xl leading-snug text-forest">Katılım başvurusu</p>
+                    <p class="mt-3 text-sm leading-relaxed text-muted">Formu doldurun, dernek yönetimi sizinle iletişime geçsin.</p>
+                </div>
+
+                <form method="POST" action="{{ route('events.register', $event) }}" class="space-y-5 p-8 lg:p-10">
+                    @csrf
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <x-field name="name" label="Ad soyad" placeholder="Ad soyad" required autocomplete="name" />
+                        <x-field name="email" type="email" label="E-posta" placeholder="E-posta" required autocomplete="email" />
+                        <x-field name="phone" label="Telefon" placeholder="Telefon" autocomplete="tel" class="sm:col-span-2" />
+                    </div>
+
+                    <x-field name="notes" type="textarea" label="Not" rows="4" placeholder="Eklemek istedikleriniz" />
+
+                    <x-consent />
+
+                    <button type="submit" class="btn btn-solid">
+                        Başvuruyu gönder
+                        <x-ui.icon name="arrow-right" class="h-4 w-4" />
+                    </button>
+                </form>
+            </div>
+        </div>
     @endif
-</article>
+</section>
+
 @endsection

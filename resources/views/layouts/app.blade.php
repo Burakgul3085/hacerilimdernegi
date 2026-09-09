@@ -1,112 +1,288 @@
+@php
+    $navItems = \App\Support\SiteSettings::list('nav_items');
+    $currentPath = '/'.trim(request()->path(), '/');
+
+    $isActive = function (string $url) use ($currentPath): bool {
+        $url = '/'.trim($url, '/');
+
+        return $url !== '/' && ($currentPath === $url || str_starts_with($currentPath, $url.'/'));
+    };
+
+    $ctaLabel = $settings['nav_cta_label'] ?? 'Bağış';
+    $ctaUrl = $settings['nav_cta_url'] ?: route('donate');
+    $siteUrl = 'https://'.($settings['domain'] ?: 'hacerilimvekulturdernegi.org');
+    $canonical = $siteUrl.request()->getPathInfo();
+
+    $organizationSchema = json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'NGO',
+        'name' => $settings['site_name'],
+        'description' => $settings['tagline'],
+        'url' => $siteUrl,
+        'logo' => $logoUrl,
+        'email' => $settings['email'] ?: null,
+        'telephone' => $settings['phone'] ?: null,
+        'address' => [
+            '@type' => 'PostalAddress',
+            'streetAddress' => $settings['address'],
+            'addressLocality' => 'Gaziantep',
+            'addressCountry' => 'TR',
+        ],
+        'sameAs' => array_values(array_filter([
+            $settings['telegram'] ?? null,
+            $settings['whatsapp'] ?? null,
+            $settings['twitter'] ?? null,
+            $settings['instagram'] ?? null,
+            $settings['youtube'] ?? null,
+            $settings['facebook'] ?? null,
+        ])),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+@endphp
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', $settings['site_name'] ?? 'Hâcer İlim ve Kültür Derneği')</title>
+    <meta name="theme-color" content="{{ $settings['color_primary'] ?: '#161513' }}">
+
+    <title>@hasSection('title')@yield('title') — {{ $settings['site_name'] }}@else{{ $settings['site_name'] }}@endif</title>
     <meta name="description" content="@yield('description', $settings['tagline'] ?? '')">
-    <link rel="canonical" href="{{ 'https://'.($settings['domain'] ?? 'hacerilimvekulturdernegi.org').request()->getPathInfo() }}">
-    <link rel="icon" type="image/png" href="{{ $logoUrl }}">
+    <link rel="canonical" href="{{ $canonical }}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:site_name" content="{{ $settings['site_name'] }}">
+    <meta property="og:title" content="@yield('title', $settings['site_name'])">
+    <meta property="og:description" content="@yield('description', $settings['tagline'] ?? '')">
+    <meta property="og:url" content="{{ $canonical }}">
+    <meta property="og:image" content="{{ \App\Support\SiteSettings::heroImageUrl() }}">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" type="image/png" href="{{ \App\Support\SiteSettings::faviconUrl() }}">
+    <link rel="apple-touch-icon" href="{{ $logoUrl }}">
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=cormorant-garamond:500,600,700|source-sans-3:400,500,600,700" rel="stylesheet" />
+
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        <script>document.documentElement.classList.add('js');</script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
+
     <style>
         :root {
-            --color-forest: {{ $settings['color_primary'] ?? '#161513' }};
-            --color-gold: {{ $settings['color_gold'] ?? '#8A7A62' }};
+            --color-forest: {{ $settings['color_primary'] ?: '#161513' }};
+            --color-gold: {{ $settings['color_gold'] ?: '#8A7A62' }};
         }
     </style>
+
+    <script type="application/ld+json">{!! $organizationSchema !!}</script>
+
+    @stack('head')
 </head>
-<body class="min-h-screen bg-cream text-ink" x-data="{ open: false, cookies: localStorage.getItem('hacer_cookies') !== '1' }">
-    <div class="bg-forest-deep text-cream/80 text-center text-[11px] tracking-[0.28em] uppercase py-2">
-        Gaziantep · İlim · Sohbet · Kültür
-    </div>
-    <header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
-        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-            <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3">
-                <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-14 w-auto max-w-[220px] object-contain">
-            </a>
-            <nav class="hidden items-center gap-5 text-sm font-medium text-forest lg:flex">
-                <a href="{{ route('about') }}">Hakkımızda</a>
-                <a href="{{ route('programs.index') }}">Programlar</a>
-                <a href="{{ route('events.index') }}">Etkinlikler</a>
-                <a href="{{ route('posts.index') }}">Yazılar</a>
-                <a href="{{ route('media.index') }}">Medya</a>
-                <a href="{{ route('live') }}">Canlı</a>
-                <a href="{{ route('membership') }}">Üyelik</a>
-                <a href="{{ route('donate') }}" class="rounded-full bg-forest px-4 py-2 text-cream">Bağış</a>
-                <a href="{{ route('contact') }}">İletişim</a>
-            </nav>
-            <button class="lg:hidden rounded-md border border-line px-3 py-2 text-sm" @click="open = !open" type="button">Menü</button>
+<body class="min-h-screen bg-cream text-ink"
+      x-data="{ menu: false, search: false, cookies: localStorage.getItem('hacer_cookies') !== '1' }"
+      :class="menu && 'overflow-hidden'">
+
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-full focus:bg-forest focus:px-5 focus:py-3 focus:text-cream">
+        İçeriğe geç
+    </a>
+
+    @if (filled($settings['topbar_text'] ?? null))
+        <div class="bg-forest-deep">
+            <div class="shell py-2.5 text-center">
+                <p class="text-[10px] font-medium uppercase tracking-[0.34em] text-cream/60">{{ $settings['topbar_text'] }}</p>
+            </div>
         </div>
-        <div class="lg:hidden border-t border-line bg-paper px-4 py-4 space-y-3" x-show="open" x-cloak>
-            <a class="block" href="{{ route('about') }}">Hakkımızda</a>
-            <a class="block" href="{{ route('programs.index') }}">Programlar</a>
-            <a class="block" href="{{ route('events.index') }}">Etkinlikler</a>
-            <a class="block" href="{{ route('posts.index') }}">Yazılar</a>
-            <a class="block" href="{{ route('media.index') }}">Medya</a>
-            <a class="block" href="{{ route('live') }}">Canlı</a>
-            <a class="block" href="{{ route('membership') }}">Üyelik</a>
-            <a class="block" href="{{ route('donate') }}">Bağış</a>
-            <a class="block" href="{{ route('contact') }}">İletişim</a>
+    @endif
+
+    <header class="sticky top-0 z-50 border-b border-line bg-paper/85 backdrop-blur-xl">
+        <div class="shell flex h-[4.5rem] items-center justify-between gap-6 lg:h-20">
+            <a href="{{ route('home') }}" class="flex shrink-0 items-center" aria-label="{{ $settings['site_name'] }}">
+                <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-11 w-auto max-w-[200px] object-contain lg:h-14">
+            </a>
+
+            <nav class="hidden items-center gap-6 xl:flex" aria-label="Ana menü">
+                @foreach ($navItems as $item)
+                    <a href="{{ $item['url'] ?? '#' }}" class="nav-link" data-active="{{ $isActive($item['url'] ?? '') ? '1' : '0' }}">
+                        {{ $item['label'] ?? '' }}
+                    </a>
+                @endforeach
+            </nav>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                @if (filled($ctaLabel))
+                    <a href="{{ $ctaUrl }}" class="btn btn-solid btn-sm hidden sm:inline-flex">{{ $ctaLabel }}</a>
+                @endif
+
+                <a href="{{ route('contact') }}" class="nav-link hidden xl:inline" data-active="{{ $isActive('/iletisim') ? '1' : '0' }}">İletişim</a>
+
+                <button type="button" @click="search = !search; $nextTick(() => search && $refs.searchInput?.focus())"
+                        class="flex h-10 w-10 items-center justify-center rounded-full border border-line text-forest transition hover:border-gold hover:text-gold"
+                        :aria-expanded="search" aria-controls="site-search">
+                    <span class="sr-only">Arama</span>
+                    <x-ui.icon name="search" class="h-[18px] w-[18px]" />
+                </button>
+
+                <button type="button" @click="menu = true"
+                        class="flex h-10 w-10 items-center justify-center rounded-full border border-line text-forest transition hover:border-gold hover:text-gold xl:hidden">
+                    <span class="sr-only">Menüyü aç</span>
+                    <x-ui.icon name="menu" class="h-[18px] w-[18px]" />
+                </button>
+            </div>
+        </div>
+
+        <div id="site-search" x-show="search" x-cloak x-transition.opacity class="border-t border-line bg-paper">
+            <form action="{{ route('search') }}" method="GET" class="shell flex items-center gap-3 py-4">
+                <x-ui.icon name="search" class="h-5 w-5 shrink-0 text-gold" />
+                <label for="site-search-input" class="sr-only">Sitede ara</label>
+                <input id="site-search-input" x-ref="searchInput" type="search" name="q" value="{{ request('q') }}"
+                       placeholder="Program, etkinlik veya yazı arayın…"
+                       class="w-full bg-transparent text-base text-forest placeholder:text-muted/70 focus:outline-none">
+                <button type="submit" class="btn btn-solid btn-sm shrink-0">Ara</button>
+                <button type="button" @click="search = false" class="shrink-0 text-muted transition hover:text-forest">
+                    <span class="sr-only">Aramayı kapat</span>
+                    <x-ui.icon name="close" class="h-5 w-5" />
+                </button>
+            </form>
         </div>
     </header>
 
+    <div x-show="menu" x-cloak class="fixed inset-0 z-[60] xl:hidden" role="dialog" aria-modal="true" aria-label="Menü">
+        <div class="absolute inset-0 bg-forest-deep/70" @click="menu = false" x-transition.opacity></div>
+
+        <div class="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-paper shadow-float"
+             x-transition:enter="transition duration-300 ease-out" x-transition:enter-start="translate-x-full"
+             x-transition:leave="transition duration-200 ease-in" x-transition:leave-end="translate-x-full">
+            <div class="flex items-center justify-between border-b border-line px-5 py-4">
+                <img src="{{ $logoUrl }}" alt="" class="h-10 w-auto object-contain">
+                <button type="button" @click="menu = false" class="flex h-10 w-10 items-center justify-center rounded-full border border-line text-forest">
+                    <span class="sr-only">Menüyü kapat</span>
+                    <x-ui.icon name="close" class="h-5 w-5" />
+                </button>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto px-5 py-6">
+                <ul class="space-y-1">
+                    @foreach ($navItems as $item)
+                        <li>
+                            <a href="{{ $item['url'] ?? '#' }}"
+                               class="flex items-center justify-between rounded-xl px-4 py-3 font-display text-2xl text-forest transition hover:bg-cream {{ $isActive($item['url'] ?? '') ? 'bg-cream' : '' }}">
+                                {{ $item['label'] ?? '' }}
+                                <x-ui.icon name="chevron-right" class="h-4 w-4 text-gold" />
+                            </a>
+                        </li>
+                    @endforeach
+                    <li>
+                        <a href="{{ route('contact') }}" class="flex items-center justify-between rounded-xl px-4 py-3 font-display text-2xl text-forest transition hover:bg-cream">
+                            İletişim
+                            <x-ui.icon name="chevron-right" class="h-4 w-4 text-gold" />
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="space-y-4 border-t border-line px-5 py-5">
+                @if (filled($ctaLabel))
+                    <a href="{{ $ctaUrl }}" class="btn btn-solid w-full">{{ $ctaLabel }}</a>
+                @endif
+                <x-social-links :settings="$settings" />
+            </div>
+        </div>
+    </div>
+
     @if (session('status'))
-        <div class="mx-auto mt-6 max-w-6xl px-4">
-            <div class="rounded-xl border border-gold bg-gold-light/40 px-4 py-3 text-sm text-forest">{{ session('status') }}</div>
+        <div class="shell pt-8">
+            <div class="flex items-start gap-3 rounded-2xl border border-gold/40 bg-gold-light/25 px-5 py-4 text-sm text-forest" role="status">
+                <x-ui.icon name="check" class="mt-0.5 h-5 w-5 shrink-0 text-gold" />
+                <p>{{ session('status') }}</p>
+            </div>
         </div>
     @endif
 
-    <main>
+    <main id="main">
         @yield('content')
     </main>
 
-    <footer class="mt-20 border-t border-line bg-forest-deep text-cream">
-        <div class="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-4">
-            <div class="md:col-span-2">
-                <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="mb-4 h-16 w-auto brightness-0 invert">
-                <p class="font-display text-3xl">Hâcer İlim ve Kültür Derneği</p>
-                <p class="mt-3 max-w-md text-sm text-cream/70">{{ $settings['tagline'] }}</p>
+    <footer class="mt-24 bg-forest-deep text-cream">
+        <div class="shell grid gap-12 py-16 lg:grid-cols-12 lg:gap-10">
+            <div class="lg:col-span-5">
+                <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-14 w-auto object-contain brightness-0 invert">
+                <p class="mt-6 font-display text-3xl leading-snug">{{ $settings['site_name'] }}</p>
+                <p class="mt-3 max-w-sm text-sm leading-relaxed text-cream/60">{{ $settings['tagline'] }}</p>
+                <x-social-links :settings="$settings" tone="dark" class="mt-7" />
             </div>
-            <div class="text-sm space-y-2">
-                <p class="text-gold tracking-wide uppercase text-xs">İletişim</p>
-                <p>{{ $settings['address'] }}</p>
-                @if ($settings['phone'])<p>{{ $settings['phone'] }}</p>@endif
-                <p>{{ $settings['email'] }}</p>
-                <div class="flex flex-wrap gap-3 pt-2 text-gold-light">
-                    @if (!empty($settings['telegram']))<a href="{{ $settings['telegram'] }}" target="_blank" rel="noopener">Telegram</a>@endif
-                    @if (!empty($settings['whatsapp']))<a href="{{ $settings['whatsapp'] }}" target="_blank" rel="noopener">WhatsApp</a>@endif
-                    @if (!empty($settings['twitter']))<a href="{{ $settings['twitter'] }}" target="_blank" rel="noopener">X</a>@endif
-                    @if (!empty($settings['instagram']))<a href="{{ $settings['instagram'] }}" target="_blank" rel="noopener">Instagram</a>@endif
-                    @if (!empty($settings['youtube']))<a href="{{ $settings['youtube'] }}" target="_blank" rel="noopener">YouTube</a>@endif
-                </div>
+
+            <div class="lg:col-span-4">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">İletişim</p>
+                <ul class="mt-5 space-y-4 text-sm text-cream/75">
+                    @if (filled($settings['address']))
+                        <li class="flex items-start gap-3">
+                            <x-ui.icon name="pin" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold" />
+                            <span class="leading-relaxed">{{ $settings['address'] }}</span>
+                        </li>
+                    @endif
+                    @if (filled($settings['phone']))
+                        <li class="flex items-start gap-3">
+                            <x-ui.icon name="phone" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold" />
+                            <a href="tel:{{ preg_replace('/\s+/', '', $settings['phone']) }}" class="transition hover:text-cream">{{ $settings['phone'] }}</a>
+                        </li>
+                    @endif
+                    @if (filled($settings['email']))
+                        <li class="flex items-start gap-3">
+                            <x-ui.icon name="mail" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold" />
+                            <a href="mailto:{{ $settings['email'] }}" class="break-all transition hover:text-cream">{{ $settings['email'] }}</a>
+                        </li>
+                    @endif
+                </ul>
             </div>
-            <div>
-                <p class="text-gold tracking-wide uppercase text-xs mb-3">E-bülten</p>
-                <form method="POST" action="{{ route('newsletter.store') }}" class="space-y-2">
+
+            <div class="lg:col-span-3">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">{{ $settings['newsletter_title'] ?: 'E-bülten' }}</p>
+                <form method="POST" action="{{ route('newsletter.store') }}" class="mt-5">
                     @csrf
-                    <input type="email" name="email" required placeholder="E-posta" class="w-full rounded-lg bg-forest px-3 py-2 text-sm text-cream placeholder:text-cream/50">
-                    <button class="w-full rounded-lg bg-cream px-3 py-2 text-sm font-semibold text-forest">Kaydol</button>
+                    <label for="footer-newsletter" class="sr-only">E-posta adresiniz</label>
+                    <div class="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1.5 pl-4 pr-1.5 transition focus-within:border-gold">
+                        <input id="footer-newsletter" type="email" name="email" required placeholder="E-posta adresiniz"
+                               class="w-full bg-transparent text-sm text-cream placeholder:text-cream/40 focus:outline-none">
+                        <button type="submit" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cream text-forest transition hover:bg-gold hover:text-white">
+                            <span class="sr-only">Kaydol</span>
+                            <x-ui.icon name="arrow-right" class="h-4 w-4" />
+                        </button>
+                    </div>
                 </form>
+                @if (filled($settings['newsletter_text']))
+                    <p class="mt-3 text-xs leading-relaxed text-cream/50">{{ $settings['newsletter_text'] }}</p>
+                @endif
             </div>
         </div>
-        <div class="border-t border-white/10 px-4 py-4 text-center text-xs text-cream/60">
-            <a href="{{ route('legal', 'kvkk') }}">KVKK</a> ·
-            <a href="{{ route('legal', 'gizlilik') }}">Gizlilik</a> ·
-            <a href="{{ route('legal', 'cerezler') }}">Çerezler</a>
-            <span class="mx-2">|</span>
-            Kişisel veriler Almanya (Frankfurt) sunucusunda işlenir.
+
+        <div class="border-t border-white/10">
+            <div class="shell flex flex-col gap-3 py-5 text-xs text-cream/50 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <span>© {{ date('Y') }} {{ $settings['site_name'] }}</span>
+                    <a href="{{ route('legal', 'kvkk') }}" class="transition hover:text-cream">KVKK</a>
+                    <a href="{{ route('legal', 'gizlilik') }}" class="transition hover:text-cream">Gizlilik</a>
+                    <a href="{{ route('legal', 'cerezler') }}" class="transition hover:text-cream">Çerezler</a>
+                </div>
+                @if (filled($settings['footer_note']))
+                    <p>{{ $settings['footer_note'] }}</p>
+                @endif
+            </div>
         </div>
     </footer>
 
-    <div class="fixed inset-x-0 bottom-0 z-50 bg-forest text-cream px-4 py-4 text-sm shadow-2xl" x-show="cookies" x-cloak>
-        <div class="mx-auto flex max-w-6xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <p>Site deneyimi için zorunlu çerezler kullanılır. Ayrıntı: <a class="underline text-gold-light" href="{{ route('legal', 'cerezler') }}">çerez politikası</a>.</p>
-            <button type="button" class="rounded-full bg-cream px-4 py-2 text-forest" @click="localStorage.setItem('hacer_cookies','1'); cookies=false">Kabul</button>
+    <div x-show="cookies" x-cloak x-transition.opacity class="fixed inset-x-0 bottom-0 z-50 px-4 pb-4">
+        <div class="shell">
+            <div class="flex flex-col gap-4 rounded-2xl bg-forest px-6 py-5 text-sm text-cream shadow-float sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-cream/80">
+                    Site deneyimi için zorunlu çerezler kullanılır. Ayrıntı:
+                    <a class="underline decoration-gold underline-offset-4" href="{{ route('legal', 'cerezler') }}">çerez politikası</a>.
+                </p>
+                <button type="button" class="btn btn-cream btn-sm shrink-0"
+                        @click="localStorage.setItem('hacer_cookies','1'); cookies = false">Kabul ediyorum</button>
+            </div>
         </div>
     </div>
 </body>

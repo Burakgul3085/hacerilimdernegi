@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ProgramType;
 use App\Models\Event;
 use App\Models\MediaAlbum;
 use App\Models\Post;
@@ -16,10 +15,11 @@ class HomeController extends Controller
     {
         return view('pages.home', [
             'programs' => Program::query()->published()->upcoming()->limit(3)->get(),
+            'events' => Event::query()->published()->where(function ($query): void {
+                $query->whereNull('starts_at')->orWhere('starts_at', '>=', now()->subDay());
+            })->orderBy('starts_at')->limit(4)->get(),
             'posts' => Post::query()->published()->latest('published_at')->latest()->limit(3)->get(),
-            'events' => Event::query()->published()->orderBy('starts_at')->limit(3)->get(),
-            'albums' => MediaAlbum::query()->published()->latest()->limit(3)->get(),
-            'programTypes' => ProgramType::cases(),
+            'albums' => MediaAlbum::query()->published()->withCount('items')->latest()->limit(3)->get(),
             'settings' => SiteSettings::all(),
         ]);
     }

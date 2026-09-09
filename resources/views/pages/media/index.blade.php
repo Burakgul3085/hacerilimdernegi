@@ -1,19 +1,29 @@
 @extends('layouts.app')
+
 @section('title', 'Medya')
+@section('description', $settings['media_intro'])
 
 @section('content')
-<section class="mx-auto max-w-6xl px-4 py-16">
-    <h1 class="font-display text-5xl text-forest">Medya</h1>
-    <div class="mt-10 grid gap-6 md:grid-cols-3">
-        @forelse ($albums as $album)
-            <a href="{{ route('media.show', $album) }}" class="rounded-2xl border border-line bg-paper p-6 hover:border-gold">
-                <h2 class="font-display text-2xl text-forest">{{ $album->title }}</h2>
-                <p class="mt-2 text-sm text-muted">{{ $album->description }}</p>
-            </a>
-        @empty
-            <p class="text-muted">Albüm yok.</p>
-        @endforelse
-    </div>
-    <div class="mt-10">{{ $albums->links() }}</div>
+
+<x-page-header
+    eyebrow="Arşiv"
+    title="Medya"
+    :lead="$settings['media_intro']"
+    :breadcrumbs="[['label' => 'Medya']]" />
+
+<section class="shell py-12 lg:py-16">
+    @if ($albums->isEmpty())
+        <x-empty-state icon="photo" title="Albüm yok"
+                       text="Fotoğraf, video ve ses kayıtları yönetim panelinden albüm olarak yayınlanır." />
+    @else
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            @foreach ($albums as $album)
+                <div class="reveal"><x-album-card :album="$album" /></div>
+            @endforeach
+        </div>
+
+        <div class="mt-12">{{ $albums->links() }}</div>
+    @endif
 </section>
+
 @endsection

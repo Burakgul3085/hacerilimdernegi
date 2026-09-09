@@ -1,37 +1,98 @@
 @extends('layouts.app')
+
 @section('title', 'İletişim')
+@section('description', $settings['contact_intro'])
 
 @section('content')
-<section class="mx-auto max-w-6xl px-4 py-16 grid gap-12 md:grid-cols-2">
-    <div>
-        <h1 class="font-display text-5xl text-forest">İletişim</h1>
-        <p class="mt-4 text-muted">{{ $settings['address'] }}</p>
-        @if ($settings['phone'])
-            <p class="mt-2">{{ $settings['phone'] }}</p>
-        @endif
-        <p>{{ $settings['email'] }}</p>
-        <div class="mt-4 flex flex-wrap gap-3 text-sm">
-            @if (!empty($settings['telegram']))<a class="underline" href="{{ $settings['telegram'] }}" target="_blank" rel="noopener">Telegram</a>@endif
-            @if (!empty($settings['whatsapp']))<a class="underline" href="{{ $settings['whatsapp'] }}" target="_blank" rel="noopener">WhatsApp</a>@endif
-            @if (!empty($settings['twitter']))<a class="underline" href="{{ $settings['twitter'] }}" target="_blank" rel="noopener">X</a>@endif
+
+<x-page-header
+    eyebrow="İletişim"
+    title="İletişim"
+    :lead="$settings['contact_intro']"
+    :breadcrumbs="[['label' => 'İletişim']]" />
+
+<section class="shell py-14 lg:py-20">
+    <div class="grid gap-10 lg:grid-cols-2 lg:gap-14">
+        <div class="reveal">
+            <ul class="space-y-5">
+                @if (filled($settings['address']))
+                    <li class="flex items-start gap-4">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line text-gold">
+                            <x-ui.icon name="pin" class="h-5 w-5" />
+                        </span>
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">Adres</p>
+                            <p class="mt-1 leading-relaxed text-muted">{{ $settings['address'] }}</p>
+                        </div>
+                    </li>
+                @endif
+
+                @if (filled($settings['phone']))
+                    <li class="flex items-start gap-4">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line text-gold">
+                            <x-ui.icon name="phone" class="h-5 w-5" />
+                        </span>
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">Telefon</p>
+                            <a href="tel:{{ preg_replace('/\s+/', '', $settings['phone']) }}" class="mt-1 block text-muted transition hover:text-forest">{{ $settings['phone'] }}</a>
+                        </div>
+                    </li>
+                @endif
+
+                @if (filled($settings['email']))
+                    <li class="flex items-start gap-4">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line text-gold">
+                            <x-ui.icon name="mail" class="h-5 w-5" />
+                        </span>
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">E-posta</p>
+                            <a href="mailto:{{ $settings['email'] }}" class="mt-1 block break-all text-muted transition hover:text-forest">{{ $settings['email'] }}</a>
+                        </div>
+                    </li>
+                @endif
+            </ul>
+
+            <x-social-links :settings="$settings" class="mt-8" />
         </div>
-        @if ($settings['map_embed'])
-            <div class="mt-6 overflow-hidden rounded-2xl">{!! $settings['map_embed'] !!}</div>
+
+        @if (filled($settings['map_embed']))
+            <div class="reveal overflow-hidden rounded-2xl border border-line [&_iframe]:block [&_iframe]:h-full [&_iframe]:min-h-[22rem] [&_iframe]:w-full">
+                {!! $settings['map_embed'] !!}
+            </div>
         @endif
     </div>
-    <form method="POST" action="{{ route('contact.store') }}" class="space-y-4">
-        @csrf
-        @include('partials.form-errors')
-        <input name="name" required placeholder="Ad soyad" class="w-full rounded-lg border-line px-3 py-2" value="{{ old('name') }}">
-        <input type="email" name="email" required placeholder="E-posta" class="w-full rounded-lg border-line px-3 py-2" value="{{ old('email') }}">
-        <input name="phone" placeholder="Telefon" class="w-full rounded-lg border-line px-3 py-2" value="{{ old('phone') }}">
-        <input name="subject" placeholder="Konu" class="w-full rounded-lg border-line px-3 py-2" value="{{ old('subject') }}">
-        <textarea name="message" required rows="6" placeholder="Mesaj" class="w-full rounded-lg border-line px-3 py-2">{{ old('message') }}</textarea>
-        <label class="flex items-start gap-2 text-sm text-muted">
-            <input type="checkbox" name="kvkk_accepted" value="1" required>
-            <span>KVKK metnini okudum ve kabul ediyorum.</span>
-        </label>
-        <button class="rounded-full bg-forest px-6 py-2 text-cream">Gönder</button>
-    </form>
+
+    <div class="reveal mt-14 overflow-hidden rounded-2xl border border-line bg-paper">
+        <div class="grid lg:grid-cols-[20rem_minmax(0,1fr)]">
+            <div class="grain flex flex-col justify-center bg-cream p-8 lg:p-10">
+                <span class="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-paper text-gold">
+                    <x-ui.icon name="chat" class="h-6 w-6" />
+                </span>
+                <p class="mt-5 font-display text-3xl leading-snug text-forest">Bize yazın</p>
+                <p class="mt-3 text-sm leading-relaxed text-muted">Soru, öneri ve iş birliği talepleriniz için formu doldurabilirsiniz.</p>
+            </div>
+
+            <form method="POST" action="{{ route('contact.store') }}" class="space-y-5 p-8 lg:p-10">
+                @csrf
+
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <x-field name="name" label="Ad soyad" placeholder="Ad soyad" required autocomplete="name" />
+                    <x-field name="email" type="email" label="E-posta" placeholder="E-posta" required autocomplete="email" />
+                    <x-field name="phone" label="Telefon" placeholder="Telefon" autocomplete="tel" />
+                    <x-field name="subject" label="Konu" placeholder="Konu" />
+                </div>
+
+                <x-field name="message" type="textarea" label="Mesaj" rows="6" placeholder="Mesajınız" required />
+
+                <x-consent />
+
+                <button type="submit" class="btn btn-solid">
+                    Gönder
+                    <x-ui.icon name="arrow-right" class="h-4 w-4" />
+                </button>
+            </form>
+        </div>
+    </div>
 </section>
+
 @endsection

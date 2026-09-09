@@ -10,16 +10,22 @@
 @theme {
     --font-sans: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
+
     --color-forest: #161513;
     --color-forest-deep: #0c0b0a;
     --color-forest-soft: #3a3733;
     --color-gold: #8a7a62;
     --color-gold-light: #d4cbbe;
     --color-cream: #fbf6ec;
+    --color-cream-deep: #f3ecdd;
     --color-paper: #fffcf8;
     --color-ink: #161513;
     --color-muted: #6b6560;
     --color-line: #e6dfd3;
+
+    --shadow-soft: 0 1px 2px rgb(22 21 19 / 0.04), 0 14px 34px -18px rgb(22 21 19 / 0.24);
+    --shadow-lift: 0 28px 64px -32px rgb(22 21 19 / 0.42);
+    --shadow-float: 0 30px 70px -34px rgb(22 21 19 / 0.5);
 }
 
 @layer base {
@@ -31,22 +37,207 @@
         @apply bg-cream text-ink font-sans antialiased;
     }
 
-    h1, h2, h3, .font-display {
+    h1,
+    h2,
+    h3,
+    .font-display {
         font-family: var(--font-display);
+        font-weight: 600;
+        letter-spacing: -0.015em;
+    }
+
+    ::selection {
+        @apply bg-gold/25 text-forest;
+    }
+
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-gold;
+    }
+}
+
+@layer components {
+    /* Sayfa genişliği: tüm bölümler aynı hizada dursun. */
+    .shell {
+        @apply mx-auto w-full max-w-[78rem] px-5 sm:px-8;
+    }
+
+    .eyebrow {
+        @apply text-[11px] font-semibold uppercase tracking-[0.32em] text-gold;
+    }
+
+    .display-1 {
+        @apply font-display text-[2.6rem] leading-[1.08] text-forest sm:text-6xl lg:text-[4.1rem];
+    }
+
+    .display-2 {
+        @apply font-display text-4xl leading-[1.12] text-forest sm:text-5xl;
+    }
+
+    .display-3 {
+        @apply font-display text-2xl leading-snug text-forest sm:text-3xl;
+    }
+
+    .lead {
+        @apply text-base leading-relaxed text-muted sm:text-lg;
+    }
+
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition duration-300;
+    }
+
+    .btn-solid {
+        @apply bg-forest text-cream shadow-soft hover:bg-forest-deep hover:shadow-lift;
+    }
+
+    .btn-outline {
+        @apply border border-forest/20 text-forest hover:border-forest/50 hover:bg-forest/5;
+    }
+
+    .btn-cream {
+        @apply bg-cream text-forest hover:bg-white;
+    }
+
+    .btn-gold {
+        @apply bg-gold text-white hover:bg-[#75674f];
+    }
+
+    .btn-sm {
+        @apply px-4 py-2 text-[13px];
+    }
+
+    .card {
+        @apply rounded-2xl border border-line bg-paper transition duration-300;
+    }
+
+    .card-hover {
+        @apply hover:-translate-y-1 hover:border-gold/50 hover:shadow-lift;
+    }
+
+    .chip {
+        @apply inline-flex items-center rounded-full border border-line bg-paper px-4 py-2 text-[13px] font-medium text-forest transition hover:border-gold/60 hover:text-gold;
+    }
+
+    .chip-active {
+        @apply border-forest bg-forest text-cream hover:border-forest hover:text-cream;
+    }
+
+    .tag {
+        @apply text-[10px] font-semibold uppercase tracking-[0.24em] text-gold;
+    }
+
+    .field {
+        @apply w-full rounded-xl border border-line bg-paper px-4 py-3 text-sm text-ink transition placeholder:text-muted/70 focus:border-gold focus:ring-2 focus:ring-gold/20;
+    }
+
+    .nav-link {
+        @apply relative text-[15px] font-medium text-forest/85 transition-colors hover:text-forest;
+    }
+
+    .nav-link::after {
+        content: '';
+        @apply absolute -bottom-1.5 left-0 h-px w-0 bg-gold transition-all duration-300;
+    }
+
+    .nav-link:hover::after,
+    .nav-link[data-active='1']::after {
+        @apply w-full;
+    }
+
+    .nav-link[data-active='1'] {
+        @apply text-forest;
+    }
+
+    .arrow-btn {
+        @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-forest transition duration-300 group-hover:border-gold group-hover:bg-gold group-hover:text-white;
+    }
+
+    .rule {
+        @apply h-px w-full bg-line;
+    }
+
+    .page-btn {
+        @apply inline-flex h-10 min-w-10 items-center justify-center rounded-full border border-line bg-paper px-3 text-sm font-medium text-forest transition hover:border-gold hover:text-gold;
+    }
+
+    .page-btn-active {
+        @apply border-forest bg-forest text-cream hover:border-forest hover:text-cream;
+    }
+
+    .page-btn-disabled {
+        @apply cursor-not-allowed opacity-40 hover:border-line hover:text-forest;
+    }
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+
+    .grain {
+        background-image: radial-gradient(rgb(138 122 98 / 0.12) 1px, transparent 1px);
+        background-size: 22px 22px;
+    }
+}
+
+/* Blokların görünüm alanına girdikçe yumuşak belirmesi. */
+html.js .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+html.js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition:
+        opacity 0.75s ease,
+        transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.js .reveal,
+    html.js .reveal.is-visible {
+        opacity: 1;
+        transform: none;
+        transition: none;
     }
 }
 
 .prose-hacer {
-    @apply max-w-none leading-relaxed text-muted;
+    @apply max-w-none text-[17px] leading-[1.85] text-muted;
 }
 
-.prose-hacer h2,
+.prose-hacer h2 {
+    @apply mt-10 mb-3 font-display text-3xl text-forest;
+}
+
 .prose-hacer h3 {
-    @apply mt-8 mb-3 text-forest font-display;
+    @apply mt-8 mb-2 font-display text-2xl text-forest;
 }
 
 .prose-hacer p {
-    @apply mb-4;
+    @apply mb-5;
 }
 
-[x-cloak] { display: none !important; }
+.prose-hacer ul {
+    @apply mb-5 list-disc space-y-2 pl-5;
+}
+
+.prose-hacer ol {
+    @apply mb-5 list-decimal space-y-2 pl-5;
+}
+
+.prose-hacer a {
+    @apply text-forest underline decoration-gold underline-offset-4 hover:text-gold;
+}
+
+.prose-hacer blockquote {
+    @apply my-8 border-l-2 border-gold pl-5 font-display text-2xl leading-snug text-forest;
+}
+
+.prose-hacer img {
+    @apply my-8 rounded-2xl;
+}
+
+[x-cloak] {
+    display: none !important;
+}
