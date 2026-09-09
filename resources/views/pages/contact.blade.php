@@ -6,8 +6,15 @@
     <div>
         <h1 class="font-display text-5xl text-forest">İletişim</h1>
         <p class="mt-4 text-muted">{{ $settings['address'] }}</p>
-        <p class="mt-2">{{ $settings['phone'] }}</p>
+        @if ($settings['phone'])
+            <p class="mt-2">{{ $settings['phone'] }}</p>
+        @endif
         <p>{{ $settings['email'] }}</p>
+        <div class="mt-4 flex flex-wrap gap-3 text-sm">
+            @if (!empty($settings['telegram']))<a class="underline" href="{{ $settings['telegram'] }}" target="_blank" rel="noopener">Telegram</a>@endif
+            @if (!empty($settings['whatsapp']))<a class="underline" href="{{ $settings['whatsapp'] }}" target="_blank" rel="noopener">WhatsApp</a>@endif
+            @if (!empty($settings['twitter']))<a class="underline" href="{{ $settings['twitter'] }}" target="_blank" rel="noopener">X</a>@endif
+        </div>
         @if ($settings['map_embed'])
             <div class="mt-6 overflow-hidden rounded-2xl">{!! $settings['map_embed'] !!}</div>
         @endif

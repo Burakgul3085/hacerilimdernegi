@@ -12,7 +12,20 @@ class PublicSiteTest extends TestCase
 
     public function test_home_page_renders(): void
     {
-        $this->get('/')->assertOk()->assertSee('Hacer İlim');
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Hâcer')
+            ->assertSee('info@hacerilimvekulturdernegi.org')
+            ->assertSee('https://x.com/hacerilimkultur', false);
+    }
+
+    public function test_donation_page_marks_placeholder_bank_details_as_demo(): void
+    {
+        $this->get('/bagis')
+            ->assertOk()
+            ->assertSee('Demo banka bilgisi')
+            ->assertSee('ödeme yapmayınız')
+            ->assertSee('DEMO — GERÇEK IBAN BEKLENİYOR');
     }
 
     public function test_contact_requires_kvkk(): void

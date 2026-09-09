@@ -1,4 +1,4 @@
-# Hacer İlim ve Kültür Derneği
+# Hâcer İlim ve Kültür Derneği
 
 Kurumsal dinamik web sitesi: Laravel 13, Filament 5 yönetim paneli, MySQL, Tailwind.
 
@@ -18,12 +18,12 @@ php artisan serve
 ```
 
 Yönetim: `/yonetim`  
-Varsayılan kullanıcı: `yonetim@hacerilim.org` / `password` (üretimde mutlaka değiştirin)
+Varsayılan kullanıcı: `info@hacerilimvekulturdernegi.org` / `password` (üretimde mutlaka değiştirin)
 
 ## Marka
 
-Logo: `public/images/logo.svg` — asıl logo panelden (`Site ayarları`) yüklenebilir. Renkler: orman yeşili `#143D2C`, altın `#C4A35A`, krem `#F6F1E7`.
+Logo: `public/images/logo-mark.png`. Marka renkleri: mürekkep siyahı `#161513`, sıcak taupe `#8A7A62`, krem `#FBF6EC`.
 
 ## Sunucu
 
-Hostinger KVM 2, Ubuntu 24.04, Frankfurt: `deploy/` klasörüne bakın.
+Domain: `hacerilimvekulturdernegi.org`. Hostinger KVM 2, Ubuntu 24.04, Frankfurt kurulumu için `deploy/` klasörüne bakın.

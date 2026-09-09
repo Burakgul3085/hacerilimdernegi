@@ -13,8 +13,10 @@ class EventController extends Controller
 {
     public function index(): View
     {
+        $events = Event::query()->published()->orderBy('starts_at')->get();
+
         return view('pages.events.index', [
-            'events' => Event::query()->published()->orderBy('starts_at')->paginate(9),
+            'grouped' => $events->groupBy(fn (Event $event) => optional($event->starts_at)->translatedFormat('F Y') ?: 'Tarihsiz'),
         ]);
     }
 

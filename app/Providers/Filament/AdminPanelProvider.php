@@ -30,13 +30,13 @@ class AdminPanelProvider extends PanelProvider
             ->path('yonetim')
             ->login()
             ->profile()
-            ->brandName('Hacer İlim Yönetim')
-            ->brandLogo(asset('images/logo.svg'))
-            ->brandLogoHeight('2.4rem')
-            ->favicon(asset('images/logo.svg'))
+            ->brandName('Hâcer İlim Yönetim')
+            ->brandLogo(asset('images/logo-mark.png'))
+            ->brandLogoHeight('2.8rem')
+            ->favicon(asset('images/logo-mark.png'))
             ->colors([
-                'primary' => Color::hex('#143D2C'),
-                'warning' => Color::hex('#C4A35A'),
+                'primary' => Color::hex('#161513'),
+                'warning' => Color::hex('#8A7A62'),
             ])
             ->multiFactorAuthentication([
                 AppAuthentication::make()->recoverable(),

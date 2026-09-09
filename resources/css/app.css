@@ -10,16 +10,16 @@
 @theme {
     --font-sans: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
-    --color-forest: #143d2c;
-    --color-forest-deep: #0c271c;
-    --color-forest-soft: #2d5a45;
-    --color-gold: #c4a35a;
-    --color-gold-light: #e6d3a3;
-    --color-cream: #f6f1e7;
-    --color-paper: #fbf7f0;
-    --color-ink: #1a1f1c;
-    --color-muted: #5c675f;
-    --color-line: #d9d0c0;
+    --color-forest: #161513;
+    --color-forest-deep: #0c0b0a;
+    --color-forest-soft: #3a3733;
+    --color-gold: #8a7a62;
+    --color-gold-light: #d4cbbe;
+    --color-cream: #fbf6ec;
+    --color-paper: #fffcf8;
+    --color-ink: #161513;
+    --color-muted: #6b6560;
+    --color-line: #e6dfd3;
 }
 
 @layer base {

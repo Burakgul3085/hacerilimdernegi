@@ -4,27 +4,25 @@
 @section('description', $settings['tagline'])
 
 @section('content')
-<section class="relative overflow-hidden bg-forest text-cream">
-    <div class="absolute inset-0 opacity-30" style="background-image:radial-gradient(circle at 20% 20%, #c4a35a 0, transparent 35%), radial-gradient(circle at 80% 0, #2d5a45 0, transparent 40%);"></div>
-    <div class="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 md:grid-cols-2 md:py-28">
+<section class="border-b border-line bg-cream">
+    <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 md:grid-cols-2 md:py-24">
         <div>
-            <p class="text-gold tracking-[0.28em] uppercase text-xs">Gaziantep</p>
-            <h1 class="mt-4 font-display text-5xl leading-tight md:text-6xl">İlim, sohbet ve kültür etrafında duran bir dernek.</h1>
-            <p class="mt-6 max-w-xl text-lg text-gold-light/90">{{ $settings['about_excerpt'] }}</p>
+            <p class="text-gold tracking-[0.28em] uppercase text-xs">Gaziantep · Şehitkamil</p>
+            <h1 class="mt-4 font-display text-5xl leading-tight text-forest md:text-6xl">İlim, sohbet ve kültür etrafında duran bir dernek.</h1>
+            <p class="mt-6 max-w-xl text-lg text-muted">{{ $settings['about_excerpt'] }}</p>
             <div class="mt-8 flex flex-wrap gap-3">
-                <a href="{{ route('programs.index') }}" class="rounded-full bg-gold px-6 py-3 font-semibold text-forest-deep">Programlar</a>
-                <a href="{{ route('membership') }}" class="rounded-full border border-gold/50 px-6 py-3">Üyelik / gönüllü</a>
+                <a href="{{ route('programs.index') }}" class="rounded-full bg-forest px-6 py-3 font-semibold text-cream">Programlar</a>
+                <a href="{{ route('membership') }}" class="rounded-full border border-forest/30 px-6 py-3">Üyelik / gönüllü</a>
             </div>
         </div>
-        <div class="rounded-[2rem] border border-gold/30 bg-forest-deep/60 p-8 shadow-2xl">
-            <p class="text-gold text-sm uppercase tracking-widest">Yaklaşan program</p>
+        <div class="flex flex-col items-center rounded-[2rem] border border-line bg-paper p-10 shadow-sm">
+            <img src="{{ \App\Support\SiteSettings::logoUrl() }}" alt="{{ $settings['site_name'] }}" class="h-40 w-auto object-contain">
+            <p class="mt-8 text-xs uppercase tracking-[0.3em] text-gold">Yaklaşan program</p>
             @forelse ($programs->take(1) as $program)
-                <h2 class="mt-4 font-display text-3xl">{{ $program->title }}</h2>
-                <p class="mt-2 text-gold-light">{{ optional($program->starts_at)->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</p>
-                <p class="mt-4 text-sm leading-relaxed">{{ \Illuminate\Support\Str::limit(strip_tags($program->description), 180) }}</p>
+                <h2 class="mt-3 text-center font-display text-3xl text-forest">{{ $program->title }}</h2>
+                <p class="mt-2 text-muted">{{ optional($program->starts_at)->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</p>
             @empty
-                <h2 class="mt-4 font-display text-3xl">Dersler, sohbetler ve kitap tahlilleri</h2>
-                <p class="mt-4 text-sm">Program takvimi panelden yayınlandığında burada görünür.</p>
+                <h2 class="mt-3 text-center font-display text-3xl text-forest">Dersler, sohbetler, kitap tahlilleri</h2>
             @endforelse
         </div>
     </div>
@@ -64,10 +62,10 @@
 
 <section class="mx-auto max-w-6xl px-4 py-16 grid gap-10 md:grid-cols-2">
     <div class="rounded-3xl bg-forest p-10 text-cream">
-        <p class="text-gold uppercase tracking-widest text-xs">Canlı yayın</p>
+        <p class="text-gold-light uppercase tracking-widest text-xs">Canlı yayın</p>
         <h2 class="mt-3 font-display text-4xl">Sohbet ve ders yayınları</h2>
-        <p class="mt-4 text-gold-light">YouTube ve Instagram hesaplarımızdan canlı yayınları takip edebilirsiniz.</p>
-        <a href="{{ route('live') }}" class="mt-6 inline-block rounded-full bg-gold px-5 py-2 font-semibold text-forest-deep">Canlı sayfası</a>
+        <p class="mt-4 text-cream/75">Telegram, WhatsApp ve X hesaplarımızdan duyuruları takip edebilirsiniz.</p>
+        <a href="{{ route('live') }}" class="mt-6 inline-block rounded-full bg-cream px-5 py-2 font-semibold text-forest">Canlı sayfası</a>
     </div>
     <div class="rounded-3xl border border-line bg-paper p-10">
         <p class="text-gold uppercase tracking-widest text-xs">Destek</p>

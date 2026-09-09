@@ -14,27 +14,32 @@ class SiteSettings
     public static function defaults(): array
     {
         return [
-            'site_name' => 'Hacer İlim ve Kültür Derneği',
-            'tagline' => 'İlim, sohbet ve kültürle gaziantepli bir yapılanma',
-            'about_excerpt' => 'Gaziantep merkezli derneğimiz; dersler, sohbetler ve kitap tahlilleri ile ilim ve kültür etrafında bir araya gelir.',
-            'address' => 'Gaziantep, Türkiye',
+            'site_name' => 'Hâcer İlim ve Kültür Derneği',
+            'tagline' => 'Gaziantep’te ilim, sohbet ve kültür',
+            'about_excerpt' => 'Hâcer İlim ve Kültür Derneği, Gaziantep’te dersler, sohbetler ve kitap tahlilleri etrafında bir ilim muhiti kurar.',
+            'address' => 'Karacaahmet, 38012 Nolu Cadde No: 36A, Bina 111 Kat 1 Daire 1, 27590 Şehitkamil / Gaziantep',
             'phone' => '',
-            'email' => 'info@hacerilim.org',
-            'map_embed' => '',
+            'email' => 'info@hacerilimvekulturdernegi.org',
+            'domain' => 'hacerilimvekulturdernegi.org',
+            'map_embed' => '<iframe src="https://maps.google.com/maps?q=Karacaahmet%2038012%20Nolu%20Cadde%2036A%20%C5%9Eehitkamil%20Gaziantep&t=&z=16&ie=UTF8&iwloc=&output=embed" width="100%" height="280" style="border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Dernek konumu"></iframe>',
             'facebook' => '',
             'instagram' => '',
             'youtube' => '',
+            'telegram' => 'https://t.me/+A1atig-4aOYyYjE8',
+            'whatsapp' => 'https://whatsapp.com/channel/0029VbBGQs30AgW5W0OZ4F3y',
+            'twitter' => 'https://x.com/hacerilimkultur',
             'live_youtube_url' => '',
             'live_instagram_url' => '',
             'live_is_active' => '0',
-            'iban' => '',
-            'bank_account_name' => 'Hacer İlim ve Kültür Derneği',
-            'bank_name' => '',
-            'donation_note' => 'Bağışlarınızı dernek IBAN hesabına EFT/havale ile iletebilirsiniz. Açıklama kısmına adınızı yazmanız yeterlidir. Online kart ödemesi alınmamaktadır.',
+            'bank_account_name' => 'Hâcer İlim ve Kültür Derneği',
+            'bank_name' => 'Demo Bankası',
+            'bank_details_are_demo' => '1',
+            'donation_note' => 'Banka ve IBAN bilgileri henüz dernek yönetimi tarafından bildirilmedi. Aşağıdaki bilgiler yalnızca tasarım ön izlemesi içindir; bu bilgilere ödeme yapmayınız.',
+            'iban' => 'DEMO — GERÇEK IBAN BEKLENİYOR',
             'logo' => '',
             'favicon' => '',
-            'color_primary' => '#143D2C',
-            'color_gold' => '#C4A35A',
+            'color_primary' => '#161513',
+            'color_gold' => '#8A7A62',
             'kvkk_text' => '',
             'privacy_text' => '',
             'cookie_text' => '',
@@ -82,6 +87,6 @@ class SiteSettings
             return Storage::disk('public')->url($logo);
         }
 
-        return asset('images/logo.svg');
+        return asset('images/logo-mark.png');
     }
 }

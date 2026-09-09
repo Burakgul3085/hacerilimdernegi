@@ -38,6 +38,18 @@
                     <x-filament::input type="email" wire:model="email" placeholder="E-posta" />
                 </x-filament::input.wrapper>
                 <x-filament::input.wrapper>
+                    <x-filament::input type="text" wire:model="domain" placeholder="Domain" />
+                </x-filament::input.wrapper>
+                <x-filament::input.wrapper>
+                    <x-filament::input type="url" wire:model="telegram" placeholder="Telegram URL" />
+                </x-filament::input.wrapper>
+                <x-filament::input.wrapper>
+                    <x-filament::input type="url" wire:model="whatsapp" placeholder="WhatsApp kanal URL" />
+                </x-filament::input.wrapper>
+                <x-filament::input.wrapper>
+                    <x-filament::input type="url" wire:model="twitter" placeholder="X / Twitter URL" />
+                </x-filament::input.wrapper>
+                <x-filament::input.wrapper>
                     <x-filament::input type="url" wire:model="instagram" placeholder="Instagram URL" />
                 </x-filament::input.wrapper>
                 <x-filament::input.wrapper>
@@ -74,6 +86,10 @@
                     <x-filament::input type="text" wire:model="bank_account_name" placeholder="Hesap adı" />
                 </x-filament::input.wrapper>
             </div>
+            <label class="mt-4 flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model="bank_details_are_demo">
+                Banka bilgileri demo; ziyaretçiye ödeme yapmama uyarısı göster
+            </label>
             <textarea wire:model="donation_note" rows="3" class="mt-4 w-full rounded-lg border-gray-300 text-sm"></textarea>
         </x-filament::section>
 

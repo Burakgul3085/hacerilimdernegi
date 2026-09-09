@@ -5,7 +5,7 @@
 3. `.env` üretim değerleri:
    - `APP_ENV=production`
    - `APP_DEBUG=false`
-   - `APP_URL=https://alanadiniz.org`
+   - `APP_URL=https://hacerilimvekulturdernegi.org`
    - `DB_CONNECTION=mysql` ve ubuntu-setup’taki kullanıcı
    - `SESSION_ENCRYPT=true`
    - `SESSION_SECURE_COOKIE=true`
@@ -14,7 +14,7 @@
 5. `php artisan migrate --seed --force` (ilk kurulum; admin şifresini `ADMIN_PASSWORD` ile verin)
 6. `php artisan storage:link`
 7. `npm ci && npm run build`
-8. `deploy/nginx.conf` dosyasını site adı ve PHP soketi ile kopyalayın, `certbot --nginx` çalıştırın.
+8. `deploy/nginx.conf` dosyasını PHP soketi ile kopyalayın, ardından `certbot --nginx -d hacerilimvekulturdernegi.org -d www.hacerilimvekulturdernegi.org` çalıştırın.
 9. Queue için Supervisor örneği:
 
 ```

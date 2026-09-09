@@ -1,12 +1,10 @@
 :root {
-    --hacer-forest: #143d2c;
-    --hacer-forest-deep: #0c271c;
-    --hacer-forest-soft: #2d5a45;
-    --hacer-gold: #c4a35a;
-    --hacer-gold-light: #e6d3a3;
-    --hacer-cream: #f6f1e7;
-    --hacer-paper: #fbf7f0;
-    --hacer-ink: #1a1f1c;
-    --hacer-muted: #5c675f;
-    --hacer-line: #d9d0c0;
+    --hacer-ink: #161513;
+    --hacer-ink-deep: #0c0b0a;
+    --hacer-taupe: #8a7a62;
+    --hacer-taupe-light: #d4cbbe;
+    --hacer-cream: #fbf6ec;
+    --hacer-paper: #fffcf8;
+    --hacer-muted: #6b6560;
+    --hacer-line: #e6dfd3;
 }

@@ -41,6 +41,8 @@ class ManageSettings extends Page
 
     public string $email = '';
 
+    public string $domain = '';
+
     public string $map_embed = '';
 
     public string $facebook = '';
@@ -48,6 +50,12 @@ class ManageSettings extends Page
     public string $instagram = '';
 
     public string $youtube = '';
+
+    public string $telegram = '';
+
+    public string $whatsapp = '';
+
+    public string $twitter = '';
 
     public string $live_youtube_url = '';
 
@@ -61,11 +69,13 @@ class ManageSettings extends Page
 
     public string $bank_name = '';
 
+    public bool $bank_details_are_demo = true;
+
     public string $donation_note = '';
 
-    public string $color_primary = '#143D2C';
+    public string $color_primary = '#161513';
 
-    public string $color_gold = '#C4A35A';
+    public string $color_gold = '#8A7A62';
 
     public string $kvkk_text = '';
 
@@ -92,16 +102,21 @@ class ManageSettings extends Page
         $this->address = (string) $settings['address'];
         $this->phone = (string) $settings['phone'];
         $this->email = (string) $settings['email'];
+        $this->domain = (string) $settings['domain'];
         $this->map_embed = (string) $settings['map_embed'];
         $this->facebook = (string) $settings['facebook'];
         $this->instagram = (string) $settings['instagram'];
         $this->youtube = (string) $settings['youtube'];
+        $this->telegram = (string) ($settings['telegram'] ?? '');
+        $this->whatsapp = (string) ($settings['whatsapp'] ?? '');
+        $this->twitter = (string) ($settings['twitter'] ?? '');
         $this->live_youtube_url = (string) $settings['live_youtube_url'];
         $this->live_instagram_url = (string) $settings['live_instagram_url'];
         $this->live_is_active = (string) $settings['live_is_active'] === '1';
         $this->iban = (string) $settings['iban'];
         $this->bank_account_name = (string) $settings['bank_account_name'];
         $this->bank_name = (string) $settings['bank_name'];
+        $this->bank_details_are_demo = (string) $settings['bank_details_are_demo'] === '1';
         $this->donation_note = (string) $settings['donation_note'];
         $this->color_primary = (string) $settings['color_primary'];
         $this->color_gold = (string) $settings['color_gold'];
@@ -115,14 +130,15 @@ class ManageSettings extends Page
         $this->validate([
             'site_name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email'],
+            'domain' => ['nullable', 'string', 'max:255'],
             'iban' => ['nullable', 'string', 'max:64'],
             'logo' => ['nullable', 'image', 'mimes:'.implode(',', UploadRules::IMAGE_EXTENSIONS), 'max:'.UploadRules::MAX_IMAGE_KB],
             'favicon' => ['nullable', 'image', 'mimes:png,ico,svg,webp', 'max:512'],
         ]);
 
         $fields = [
-            'site_name', 'tagline', 'about_excerpt', 'address', 'phone', 'email', 'map_embed',
-            'facebook', 'instagram', 'youtube', 'live_youtube_url', 'live_instagram_url',
+            'site_name', 'tagline', 'about_excerpt', 'address', 'phone', 'email', 'domain', 'map_embed',
+            'facebook', 'instagram', 'youtube', 'telegram', 'whatsapp', 'twitter', 'live_youtube_url', 'live_instagram_url',
             'iban', 'bank_account_name', 'bank_name', 'donation_note',
             'color_primary', 'color_gold', 'kvkk_text', 'privacy_text', 'cookie_text',
         ];
@@ -132,6 +148,7 @@ class ManageSettings extends Page
         }
 
         SiteSettings::put('live_is_active', $this->live_is_active);
+        SiteSettings::put('bank_details_are_demo', $this->bank_details_are_demo);
 
         if ($this->logo instanceof TemporaryUploadedFile) {
             SiteSettings::put('logo', $this->logo->store('brand', 'public'));
