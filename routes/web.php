@@ -12,7 +12,7 @@ use App\Support\SiteSettings;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 
-View::composer(['layouts.app', 'pages.*'], function ($view): void {
+View::composer(['layouts.app', 'layouts.error', 'pages.*', 'errors.*', 'errors::*'], function ($view): void {
     $view->with('settings', SiteSettings::all());
     $view->with('logoUrl', SiteSettings::logoUrl());
 });

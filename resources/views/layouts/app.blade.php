@@ -92,7 +92,15 @@
     <link href="https://fonts.bunny.net/css?family=cormorant-garamond:500,600,700|source-sans-3:400,500,600,700" rel="stylesheet" />
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        <script>document.documentElement.classList.add('js');</script>
+        <script>
+            document.documentElement.classList.add('js');
+            try {
+                if (! window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                    && (sessionStorage.getItem('hacer_veil') === '1' || ! sessionStorage.getItem('hacer_veil_seen'))) {
+                    document.documentElement.classList.add('veil-pending');
+                }
+            } catch (error) {}
+        </script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
 
@@ -100,6 +108,16 @@
         :root {
             --color-forest: {{ $settings['color_primary'] ?: '#161513' }};
             --color-gold: {{ $settings['color_gold'] ?: '#8A7A62' }};
+        }
+
+        .page-veil { display: none; }
+        html.js.veil-pending .page-veil {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: grid;
+            place-items: center;
+            background: #0c0b0a;
         }
     </style>
 
@@ -164,6 +182,8 @@
       x-on:scroll.window.passive="onChromeScroll()"
       x-on:keydown.escape.window="menu = false; search = false"
       :class="menu && 'overflow-hidden'">
+
+    <x-page-veil :logo-url="$logoUrl" />
 
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-full focus:bg-forest focus:px-5 focus:py-3 focus:text-cream">
         İçeriğe geç

@@ -435,6 +435,140 @@ body.overflow-hidden .site-float {
     background: linear-gradient(90deg, var(--color-gold-light), var(--color-gold));
 }
 
+.page-veil {
+    display: none;
+}
+
+html.js .page-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(ellipse at 50% 38%, rgb(58 55 51 / 0.9) 0%, transparent 52%),
+        radial-gradient(circle at 50% 100%, rgb(138 122 98 / 0.28), transparent 46%),
+        var(--color-forest);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.js .page-veil.is-covering,
+html.js.veil-pending .page-veil {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+html.js .page-veil.is-leaving {
+    opacity: 0;
+    visibility: visible;
+    pointer-events: none;
+}
+
+html.js .page-veil.is-done {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.page-veil-stage {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 1.15rem;
+}
+
+.page-veil-mark {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 10.5rem;
+    height: 10.5rem;
+}
+
+.page-veil-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: var(--color-cream);
+    box-shadow:
+        0 0 0 1px rgb(212 203 190 / 0.7),
+        0 0 0 10px rgb(138 122 98 / 0.12),
+        0 0 56px rgb(212 203 190 / 0.38);
+    animation: page-veil-pulse 2.4s ease-in-out infinite;
+}
+
+.page-veil-logo {
+    position: relative;
+    z-index: 1;
+    width: 6.75rem;
+    height: 6.75rem;
+    object-fit: contain;
+}
+
+.page-veil-name {
+    margin: 0.15rem 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.46em;
+    text-indent: 0.46em;
+    text-transform: uppercase;
+    color: rgb(251 246 236 / 0.92);
+}
+
+.page-veil-dots {
+    display: flex;
+    gap: 0.4rem;
+    margin: 0;
+}
+
+.page-veil-dots span {
+    width: 0.38rem;
+    height: 0.38rem;
+    border-radius: 9999px;
+    background: rgb(212 203 190 / 0.85);
+    animation: page-veil-dot 1.15s ease-in-out infinite;
+}
+
+.page-veil-dots span:nth-child(2) {
+    animation-delay: 0.16s;
+}
+
+.page-veil-dots span:nth-child(3) {
+    animation-delay: 0.32s;
+}
+
+@keyframes page-veil-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.06);
+        opacity: 1;
+    }
+}
+
+@keyframes page-veil-dot {
+    0%,
+    80%,
+    100% {
+        opacity: 0.28;
+        transform: translateY(0);
+    }
+
+    40% {
+        opacity: 1;
+        transform: translateY(-0.18rem);
+    }
+}
+
 /* Blokların görünüm alanına girdikçe sinematik belirmesi. */
 html.js .reveal {
     opacity: 0;
@@ -579,6 +713,20 @@ html.js .reveal.is-visible .media-zoom {
         transform: none;
         filter: none;
         will-change: auto;
+    }
+
+    html.js .page-veil,
+    html.js .page-veil.is-covering,
+    html.js.veil-pending .page-veil {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: none;
+    }
+
+    .page-veil-ring,
+    .page-veil-dots span {
+        animation: none;
     }
 
     .btn,

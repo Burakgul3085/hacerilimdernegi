@@ -15,8 +15,19 @@ class PublicSiteTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('Hâcer')
+            ->assertSee('data-page-veil', false)
             ->assertSee('info@hacerilimvekulturdernegi.org')
             ->assertSee('https://x.com/hacerilimkultur', false);
+    }
+
+    public function test_unknown_path_renders_branded_not_found_page(): void
+    {
+        $this->get('/olmayan-sayfa')
+            ->assertNotFound()
+            ->assertSee('Aradığınız sayfa bulunamadı')
+            ->assertSee('Ana sayfaya dön')
+            ->assertSee('data-page-veil', false)
+            ->assertSee(route('home'), false);
     }
 
     public function test_donation_page_marks_placeholder_bank_details_as_demo(): void
