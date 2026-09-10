@@ -11,6 +11,7 @@ use Filament\Forms\Components\OneTimeCodeInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\View;
 use Illuminate\Contracts\Auth\Authenticatable;
 use RuntimeException;
 use SensitiveParameter;
@@ -77,9 +78,12 @@ class EmailCodeAuthentication extends EmailAuthentication
     public function getChallengeFormComponents(Authenticatable $user): array
     {
         return [
+            View::make('filament.auth.otp-intro'),
             OneTimeCodeInput::make('code')
                 ->label('Doğrulama kodu')
                 ->length(4)
+                ->extraAttributes(['class' => 'hacer-otp'])
+                ->extraFieldWrapperAttributes(['class' => 'hacer-otp-field'])
                 ->validationAttribute('doğrulama kodu')
                 ->belowContent(Action::make('resend')
                     ->label('Kodu yeniden gönder')

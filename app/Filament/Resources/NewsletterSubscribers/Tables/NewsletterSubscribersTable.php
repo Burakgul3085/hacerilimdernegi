@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\NewsletterSubscribers\Tables;
 
+use App\Actions\ExportNewsletterSubscribers;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class NewsletterSubscribersTable
 {
@@ -23,19 +26,17 @@ class NewsletterSubscribersTable
                 ]),
             ])
             ->headerActions([
-                \Filament\Actions\Action::make('export')
-                    ->label('CSV dışa aktar')
-                    ->action(function (): \Symfony\Component\HttpFoundation\StreamedResponse {
-                        $filename = 'bulten-'.now()->format('Y-m-d').'.csv';
+                Action::make('export')
+                    ->label('Excel dışa aktar')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function (ExportNewsletterSubscribers $export): StreamedResponse {
+                        $workbook = $export->handle();
 
-                        return response()->streamDownload(function (): void {
-                            $out = fopen('php://output', 'w');
-                            fputcsv($out, ['email', 'confirmed_at', 'created_at']);
-                            \App\Models\NewsletterSubscriber::query()->orderBy('id')->each(function ($row) use ($out): void {
-                                fputcsv($out, [$row->email, $row->confirmed_at, $row->created_at]);
-                            });
-                            fclose($out);
-                        }, $filename);
+                        return response()->streamDownload(function () use ($workbook): void {
+                            echo $workbook['contents'];
+                        }, $workbook['filename'], [
+                            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        ]);
                     }),
             ]);
     }

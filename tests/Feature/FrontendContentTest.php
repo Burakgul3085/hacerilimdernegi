@@ -44,7 +44,7 @@ class FrontendContentTest extends TestCase
             route('posts.show', $post),
             '/medya',
             route('media.show', $album),
-            '/canli',
+            '/seckiler',
             '/uyelik',
             '/bagis',
             '/iletisim',
@@ -107,6 +107,109 @@ class FrontendContentTest extends TestCase
             ->assertSee('Özel bağlantı')
             ->assertSee('/ozel-sayfa')
             ->assertDontSee('>Programlar<', false);
+    }
+
+    public function test_header_tray_shows_contact_membership_and_social_from_settings(): void
+    {
+        SiteSettings::put('email', 'panel@hacer.test');
+        SiteSettings::put('phone', '05426588530');
+        SiteSettings::put('address', 'Karacaahmet test adresi');
+        SiteSettings::put('membership_card_title', 'Panel gönüllü başlığı');
+        SiteSettings::put('membership_card_text', 'Panel gönüllü metni');
+        SiteSettings::put('instagram', 'https://www.instagram.com/hacerilimkultur');
+
+        $this->get('/')
+            ->assertSee('id="site-tray"', false)
+            ->assertSee('Paneli kapat')
+            ->assertSee('İletişime geçin')
+            ->assertSee('Gönüllü ol')
+            ->assertSee('Panel gönüllü başlığı')
+            ->assertSee('Panel gönüllü metni')
+            ->assertSee('Üyelik / gönüllülük formu')
+            ->assertSee(route('membership', absolute: false), false)
+            ->assertSee('panel@hacer.test')
+            ->assertSee('Karacaahmet test adresi')
+            ->assertSee('Sosyal medyada bizi takip edin')
+            ->assertSee('https://www.instagram.com/hacerilimkultur', false);
+    }
+
+    public function test_header_keeps_a_home_link_first_on_inner_pages(): void
+    {
+        SiteSettings::put('nav_items', json_encode([
+            ['label' => 'Özel bağlantı', 'url' => '/ozel-sayfa'],
+        ], JSON_UNESCAPED_UNICODE));
+
+        $this->get('/hakkimizda')
+            ->assertOk()
+            ->assertSee('<a href="/" class="nav-link"', false)
+            ->assertSeeInOrder(['Ana sayfa', 'Özel bağlantı', 'Hakkımızda']);
+    }
+
+    public function test_home_overlays_the_hero_with_a_glass_header(): void
+    {
+        $this->get('/')
+            ->assertSee('has-topbar', false)
+            ->assertSee('site-chrome', false)
+            ->assertSee('site-header', false)
+            ->assertSee('onChromeScroll', false)
+            ->assertSee('topbarHidden', false)
+            ->assertSee('is-compact', false)
+            ->assertSee('site-topbar', false)
+            ->assertSee('hero-copy', false)
+            ->assertSee('h-14 w-auto max-w-[240px]', false)
+            ->assertDontSee('site-chrome-spacer', false);
+    }
+
+    public function test_home_page_wires_cinematic_scroll_and_hover_markup(): void
+    {
+        $this->get('/')
+            ->assertSee('page-home', false)
+            ->assertSee('hero-cinematic', false)
+            ->assertSee('hero-enter', false)
+            ->assertSee('hero-parallax', false)
+            ->assertSee('data-parallax', false)
+            ->assertSee('data-scroll-progress', false)
+            ->assertSee('reveal-left', false)
+            ->assertSee('reveal-right', false)
+            ->assertSee('value-pillar', false)
+            ->assertSee('cinematic-panel', false)
+            ->assertSee('data-count', false);
+
+        $this->get('/hakkimizda')
+            ->assertDontSee('hero-cinematic', false)
+            ->assertDontSee('data-scroll-progress', false);
+    }
+
+    public function test_inner_pages_reserve_space_under_the_fixed_header(): void
+    {
+        $this->get('/hakkimizda')
+            ->assertSee('site-chrome', false)
+            ->assertSee('site-chrome-spacer', false)
+            ->assertDontSee('hero-copy', false);
+    }
+
+    public function test_contact_phone_opens_whatsapp_on_home_and_in_the_footer(): void
+    {
+        SiteSettings::put('whatsapp', 'https://whatsapp.com/channel/0029VbBGQs30AgW5W0OZ4F3y');
+        SiteSettings::put('phone', '05426588530');
+
+        $this->get('/')
+            ->assertSee('site-float', false)
+            ->assertSee('images/icons/mouse.svg', false)
+            ->assertSee('scrollToTop', false)
+            ->assertSee('https://wa.me/905426588530', false);
+
+        $this->get('/hakkimizda')
+            ->assertDontSee('site-float', false)
+            ->assertSee('https://wa.me/905426588530', false);
+    }
+
+    public function test_home_hides_the_whatsapp_button_when_no_phone_number_is_set(): void
+    {
+        $this->get('/')
+            ->assertSee('site-float', false)
+            ->assertDontSee('https://wa.me/', false)
+            ->assertDontSee('site-float-whatsapp', false);
     }
 
     public function test_footer_credits_the_developer_from_settings(): void

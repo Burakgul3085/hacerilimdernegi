@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Auth\EmailCodeAuthentication;
 use App\Enums\UserRole;
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\ManageSettings;
 use App\Models\Setting;
 use App\Models\User;
@@ -53,6 +54,19 @@ class AdminLoginEmailCodeTest extends TestCase
             ->assertHasNoErrors();
 
         $this->assertSame('eski-uygulama-sifresi', SiteSettings::secret('mailer_password'));
+    }
+
+    public function test_mailer_settings_strip_spaces_from_the_application_password(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::SuperAdmin]));
+
+        Livewire::test(ManageSettings::class)
+            ->set('data.mailer_username', 'dernek@gmail.com')
+            ->set('data.mailer_password', 'abcd efgh ijkl mnop')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('abcdefghijklmnop', SiteSettings::secret('mailer_password'));
     }
 
     public function test_email_authentication_generates_a_four_digit_code(): void
@@ -132,5 +146,24 @@ class AdminLoginEmailCodeTest extends TestCase
         $user = User::factory()->create(['role' => UserRole::Editor]);
 
         $this->assertTrue($user->hasEmailAuthentication());
+    }
+
+    public function test_login_challenge_renders_animated_code_inputs(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create(['role' => UserRole::SuperAdmin]);
+
+        Livewire::test(Login::class)
+            ->fillForm([
+                'email' => $user->email,
+                'password' => 'password',
+            ])
+            ->call('authenticate')
+            ->assertSee('Kimliğinizi doğrulayın')
+            ->assertSee('E-postanıza gelen 4 haneli kodu kutulara yazın.')
+            ->assertSee('hacer-otp', false)
+            ->assertSee('hacer-otp-pop', false)
+            ->assertSee('fi-one-time-code-input-digit', false);
     }
 }

@@ -15,7 +15,7 @@ class SiteSettings
      *
      * @var list<string>
      */
-    public const LIST_KEYS = ['nav_items', 'value_pillars', 'stats'];
+    public const LIST_KEYS = ['nav_items', 'value_pillars', 'stats', 'instagram_posts'];
 
     /**
      * @return array<string, mixed>
@@ -33,14 +33,12 @@ class SiteSettings
             'domain' => 'hacerilimvekulturdernegi.org',
             'map_embed' => '<iframe src="https://maps.google.com/maps?q=Karacaahmet%2038012%20Nolu%20Cadde%2036A%20%C5%9Eehitkamil%20Gaziantep&t=&z=16&ie=UTF8&iwloc=&output=embed" width="100%" height="420" style="border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Dernek konumu" allowfullscreen></iframe>',
             'facebook' => '',
-            'instagram' => '',
+            'instagram' => 'https://www.instagram.com/hacerilimkultur',
             'youtube' => '',
             'telegram' => 'https://t.me/+A1atig-4aOYyYjE8',
             'whatsapp' => 'https://whatsapp.com/channel/0029VbBGQs30AgW5W0OZ4F3y',
             'twitter' => 'https://x.com/hacerilimkultur',
-            'live_youtube_url' => '',
-            'live_instagram_url' => '',
-            'live_is_active' => '0',
+            'instagram_posts' => json_encode([], JSON_UNESCAPED_UNICODE),
             'bank_account_name' => 'Hâcer İlim ve Kültür Derneği',
             'bank_name' => 'Demo Bankası',
             'bank_details_are_demo' => '1',
@@ -60,7 +58,7 @@ class SiteSettings
                 ['label' => 'Etkinlikler', 'url' => '/etkinlikler'],
                 ['label' => 'Yazılar', 'url' => '/yazilar'],
                 ['label' => 'Medya', 'url' => '/medya'],
-                ['label' => 'Canlı', 'url' => '/canli'],
+                ['label' => 'Seçkiler', 'url' => '/seckiler'],
                 ['label' => 'Üyelik', 'url' => '/uyelik'],
             ], JSON_UNESCAPED_UNICODE),
             'nav_cta_label' => 'Bağış',
@@ -118,7 +116,7 @@ class SiteSettings
             'membership_intro' => 'Dernek çalışmalarına katılmak için formu doldurun.',
             'donate_intro' => 'Dernek faaliyetleri bağışlarınızla sürer.',
             'contact_intro' => 'Bizimle iletişime geçebilirsiniz.',
-            'live_intro' => 'Ders ve sohbet yayınları bu sayfadan takip edilir.',
+            'live_intro' => 'Derneğin Instagram hesabından seçilen kareler ve kısa videolar.',
 
             'membership_card_title' => 'Birlikte daha güçlüyüz',
             'membership_card_text' => 'İlim, kültür ve kardeşlik çalışmalarında sen de yerini al.',
@@ -185,6 +183,68 @@ class SiteSettings
         return array_values(array_filter($decoded, 'is_array'));
     }
 
+    /**
+     * Eski Canlı / Sosyal menü kaydını Seçkiler sayfasına taşır.
+     * Ana sayfa bağlantısını her zaman ilk sırada tutar.
+     *
+     * @return list<array<string, string>>
+     */
+    public static function navItems(): array
+    {
+        $items = array_values(array_filter(
+            array_map(function (array $item): array {
+                $url = rtrim((string) ($item['url'] ?? ''), '/');
+
+                if (in_array($url, ['/canli', '/sosyal'], true)) {
+                    $label = (string) ($item['label'] ?? '');
+
+                    if (in_array($label, ['Canlı', 'Sosyal', ''], true)) {
+                        $label = 'Seçkiler';
+                    }
+
+                    return [
+                        'label' => $label,
+                        'url' => '/seckiler',
+                    ];
+                }
+
+                return $item;
+            }, static::list('nav_items')),
+            function (array $item): bool {
+                $url = rtrim((string) ($item['url'] ?? ''), '/') ?: '/';
+                $label = (string) ($item['label'] ?? '');
+
+                return $url !== '/' && $label !== 'Ana sayfa';
+            },
+        ));
+
+        array_unshift($items, [
+            'label' => 'Ana sayfa',
+            'url' => '/',
+        ]);
+
+        return $items;
+    }
+
+    /**
+     * Eski canlı yayın ve Sosyal giriş yazılarını Seçkiler metnine çevirir.
+     */
+    public static function socialIntro(): string
+    {
+        $intro = (string) static::get('live_intro');
+
+        $legacy = [
+            'Ders ve sohbet yayınları bu sayfadan takip edilir.',
+            'Instagram paylaşımlarımız bu sayfada yer alır.',
+        ];
+
+        if (in_array($intro, $legacy, true)) {
+            return (string) static::defaults()['live_intro'];
+        }
+
+        return $intro;
+    }
+
     public static function put(string $key, mixed $value): void
     {
         if (is_bool($value)) {
@@ -219,6 +279,42 @@ class SiteSettings
         } catch (Throwable) {
             return '';
         }
+    }
+
+    /**
+     * İletişim telefonundan WhatsApp sohbet bağlantısı; boş veya geçersizse null.
+     */
+    public static function whatsappChatUrl(): ?string
+    {
+        return static::whatsappMeUrl((string) static::get('phone', ''));
+    }
+
+    /**
+     * Yazılan numarayı wa.me bağlantısına çevirir.
+     */
+    public static function whatsappMeUrl(string $number): ?string
+    {
+        $digits = preg_replace('/\D+/', '', $number) ?? '';
+
+        if ($digits === '') {
+            return null;
+        }
+
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+
+        if (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+            $digits = '90'.substr($digits, 1);
+        } elseif (strlen($digits) === 10 && str_starts_with($digits, '5')) {
+            $digits = '90'.$digits;
+        }
+
+        if (strlen($digits) < 10) {
+            return null;
+        }
+
+        return 'https://wa.me/'.$digits;
     }
 
     public static function logoUrl(): string

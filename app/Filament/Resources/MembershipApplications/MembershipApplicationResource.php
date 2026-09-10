@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\MembershipApplications;
 
 use App\Filament\Concerns\AuthorizesByRole;
-use App\Filament\Resources\MembershipApplications\Pages\CreateMembershipApplication;
 use App\Filament\Resources\MembershipApplications\Pages\EditMembershipApplication;
 use App\Filament\Resources\MembershipApplications\Pages\ListMembershipApplications;
 use App\Filament\Resources\MembershipApplications\Schemas\MembershipApplicationForm;
@@ -37,6 +36,11 @@ class MembershipApplicationResource extends Resource
         return static::editorRoles();
     }
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return MembershipApplicationForm::configure($schema);
@@ -51,7 +55,6 @@ class MembershipApplicationResource extends Resource
     {
         return [
             'index' => ListMembershipApplications::route('/'),
-            'create' => CreateMembershipApplication::route('/create'),
             'edit' => EditMembershipApplication::route('/{record}/edit'),
         ];
     }

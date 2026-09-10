@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Actions\ProcessContactMessage;
+use App\Actions\ProcessMembershipApplication;
 use App\Enums\ApplicationStatus;
 use App\Models\ContactMessage;
 use App\Models\MembershipApplication;
 use App\Models\NewsletterSubscriber;
+use App\Support\InstagramMedia;
 use App\Support\SiteSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,13 +32,15 @@ class FormController extends Controller
             'kvkk_accepted' => ['accepted'],
         ]);
 
-        MembershipApplication::query()->create([
+        $application = MembershipApplication::query()->create([
             ...$data,
             'kvkk_accepted' => true,
             'status' => ApplicationStatus::Pending,
         ]);
 
-        return back()->with('status', 'Başvurunuz alındı. Dernek yönetimi sizinle iletişime geçecektir.');
+        app(ProcessMembershipApplication::class)->handle($application);
+
+        return back()->with('status', 'Başvurunuz iletildi. Size de bir onay e-postası gönderdik.');
     }
 
     public function contact(): View
@@ -70,9 +74,17 @@ class FormController extends Controller
         return view('pages.donate', ['settings' => SiteSettings::all()]);
     }
 
-    public function live(): View
+    public function social(): View
     {
-        return view('pages.live', ['settings' => SiteSettings::all()]);
+        $profileUrl = InstagramMedia::profileUrl((string) SiteSettings::get('instagram'));
+
+        return view('pages.social', [
+            'settings' => SiteSettings::all(),
+            'posts' => InstagramMedia::collection(SiteSettings::list('instagram_posts')),
+            'profileUrl' => $profileUrl,
+            'profileUsername' => $profileUrl ? trim((string) parse_url($profileUrl, PHP_URL_PATH), '/') : null,
+            'intro' => SiteSettings::socialIntro(),
+        ]);
     }
 
     public function newsletter(Request $request): RedirectResponse

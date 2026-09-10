@@ -3,6 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Auth\EmailCodeAuthentication;
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\RequestPasswordReset;
+use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Widgets\OverviewStats;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -28,7 +31,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('yonetim')
-            ->login()
+            ->login(Login::class)
+            ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->profile()
             ->brandName('Hâcer İlim Yönetim')
             ->brandLogo(asset('images/logo-mark.png'))

@@ -28,6 +28,21 @@ class ManageSettingsTest extends TestCase
         $this->assertFalse(ManageSettings::canAccess());
     }
 
+    public function test_saving_a_phone_number_does_not_replace_the_channel_url(): void
+    {
+        $this->actingAs($this->superAdmin());
+
+        Livewire::test(ManageSettings::class)
+            ->set('data.whatsapp', 'https://whatsapp.com/channel/example')
+            ->set('data.phone', '05426588530')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('https://whatsapp.com/channel/example', SiteSettings::get('whatsapp'));
+        $this->assertSame('05426588530', SiteSettings::get('phone'));
+        $this->assertSame('https://wa.me/905426588530', SiteSettings::whatsappChatUrl());
+    }
+
     public function test_saving_stores_scalar_and_repeater_settings(): void
     {
         $this->actingAs($this->superAdmin());

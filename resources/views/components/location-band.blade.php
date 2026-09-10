@@ -16,7 +16,7 @@
 @if (filled($mapEmbed) || filled($address))
     <section class="border-t border-line bg-paper" aria-labelledby="home-location-heading">
         <div class="shell flex flex-col gap-6 py-10 sm:py-12 lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:py-14">
-            <div class="reveal max-w-2xl">
+            <div class="reveal reveal-left max-w-2xl">
                 @if (filled($eyebrow))
                     <p class="eyebrow">{{ $eyebrow }}</p>
                 @endif
@@ -27,7 +27,7 @@
             </div>
 
             @if ($mapsUrl)
-                <div class="reveal shrink-0">
+                <div class="reveal reveal-right shrink-0">
                     <a href="{{ $mapsUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
                         <x-ui.icon name="pin" class="h-4 w-4" />
                         {{ $button }}
@@ -37,7 +37,7 @@
         </div>
 
         @if (filled($mapEmbed))
-            <div class="reveal relative w-full overflow-hidden border-t border-line bg-cream-deep [&_iframe]:block [&_iframe]:h-[min(26rem,70vh)] [&_iframe]:min-h-[18rem] [&_iframe]:w-full sm:[&_iframe]:h-[min(28rem,65vh)]">
+            <div class="reveal reveal-scale relative w-full overflow-hidden border-t border-line bg-cream-deep [&_iframe]:block [&_iframe]:h-[min(26rem,70vh)] [&_iframe]:min-h-[18rem] [&_iframe]:w-full sm:[&_iframe]:h-[min(28rem,65vh)]">
                 {!! $mapEmbed !!}
             </div>
         @endif

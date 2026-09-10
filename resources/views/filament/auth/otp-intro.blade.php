@@ -1,0 +1,8 @@
+<div class="hacer-otp-intro">
+    <div class="hacer-otp-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2.2" />
+            <path d="m4 7 8 6 8-6" />
+        </svg>
+    </div>
+</div>

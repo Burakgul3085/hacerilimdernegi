@@ -75,8 +75,25 @@ class PhpMailerClient
 
             $mail->send();
         } catch (PhpMailerException $exception) {
-            throw new RuntimeException('E-posta gönderilemedi: '.$exception->getMessage(), previous: $exception);
+            throw new RuntimeException(self::deliveryErrorMessage($exception->getMessage()), previous: $exception);
         }
+    }
+
+    /**
+     * Gmail uygulama şifreleri 4’lü gruplar halinde kopyalanır; boşluklar kimliği bozar.
+     */
+    public static function normalizeApplicationPassword(string $password): string
+    {
+        return preg_replace('/\s+/', '', trim($password)) ?? '';
+    }
+
+    public static function deliveryErrorMessage(string $phpMailerMessage): string
+    {
+        if (str_contains($phpMailerMessage, 'Could not authenticate')) {
+            return 'Gmail SMTP kimliği reddedildi. Site ayarları → Mailer bölümünde Gmail adresi ve 16 karakterlik uygulama şifresini kaydedin. Normal Gmail şifresi çalışmaz.';
+        }
+
+        return 'E-posta gönderilemedi: '.$phpMailerMessage;
     }
 
     /**
@@ -104,7 +121,7 @@ class PhpMailerClient
     private function config(): array
     {
         $username = trim((string) SiteSettings::get('mailer_username', ''));
-        $password = (string) SiteSettings::secret('mailer_password');
+        $password = self::normalizeApplicationPassword((string) SiteSettings::secret('mailer_password'));
         $fromName = trim((string) SiteSettings::get('mailer_from_name', SiteSettings::get('site_name')));
 
         return [

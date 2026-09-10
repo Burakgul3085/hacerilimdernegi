@@ -4,9 +4,11 @@ namespace App\Filament\Pages;
 
 use App\Filament\Concerns\AuthorizesByRole;
 use App\Support\Icons;
+use App\Support\InstagramMedia;
 use App\Support\PhpMailerClient;
 use App\Support\SiteSettings;
 use App\Support\UploadRules;
+use Closure;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -57,7 +59,6 @@ class ManageSettings extends Page
             $settings[$key] = SiteSettings::list($key);
         }
 
-        $settings['live_is_active'] = ($settings['live_is_active'] ?? '0') === '1';
         $settings['bank_details_are_demo'] = ($settings['bank_details_are_demo'] ?? '1') === '1';
         $settings['mailer_password'] = '';
         $settings['mailer_host_fixed'] = PhpMailerClient::HOST;
@@ -95,6 +96,8 @@ class ManageSettings extends Page
         // Uygulama şifresi boş bırakılırsa mevcut şifreli değer korunur.
         if (! filled($state['mailer_password'] ?? null)) {
             unset($state['mailer_password']);
+        } else {
+            $state['mailer_password'] = PhpMailerClient::normalizeApplicationPassword((string) $state['mailer_password']);
         }
 
         foreach ($state as $key => $value) {
@@ -278,7 +281,7 @@ class ManageSettings extends Page
                         Textarea::make('membership_intro')->label('Üyelik')->rows(2),
                         Textarea::make('donate_intro')->label('Bağış')->rows(2),
                         Textarea::make('contact_intro')->label('İletişim')->rows(2),
-                        Textarea::make('live_intro')->label('Canlı yayın')->rows(2),
+                        Textarea::make('live_intro')->label('Seçkiler')->rows(2),
                     ]),
 
                 Section::make('Üyelik kartı')
@@ -320,7 +323,8 @@ class ManageSettings extends Page
                     ->columns(2)
                     ->schema([
                         Textarea::make('address')->label('Adres')->rows(2)->columnSpanFull(),
-                        TextInput::make('phone')->label('Telefon')->tel()->maxLength(40),
+                        TextInput::make('phone')->label('Telefon')->tel()->maxLength(40)
+                            ->helperText('Bu numara ana sayfadaki yeşil WhatsApp düğmesine ve alt kısımdaki WhatsApp ikonuna gider.'),
                         TextInput::make('email')->label('E-posta')->email()->maxLength(180),
                         TextInput::make('domain')->label('Alan adı')->maxLength(255)
                             ->helperText('Yalnızca alan adı; "https://" olmadan yazın.'),
@@ -334,7 +338,8 @@ class ManageSettings extends Page
                         TextInput::make('telegram')->label('Telegram')->url()->maxLength(255),
                         TextInput::make('whatsapp')->label('WhatsApp')->url()->maxLength(255),
                         TextInput::make('twitter')->label('X (Twitter)')->url()->maxLength(255),
-                        TextInput::make('instagram')->label('Instagram')->url()->maxLength(255),
+                        TextInput::make('instagram')->label('Instagram profili')->url()->maxLength(255)
+                            ->helperText('Örnek: https://www.instagram.com/hacerilimkultur'),
                         TextInput::make('youtube')->label('YouTube')->url()->maxLength(255),
                         TextInput::make('facebook')->label('Facebook')->url()->maxLength(255),
                     ]),
@@ -343,15 +348,33 @@ class ManageSettings extends Page
 
     private function broadcastAndDonationTab(): Tab
     {
-        return Tab::make('Yayın ve bağış')
-            ->icon(Heroicon::OutlinedVideoCamera)
+        return Tab::make('Seçkiler ve bağış')
+            ->icon(Heroicon::OutlinedCamera)
             ->schema([
-                Section::make('Canlı yayın')
-                    ->columns(2)
+                Section::make('Instagram vitrini')
+                    ->description('Profil adresi Seçkiler sayfasında görünür. Gönderi veya Reels linklerini sırayla ekleyin; kartlara tıklanınca Instagram gömülü görünümü açılır.')
                     ->schema([
-                        Toggle::make('live_is_active')->label('Canlı yayın aktif')->columnSpanFull(),
-                        TextInput::make('live_youtube_url')->label('YouTube yayın adresi')->url()->maxLength(255),
-                        TextInput::make('live_instagram_url')->label('Instagram yayın adresi')->url()->maxLength(255),
+                        Repeater::make('instagram_posts')
+                            ->label('Paylaşımlar')
+                            ->addActionLabel('Bağlantı ekle')
+                            ->reorderableWithDragAndDrop()
+                            ->schema([
+                                TextInput::make('url')
+                                    ->label('Gönderi veya Reels linki')
+                                    ->url()
+                                    ->required()
+                                    ->maxLength(500)
+                                    ->placeholder('https://www.instagram.com/p/... veya /reel/...')
+                                    ->rules([
+                                        function (): Closure {
+                                            return function (string $attribute, mixed $value, Closure $fail): void {
+                                                if (! is_string($value) || InstagramMedia::tryFrom($value) === null) {
+                                                    $fail('Instagram gönderi veya Reels bağlantısı girin.');
+                                                }
+                                            };
+                                        },
+                                    ]),
+                            ]),
                     ]),
 
                 Section::make('Bağış bilgileri')
@@ -400,7 +423,7 @@ class ManageSettings extends Page
                             ->columnSpanFull(),
                         TextInput::make('mailer_password')->label('Uygulama şifresi')->password()->revealable()
                             ->maxLength(255)
-                            ->helperText('Boş bırakırsanız kayıtlı şifre değişmez. Yeni uygulama şifresi yazınca otomatik güncellenir.')
+                            ->helperText('Gmail hesap şifresi değil, Google Hesabı → Güvenlik → 2 Adımlı Doğrulama → Uygulama şifreleri ile üretilen 16 karakterlik şifre. Boş bırakırsanız kayıtlı şifre değişmez.')
                             ->columnSpanFull(),
                         TextInput::make('mailer_otp_to')->label('Doğrulama kodunun gideceği e-posta')->email()->maxLength(180)
                             ->helperText('Boş bırakılırsa kod, giriş yapan kullanıcının kendi e-posta adresine gider.')
