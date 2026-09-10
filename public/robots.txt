@@ -1,2 +1,10 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /yonetim
+Disallow: /yonetim/
+Disallow: /livewire
+Disallow: /livewire/
+Disallow: /ara
+Disallow: /ara/
+
+Sitemap: https://hacerilimvekulturdernegi.org/sitemap.xml

@@ -14,8 +14,12 @@
 
     $ctaLabel = $settings['nav_cta_label'] ?? 'Bağış';
     $ctaUrl = $settings['nav_cta_url'] ?: route('donate');
-    $siteUrl = 'https://'.($settings['domain'] ?: 'hacerilimvekulturdernegi.org');
+    $siteUrl = rtrim(\App\Support\MailTemplate::publicBaseUrl(), '/');
     $canonical = $siteUrl.request()->getPathInfo();
+    $ogImage = \App\Support\SiteSettings::heroImageUrl();
+    if (! str_starts_with($ogImage, 'http://') && ! str_starts_with($ogImage, 'https://')) {
+        $ogImage = $siteUrl.'/'.ltrim($ogImage, '/');
+    }
     $whatsappChatUrl = \App\Support\SiteSettings::whatsappChatUrl();
 
     $organizationSchema = json_encode([
@@ -74,7 +78,10 @@
 
     <title>@hasSection('title')@yield('title') — {{ $settings['site_name'] }}@else{{ $settings['site_name'] }}@endif</title>
     <meta name="description" content="@yield('description', $settings['tagline'] ?? '')">
+    <meta name="robots" content="@yield('robots', 'index, follow')">
     <link rel="canonical" href="{{ $canonical }}">
+    <link rel="alternate" hreflang="tr" href="{{ $canonical }}">
+    <link rel="alternate" hreflang="x-default" href="{{ $canonical }}">
 
     <meta property="og:type" content="website">
     <meta property="og:locale" content="tr_TR">
@@ -82,8 +89,12 @@
     <meta property="og:title" content="@yield('title', $settings['site_name'])">
     <meta property="og:description" content="@yield('description', $settings['tagline'] ?? '')">
     <meta property="og:url" content="{{ $canonical }}">
-    <meta property="og:image" content="{{ \App\Support\SiteSettings::heroImageUrl() }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:alt" content="{{ $settings['site_name'] }}">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', $settings['site_name'])">
+    <meta name="twitter:description" content="@yield('description', $settings['tagline'] ?? '')">
+    <meta name="twitter:image" content="{{ $ogImage }}">
 
     <link rel="icon" type="image/png" href="{{ \App\Support\SiteSettings::faviconUrl() }}">
     <link rel="apple-touch-icon" href="{{ $logoUrl }}">

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $term !== '' ? '“'.$term.'” için sonuçlar' : 'Arama')
+@section('robots', 'noindex, follow')
 
 @section('content')
 

@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Page;
 use App\Support\SiteSettings;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class PageController extends Controller
 {
-    public function show(string $slug): View
+    public function show(string $slug): View|RedirectResponse
     {
+        if ($slug === 'hakkimizda' && request()->routeIs('pages.show')) {
+            return redirect()->route('about', status: 301);
+        }
+
         $page = Page::query()->published()->where('slug', $slug)->first();
 
         if (! $page) {
