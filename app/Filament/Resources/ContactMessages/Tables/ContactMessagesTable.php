@@ -14,11 +14,17 @@ class ContactMessagesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('name')->label('Ad')->searchable(),
-                TextColumn::make('email')->label('E-posta'),
-                TextColumn::make('subject')->label('Konu'),
+                TextColumn::make('name')->label('Ad')->searchable()->weight(fn ($record) => $record->is_read ? null : 'bold'),
+                TextColumn::make('email')->label('E-posta')->searchable(),
+                TextColumn::make('subject')->label('Konu')->limit(40),
                 IconColumn::make('is_read')->label('Okundu')->boolean(),
+                TextColumn::make('replied_at')
+                    ->label('Yanıt')
+                    ->formatStateUsing(fn ($state) => $state ? 'Yanıtlandı' : 'Bekliyor')
+                    ->badge()
+                    ->color(fn ($state) => $state ? 'success' : 'warning'),
                 TextColumn::make('created_at')->label('Tarih')->since(),
             ])
             ->recordActions([

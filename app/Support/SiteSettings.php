@@ -4,7 +4,9 @@ namespace App\Support;
 
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class SiteSettings
 {
@@ -120,14 +122,26 @@ class SiteSettings
 
             'newsletter_title' => 'E-bülten',
             'newsletter_text' => 'Gelişmelerden haberdar olun.',
-            'footer_note' => 'Kişisel veriler Almanya (Frankfurt) sunucusunda işlenir.',
+            'footer_note' => '',
 
             'developer_label' => 'Tasarım ve yazılım',
             'developer_name' => 'Burak Gül',
-            'developer_url' => 'https://www.linkedin.com/in/burakgul100',
+            'developer_url' => 'https://www.linkedin.com/in/burakgul1006/',
             'developer_email' => 'burakgul3085@gmail.com',
+
+            'mailer_username' => '',
+            'mailer_password' => '',
+            'mailer_from_name' => 'Hâcer İlim Yönetim',
+            'mailer_otp_to' => '',
         ];
     }
+
+    /**
+     * Uygulama şifresi gibi hassas ayarlar şifreli saklanır.
+     *
+     * @var list<string>
+     */
+    public const SECRET_KEYS = ['mailer_password'];
 
     public static function get(string $key, mixed $default = null): mixed
     {
@@ -170,12 +184,38 @@ class SiteSettings
 
     public static function put(string $key, mixed $value): void
     {
+        if (is_bool($value)) {
+            $value = $value ? '1' : '0';
+        }
+
+        if (in_array($key, static::SECRET_KEYS, true)) {
+            $value = filled($value) ? Crypt::encryptString((string) $value) : '';
+        }
+
         Setting::query()->updateOrCreate(
             ['key' => $key],
-            ['value' => is_bool($value) ? ($value ? '1' : '0') : $value],
+            ['value' => $value],
         );
 
         Cache::forget('site_settings');
+    }
+
+    /**
+     * Şifreli saklanan ayarı çözer; boş veya bozuk kayıtta boş metin döner.
+     */
+    public static function secret(string $key): string
+    {
+        $stored = Setting::query()->where('key', $key)->value('value');
+
+        if (! is_string($stored) || $stored === '') {
+            return '';
+        }
+
+        try {
+            return Crypt::decryptString($stored);
+        } catch (Throwable) {
+            return '';
+        }
     }
 
     public static function logoUrl(): string

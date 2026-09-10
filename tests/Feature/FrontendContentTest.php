@@ -49,12 +49,18 @@ class FrontendContentTest extends TestCase
             '/bagis',
             '/iletisim',
             '/ara?q=sohbet',
-            '/yasal/kvkk',
         ];
 
         foreach ($urls as $url) {
             $this->get($url)->assertOk();
         }
+    }
+
+    public function test_old_legal_urls_redirect_home_because_modals_replaced_pages(): void
+    {
+        $this->get('/yasal/kvkk')->assertRedirect('/');
+        $this->get('/yasal/gizlilik')->assertRedirect('/');
+        $this->get('/yasal/cerezler')->assertRedirect('/');
     }
 
     public function test_home_page_renders_hero_and_pillars_from_settings(): void
@@ -91,14 +97,14 @@ class FrontendContentTest extends TestCase
     {
         SiteSettings::put('developer_label', 'Tasarım ve yazılım');
         SiteSettings::put('developer_name', 'Burak Gül');
-        SiteSettings::put('developer_url', 'https://www.linkedin.com/in/burakgul100');
+        SiteSettings::put('developer_url', 'https://www.linkedin.com/in/burakgul1006/');
         SiteSettings::put('developer_email', 'burakgul3085@gmail.com');
 
         $this->get('/')
             ->assertOk()
             ->assertSee('Tasarım ve yazılım')
             ->assertSee('Burak Gül')
-            ->assertSee('https://www.linkedin.com/in/burakgul100', false)
+            ->assertSee('https://www.linkedin.com/in/burakgul1006/', false)
             ->assertSee('mailto:burakgul3085@gmail.com', false);
     }
 
@@ -110,6 +116,20 @@ class FrontendContentTest extends TestCase
             ->assertOk()
             ->assertDontSee('Tasarım ve yazılım')
             ->assertDontSee('mailto:burakgul3085@gmail.com', false);
+    }
+
+    public function test_legal_modal_content_comes_from_site_settings(): void
+    {
+        SiteSettings::put('kvkk_text', 'Panel KVKK metni özel ifadeyle');
+        SiteSettings::put('privacy_text', 'Panel gizlilik metni özel ifadeyle');
+        SiteSettings::put('cookie_text', 'Panel çerez metni özel ifadeyle');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Panel KVKK metni özel ifadeyle', false)
+            ->assertSee('Panel gizlilik metni özel ifadeyle', false)
+            ->assertSee('Panel çerez metni özel ifadeyle', false)
+            ->assertSee('openLegal', false);
     }
 
     public function test_program_list_filters_by_type_and_search_term(): void

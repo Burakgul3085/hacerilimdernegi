@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\ProcessContactMessage;
 use App\Enums\ApplicationStatus;
 use App\Models\ContactMessage;
 use App\Models\MembershipApplication;
@@ -54,10 +55,12 @@ class FormController extends Controller
             'kvkk_accepted' => ['accepted'],
         ]);
 
-        ContactMessage::query()->create([
+        $message = ContactMessage::query()->create([
             ...$data,
             'kvkk_accepted' => true,
         ]);
+
+        app(ProcessContactMessage::class)->handle($message);
 
         return back()->with('status', 'Mesajınız iletildi. Teşekkür ederiz.');
     }
@@ -70,22 +73,6 @@ class FormController extends Controller
     public function live(): View
     {
         return view('pages.live', ['settings' => SiteSettings::all()]);
-    }
-
-    public function legal(string $type): View
-    {
-        $map = [
-            'kvkk' => ['title' => 'KVKK aydınlatma metni', 'key' => 'kvkk_text'],
-            'gizlilik' => ['title' => 'Gizlilik politikası', 'key' => 'privacy_text'],
-            'cerezler' => ['title' => 'Çerez politikası', 'key' => 'cookie_text'],
-        ];
-
-        abort_unless(isset($map[$type]), 404);
-
-        return view('pages.legal', [
-            'title' => $map[$type]['title'],
-            'body' => SiteSettings::get($map[$type]['key']),
-        ]);
     }
 
     public function newsletter(Request $request): RedirectResponse

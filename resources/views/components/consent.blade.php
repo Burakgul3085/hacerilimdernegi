@@ -5,7 +5,9 @@
         <input type="checkbox" name="{{ $name }}" value="1" required @checked(old($name))
                class="mt-0.5 h-4 w-4 shrink-0 rounded border-line text-forest focus:ring-gold">
         <span>
-            <a href="{{ route('legal', 'kvkk') }}" class="underline decoration-gold underline-offset-4 hover:text-forest">KVKK aydınlatma metnini</a>
+            <button type="button"
+                    class="underline decoration-gold underline-offset-4 hover:text-forest"
+                    @click.prevent="openLegal('kvkk')">KVKK aydınlatma metnini</button>
             okudum; verilerimin Almanya (Frankfurt) sunucusunda işlenmesini kabul ediyorum.
         </span>
     </label>

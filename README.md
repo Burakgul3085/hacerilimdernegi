@@ -20,6 +20,8 @@ php artisan serve
 Yönetim: `/yonetim`  
 Varsayılan kullanıcı: `info@hacerilimvekulturdernegi.org` / `password` (üretimde mutlaka değiştirin)
 
+Girişte 4 haneli e-posta doğrulama kodu zorunludur. Kodlar PHPMailer ile gönderilir; SMTP hesabı, uygulama şifresi ve kodun gideceği adres **Site ayarları → Mailer** sekmesinden yönetilir.
+
 ## Marka
 
 Logo: `public/images/logo-mark.png`. Marka renkleri: mürekkep siyahı `#161513`, sıcak taupe `#8A7A62`, krem `#FBF6EC`.

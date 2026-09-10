@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Concerns\AuthorizesByRole;
 use App\Support\Icons;
+use App\Support\PhpMailerClient;
 use App\Support\SiteSettings;
 use App\Support\UploadRules;
 use Filament\Forms\Components\ColorPicker;
@@ -58,6 +59,10 @@ class ManageSettings extends Page
 
         $settings['live_is_active'] = ($settings['live_is_active'] ?? '0') === '1';
         $settings['bank_details_are_demo'] = ($settings['bank_details_are_demo'] ?? '1') === '1';
+        $settings['mailer_password'] = '';
+        $settings['mailer_host_fixed'] = PhpMailerClient::HOST;
+        $settings['mailer_port_fixed'] = (string) PhpMailerClient::PORT;
+        $settings['mailer_encryption_fixed'] = 'TLS';
 
         $this->form->fill($settings);
     }
@@ -77,6 +82,7 @@ class ManageSettings extends Page
                         $this->pageContentTab(),
                         $this->contactTab(),
                         $this->broadcastAndDonationTab(),
+                        $this->mailerTab(),
                         $this->legalTab(),
                     ]),
             ]);
@@ -84,7 +90,14 @@ class ManageSettings extends Page
 
     public function save(): void
     {
-        foreach ($this->form->getState() as $key => $value) {
+        $state = $this->form->getState();
+
+        // Uygulama şifresi boş bırakılırsa mevcut şifreli değer korunur.
+        if (! filled($state['mailer_password'] ?? null)) {
+            unset($state['mailer_password']);
+        }
+
+        foreach ($state as $key => $value) {
             if (in_array($key, SiteSettings::LIST_KEYS, true)) {
                 SiteSettings::put($key, json_encode(array_values($value ?? []), JSON_UNESCAPED_UNICODE));
 
@@ -349,6 +362,46 @@ class ManageSettings extends Page
                         TextInput::make('bank_name')->label('Banka')->maxLength(120),
                         TextInput::make('iban')->label('IBAN')->maxLength(64)->columnSpanFull(),
                         Textarea::make('donation_note')->label('Bağış notu')->rows(3)->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
+    private function mailerTab(): Tab
+    {
+        return Tab::make('Mailer')
+            ->icon(Heroicon::OutlinedEnvelope)
+            ->schema([
+                Section::make('SMTP / PHPMailer')
+                    ->description('Yönetim paneli giriş doğrulama kodları PHPMailer ile Gmail üzerinden gönderilir. Sunucu, port ve şifreleme sabittir; yalnızca hesap bilgilerini girin.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('mailer_host_fixed')
+                            ->label('SMTP sunucu')
+                            ->default(PhpMailerClient::HOST)
+                            ->disabled()
+                            ->dehydrated(false),
+                        TextInput::make('mailer_port_fixed')
+                            ->label('Port')
+                            ->default((string) PhpMailerClient::PORT)
+                            ->disabled()
+                            ->dehydrated(false),
+                        TextInput::make('mailer_encryption_fixed')
+                            ->label('Şifreleme')
+                            ->default('TLS')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->columnSpanFull(),
+                        TextInput::make('mailer_from_name')->label('Gönderen adı')->maxLength(120),
+                        TextInput::make('mailer_username')->label('E-posta (SMTP kullanıcı adı)')->email()->maxLength(180)
+                            ->helperText('Gönderimin yapılacağı Gmail hesabı.')
+                            ->columnSpanFull(),
+                        TextInput::make('mailer_password')->label('Uygulama şifresi')->password()->revealable()
+                            ->maxLength(255)
+                            ->helperText('Boş bırakırsanız kayıtlı şifre değişmez. Yeni uygulama şifresi yazınca otomatik güncellenir.')
+                            ->columnSpanFull(),
+                        TextInput::make('mailer_otp_to')->label('Doğrulama kodunun gideceği e-posta')->email()->maxLength(180)
+                            ->helperText('Boş bırakılırsa kod, giriş yapan kullanıcının kendi e-posta adresine gider.')
+                            ->columnSpanFull(),
                     ]),
             ]);
     }

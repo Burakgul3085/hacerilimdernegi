@@ -40,5 +40,5 @@ Route::get('/iletisim', [FormController::class, 'contact'])->name('contact');
 Route::post('/iletisim', [FormController::class, 'storeContact'])->middleware('throttle:forms')->name('contact.store');
 Route::post('/bulten', [FormController::class, 'newsletter'])->middleware('throttle:forms')->name('newsletter.store');
 Route::get('/ara', SearchController::class)->name('search');
-Route::get('/yasal/{type}', [FormController::class, 'legal'])->whereIn('type', ['kvkk', 'gizlilik', 'cerezler'])->name('legal');
+Route::redirect('/yasal/{type}', '/', 301)->whereIn('type', ['kvkk', 'gizlilik', 'cerezler']);
 Route::get('/sayfa/{slug}', [PageController::class, 'show'])->name('pages.show');

@@ -37,6 +37,27 @@
             $settings['facebook'] ?? null,
         ])),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    $legalDocs = [
+        'kvkk' => [
+            'title' => 'KVKK aydınlatma metni',
+            'body' => filled($settings['kvkk_text'] ?? null)
+                ? $settings['kvkk_text']
+                : 'Bu metin yönetim panelinden düzenlenir. Kişisel veriler Hostinger KVM sunucusunda (Almanya, Frankfurt) saklanır.',
+        ],
+        'gizlilik' => [
+            'title' => 'Gizlilik politikası',
+            'body' => filled($settings['privacy_text'] ?? null)
+                ? $settings['privacy_text']
+                : 'Bu metin yönetim panelinden düzenlenir.',
+        ],
+        'cerezler' => [
+            'title' => 'Çerez politikası',
+            'body' => filled($settings['cookie_text'] ?? null)
+                ? $settings['cookie_text']
+                : 'Bu metin yönetim panelinden düzenlenir.',
+        ],
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="tr">
@@ -82,7 +103,32 @@
     @stack('head')
 </head>
 <body class="min-h-screen bg-cream text-ink"
-      x-data="{ menu: false, search: false, cookies: localStorage.getItem('hacer_cookies') !== '1' }"
+      x-data="{
+          menu: false,
+          search: false,
+          cookies: localStorage.getItem('hacer_cookies') !== '1',
+          legal: null,
+          legalDocs: @js($legalDocs),
+          legalTabs: [
+              { key: 'kvkk', short: 'KVKK' },
+              { key: 'gizlilik', short: 'Gizlilik' },
+              { key: 'cerezler', short: 'Çerezler' },
+          ],
+          openLegal(type) {
+              this.legal = type;
+              this.menu = false;
+              this.search = false;
+          },
+          closeLegal() {
+              this.legal = null;
+          },
+          legalTitle() {
+              return this.legalDocs[this.legal]?.title ?? '';
+          },
+          legalBody() {
+              return this.legalDocs[this.legal]?.body ?? '';
+          },
+      }"
       :class="menu && 'overflow-hidden'">
 
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-full focus:bg-forest focus:px-5 focus:py-3 focus:text-cream">
@@ -206,99 +252,104 @@
     </main>
 
     <footer class="mt-24 bg-forest-deep text-cream">
-        <div class="shell grid gap-12 py-16 lg:grid-cols-12 lg:gap-10">
-            <div class="lg:col-span-5">
-                <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-14 w-auto object-contain brightness-0 invert">
-                <p class="mt-6 font-display text-3xl leading-snug">{{ $settings['site_name'] }}</p>
-                <p class="mt-3 max-w-sm text-sm leading-relaxed text-cream/60">{{ $settings['tagline'] }}</p>
-                <x-social-links :settings="$settings" tone="dark" class="mt-7" />
-            </div>
+        <div class="shell py-14 sm:py-16 lg:py-20">
+            <div class="grid gap-12 lg:grid-cols-12 lg:gap-14">
+                <div class="lg:col-span-5">
+                    <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-12 w-auto object-contain brightness-0 invert sm:h-14">
+                    <p class="mt-5 font-display text-[1.85rem] leading-snug tracking-tight sm:text-3xl">{{ $settings['site_name'] }}</p>
+                    @if (filled($settings['tagline']))
+                        <p class="mt-3 max-w-sm text-sm leading-relaxed text-cream/55">{{ $settings['tagline'] }}</p>
+                    @endif
+                    <x-social-links :settings="$settings" tone="dark" class="mt-8" />
+                </div>
 
-            <div class="lg:col-span-4">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">İletişim</p>
-                <ul class="mt-5 space-y-4 text-sm text-cream/75">
-                    @if (filled($settings['address']))
-                        <li class="flex items-start gap-3">
-                            <x-ui.icon name="pin" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold" />
-                            <span class="leading-relaxed">{{ $settings['address'] }}</span>
-                        </li>
-                    @endif
-                    @if (filled($settings['phone']))
-                        <li class="flex items-start gap-3">
-                            <x-ui.icon name="phone" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold" />
-                            <a href="tel:{{ preg_replace('/\s+/', '', $settings['phone']) }}" class="transition hover:text-cream">{{ $settings['phone'] }}</a>
-                        </li>
-                    @endif
-                    @if (filled($settings['email']))
-                        <li class="flex items-start gap-3">
-                            <x-ui.icon name="mail" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold" />
-                            <a href="mailto:{{ $settings['email'] }}" class="break-all transition hover:text-cream">{{ $settings['email'] }}</a>
-                        </li>
-                    @endif
-                </ul>
-            </div>
+                <div class="lg:col-span-4">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">İletişim</p>
+                    <ul class="mt-5 space-y-4 text-sm text-cream/70">
+                        @if (filled($settings['address']))
+                            <li class="flex items-start gap-3">
+                                <x-ui.icon name="pin" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold" />
+                                <span class="leading-relaxed">{{ $settings['address'] }}</span>
+                            </li>
+                        @endif
+                        @if (filled($settings['phone']))
+                            <li class="flex items-start gap-3">
+                                <x-ui.icon name="phone" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold" />
+                                <a href="tel:{{ preg_replace('/\s+/', '', $settings['phone']) }}" class="transition hover:text-cream">{{ $settings['phone'] }}</a>
+                            </li>
+                        @endif
+                        @if (filled($settings['email']))
+                            <li class="flex items-start gap-3">
+                                <x-ui.icon name="mail" class="mt-0.5 h-[18px] w-[18px] shrink-0 text-gold" />
+                                <a href="mailto:{{ $settings['email'] }}" class="break-all transition hover:text-cream">{{ $settings['email'] }}</a>
+                            </li>
+                        @endif
+                    </ul>
+                </div>
 
-            <div class="lg:col-span-3">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">{{ $settings['newsletter_title'] ?: 'E-bülten' }}</p>
-                <form method="POST" action="{{ route('newsletter.store') }}" class="mt-5">
-                    @csrf
-                    <label for="footer-newsletter" class="sr-only">E-posta adresiniz</label>
-                    <div class="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1.5 pl-4 pr-1.5 transition focus-within:border-gold">
-                        <input id="footer-newsletter" type="email" name="email" required placeholder="E-posta adresiniz"
-                               class="w-full bg-transparent text-sm text-cream placeholder:text-cream/40 focus:outline-none">
-                        <button type="submit" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cream text-forest transition hover:bg-gold hover:text-white">
-                            <span class="sr-only">Kaydol</span>
-                            <x-ui.icon name="arrow-right" class="h-4 w-4" />
-                        </button>
-                    </div>
-                </form>
-                @if (filled($settings['newsletter_text']))
-                    <p class="mt-3 text-xs leading-relaxed text-cream/50">{{ $settings['newsletter_text'] }}</p>
-                @endif
+                <div class="lg:col-span-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">{{ $settings['newsletter_title'] ?: 'E-bülten' }}</p>
+                    @if (filled($settings['newsletter_text']))
+                        <p class="mt-3 text-sm leading-relaxed text-cream/55">{{ $settings['newsletter_text'] }}</p>
+                    @endif
+                    <form method="POST" action="{{ route('newsletter.store') }}" class="mt-5">
+                        @csrf
+                        <label for="footer-newsletter" class="sr-only">E-posta adresiniz</label>
+                        <div class="flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] py-1.5 pl-4 pr-1.5 transition focus-within:border-gold/70">
+                            <input id="footer-newsletter" type="email" name="email" required placeholder="E-posta adresiniz"
+                                   class="w-full bg-transparent text-sm text-cream placeholder:text-cream/35 focus:outline-none">
+                            <button type="submit" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cream text-forest transition hover:bg-gold hover:text-white">
+                                <span class="sr-only">Kaydol</span>
+                                <x-ui.icon name="arrow-right" class="h-4 w-4" />
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
         <div class="border-t border-white/10">
-            <div class="shell flex flex-col gap-3 py-5 text-xs text-cream/50 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-                    <span>© {{ date('Y') }} {{ $settings['site_name'] }}</span>
-                    <a href="{{ route('legal', 'kvkk') }}" class="transition hover:text-cream">KVKK</a>
-                    <a href="{{ route('legal', 'gizlilik') }}" class="transition hover:text-cream">Gizlilik</a>
-                    <a href="{{ route('legal', 'cerezler') }}" class="transition hover:text-cream">Çerezler</a>
-                </div>
-                @if (filled($settings['footer_note']))
-                    <p>{{ $settings['footer_note'] }}</p>
-                @endif
-            </div>
-        </div>
+            <div class="shell flex flex-col gap-5 py-5 text-[12px] text-cream/45 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+                <p class="order-1 text-cream/50">© {{ date('Y') }} {{ $settings['site_name'] }}</p>
 
-        @if (filled($settings['developer_name']))
-            <div class="border-t border-white/10">
-                <div class="shell flex flex-wrap items-center justify-center gap-x-4 gap-y-2 py-4 text-[11px] text-cream/40">
-                    <span>
-                        {{ $settings['developer_label'] ?: 'Tasarım ve yazılım' }}:
-                        @if (filled($settings['developer_url']))
-                            <a href="{{ $settings['developer_url'] }}" target="_blank" rel="noopener noreferrer author"
-                               class="inline-flex items-center gap-1.5 align-middle font-medium text-cream/70 transition hover:text-gold">
-                                <x-ui.icon name="linkedin" class="h-3.5 w-3.5" />
-                                {{ $settings['developer_name'] }}
-                            </a>
-                        @else
-                            <span class="font-medium text-cream/70">{{ $settings['developer_name'] }}</span>
-                        @endif
-                    </span>
+                <nav class="order-2 flex flex-wrap items-center gap-x-1 gap-y-2 lg:justify-center" aria-label="Yasal metinler">
+                    <button type="button" class="rounded-full px-3 py-1 transition hover:bg-white/5 hover:text-cream" @click="openLegal('kvkk')">KVKK</button>
+                    <span class="text-cream/20" aria-hidden="true">·</span>
+                    <button type="button" class="rounded-full px-3 py-1 transition hover:bg-white/5 hover:text-cream" @click="openLegal('gizlilik')">Gizlilik</button>
+                    <span class="text-cream/20" aria-hidden="true">·</span>
+                    <button type="button" class="rounded-full px-3 py-1 transition hover:bg-white/5 hover:text-cream" @click="openLegal('cerezler')">Çerezler</button>
+                </nav>
 
-                    @if (filled($settings['developer_email']))
-                        <a href="mailto:{{ $settings['developer_email'] }}"
-                           aria-label="{{ $settings['developer_name'] }} ile e-posta üzerinden iletişime geçin"
-                           class="inline-flex items-center gap-1.5 transition hover:text-gold">
-                            <x-ui.icon name="mail" class="h-3.5 w-3.5" />
-                            <span>E-posta</span>
-                        </a>
+                <div class="order-3 flex flex-wrap items-center gap-x-3 gap-y-2 lg:justify-end">
+                    @if (filled($settings['footer_note']))
+                        <p class="text-cream/40">{{ $settings['footer_note'] }}</p>
+                    @endif
+
+                    @if (filled($settings['developer_name']))
+                        <p class="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                            <span>{{ $settings['developer_label'] ?: 'Tasarım ve yazılım' }}</span>
+                            @if (filled($settings['developer_url']))
+                                <a href="{{ $settings['developer_url'] }}" target="_blank" rel="noopener noreferrer author"
+                                   class="inline-flex items-center gap-1.5 font-medium text-cream/70 transition hover:text-gold">
+                                    <x-ui.icon name="linkedin" class="h-3.5 w-3.5" />
+                                    {{ $settings['developer_name'] }}
+                                </a>
+                            @else
+                                <span class="font-medium text-cream/70">{{ $settings['developer_name'] }}</span>
+                            @endif
+                            @if (filled($settings['developer_email']))
+                                <a href="mailto:{{ $settings['developer_email'] }}"
+                                   aria-label="{{ $settings['developer_name'] }} ile e-posta üzerinden iletişime geçin"
+                                   class="inline-flex items-center gap-1.5 transition hover:text-gold">
+                                    <x-ui.icon name="mail" class="h-3.5 w-3.5" />
+                                    <span>E-posta</span>
+                                </a>
+                            @endif
+                        </p>
                     @endif
                 </div>
             </div>
-        @endif
+        </div>
     </footer>
 
     <div x-show="cookies" x-cloak x-transition.opacity class="fixed inset-x-0 bottom-0 z-50 px-4 pb-4">
@@ -306,12 +357,14 @@
             <div class="flex flex-col gap-4 rounded-2xl bg-forest px-6 py-5 text-sm text-cream shadow-float sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-cream/80">
                     Site deneyimi için zorunlu çerezler kullanılır. Ayrıntı:
-                    <a class="underline decoration-gold underline-offset-4" href="{{ route('legal', 'cerezler') }}">çerez politikası</a>.
+                    <button type="button" class="underline decoration-gold underline-offset-4" @click="openLegal('cerezler')">çerez politikası</button>.
                 </p>
                 <button type="button" class="btn btn-cream btn-sm shrink-0"
                         @click="localStorage.setItem('hacer_cookies','1'); cookies = false">Kabul ediyorum</button>
             </div>
         </div>
     </div>
+
+    <x-legal-modal />
 </body>
 </html>
