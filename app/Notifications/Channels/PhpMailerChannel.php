@@ -3,6 +3,7 @@
 namespace App\Notifications\Channels;
 
 use App\Notifications\Contracts\SendsViaPhpMailer;
+use App\Support\MailTemplate;
 use App\Support\PhpMailerClient;
 use Illuminate\Notifications\Notification;
 use LogicException;
@@ -30,6 +31,7 @@ class PhpMailerChannel
             textBody: $payload['text'] ?? null,
             replyTo: $payload['reply_to'] ?? null,
             replyToName: $payload['reply_to_name'] ?? null,
+            embeds: $payload['embeds'] ?? MailTemplate::embeddedImages(),
         );
     }
 }

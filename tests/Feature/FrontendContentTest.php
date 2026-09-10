@@ -63,6 +63,22 @@ class FrontendContentTest extends TestCase
         $this->get('/yasal/cerezler')->assertRedirect('/');
     }
 
+    public function test_home_page_shows_location_band_above_the_footer(): void
+    {
+        SiteSettings::put('home_location_eyebrow', 'Bizi ziyaret edin');
+        SiteSettings::put('home_location_title', 'Dernek konumu');
+        SiteSettings::put('home_location_button', 'Haritayı aç');
+        SiteSettings::put('address', 'Karacaahmet, Şehitkamil / Gaziantep');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Bizi ziyaret edin')
+            ->assertSee('Dernek konumu')
+            ->assertSee('Haritayı aç')
+            ->assertSee('maps.google.com', false)
+            ->assertSee('google.com/maps/search', false);
+    }
+
     public function test_home_page_renders_hero_and_pillars_from_settings(): void
     {
         SiteSettings::put('hero_title', 'Panelden gelen başlık');

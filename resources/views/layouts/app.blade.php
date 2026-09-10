@@ -247,11 +247,11 @@
         </div>
     @endif
 
-    <main id="main">
+    <main id="main" @class(['pb-16 lg:pb-24' => ! request()->routeIs('home')])>
         @yield('content')
     </main>
 
-    <footer class="mt-24 bg-forest-deep text-cream">
+    <footer class="bg-forest-deep text-cream">
         <div class="shell py-14 sm:py-16 lg:py-20">
             <div class="grid gap-12 lg:grid-cols-12 lg:gap-14">
                 <div class="lg:col-span-5">

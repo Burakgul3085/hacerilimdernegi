@@ -281,4 +281,7 @@
     </div>
 </section>
 
+{{-- Konum / harita — footer’ın hemen üstünde --}}
+<x-location-band :settings="$settings" />
+
 @endsection

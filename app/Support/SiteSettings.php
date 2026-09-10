@@ -31,7 +31,7 @@ class SiteSettings
             'phone' => '',
             'email' => 'info@hacerilimvekulturdernegi.org',
             'domain' => 'hacerilimvekulturdernegi.org',
-            'map_embed' => '<iframe src="https://maps.google.com/maps?q=Karacaahmet%2038012%20Nolu%20Cadde%2036A%20%C5%9Eehitkamil%20Gaziantep&t=&z=16&ie=UTF8&iwloc=&output=embed" width="100%" height="280" style="border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Dernek konumu"></iframe>',
+            'map_embed' => '<iframe src="https://maps.google.com/maps?q=Karacaahmet%2038012%20Nolu%20Cadde%2036A%20%C5%9Eehitkamil%20Gaziantep&t=&z=16&ie=UTF8&iwloc=&output=embed" width="100%" height="420" style="border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Dernek konumu" allowfullscreen></iframe>',
             'facebook' => '',
             'instagram' => '',
             'youtube' => '',
@@ -104,6 +104,9 @@ class SiteSettings
             'home_posts_text' => 'Dernek gündeminden seçmeler.',
             'home_media_title' => 'Medya arşivi',
             'home_media_text' => 'Program ve etkinliklerden kareler.',
+            'home_location_eyebrow' => 'Bizi ziyaret edin',
+            'home_location_title' => 'Dernek konumu',
+            'home_location_button' => 'Haritayı aç',
 
             'about_image' => '',
             'about_quote' => 'İlim, hayatı güzelleştirir; insanı, toplumu ve yarınları inşa eder.',

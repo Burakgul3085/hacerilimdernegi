@@ -6,6 +6,7 @@ use App\Models\ContactMessage;
 use App\Models\ContactMessageReply;
 use App\Notifications\Channels\PhpMailerChannel;
 use App\Notifications\Contracts\SendsViaPhpMailer;
+use App\Support\MailTemplate;
 use App\Support\SiteSettings;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
@@ -42,16 +43,19 @@ class ContactMessageReplySent extends Notification implements SendsViaPhpMailer
             ."—\nOrijinal mesajınız:\n{$this->message->message}\n\n"
             ."Saygılarımızla,\n{$siteName}";
 
-        $html = <<<HTML
-            <div style="font-family: Georgia, 'Times New Roman', serif; color: #161513; line-height: 1.6;">
-                <p style="margin: 0 0 16px;">Merhaba {$name},</p>
-                <p style="margin: 0 0 16px;"><strong>{$siteName}</strong> olarak mesajınıza yanıtımız:</p>
-                <div style="padding: 16px; background: #f7f3eb; border-radius: 12px;">{$body}</div>
-                <p style="margin: 24px 0 8px; color: #6b6560; font-size: 13px;">Orijinal mesajınız:</p>
-                <p style="margin: 0; color: #6b6560; font-size: 13px; white-space: pre-wrap;">{$original}</p>
-                <p style="margin: 24px 0 0;">Saygılarımızla,<br><strong>{$siteName}</strong></p>
-            </div>
-            HTML;
+        $html = MailTemplate::render([
+            'title' => 'Mesajınıza yanıt',
+            'preheader' => Str::limit(strip_tags($this->reply->body), 90),
+            'eyebrow' => 'İletişim yanıtı',
+            'greeting' => "Merhaba {$name},",
+            'intro' => '<p style="margin:0;"><strong style="color:#161513;">'.$siteName.'</strong> olarak mesajınıza yanıtımız aşağıdadır.</p>',
+            'highlight' => '<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:15px;line-height:1.75;color:#161513;">'.$body.'</div>',
+            'body' => '<p style="margin:0 0 8px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8a7a62;">Orijinal mesajınız</p>'
+                .'<p style="margin:0;font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;line-height:1.7;color:#6b6560;white-space:pre-wrap;">'.$original.'</p>',
+            'closing' => 'Saygılarımızla,<br><strong>'.$siteName.'</strong>',
+            'cta_label' => 'Web sitemizi ziyaret edin',
+            'cta_url' => MailTemplate::publicBaseUrl().'/',
+        ]);
 
         return [
             'to' => [$this->message->email],

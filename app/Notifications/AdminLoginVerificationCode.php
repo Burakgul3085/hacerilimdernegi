@@ -4,7 +4,9 @@ namespace App\Notifications;
 
 use App\Notifications\Channels\PhpMailerChannel;
 use App\Notifications\Contracts\SendsViaPhpMailer;
+use App\Support\MailTemplate;
 use App\Support\PhpMailerClient;
+use App\Support\SiteSettings;
 use Illuminate\Notifications\Notification;
 use SensitiveParameter;
 
@@ -30,20 +32,25 @@ class AdminLoginVerificationCode extends Notification implements SendsViaPhpMail
             is_object($notifiable) && isset($notifiable->email) ? (string) $notifiable->email : null,
         );
 
-        $siteName = (string) config('app.name');
+        $siteName = (string) SiteSettings::get('site_name', config('app.name'));
         $minutes = $this->codeExpiryMinutes;
+        $code = e($this->code);
 
-        $text = "Yönetim paneli giriş doğrulama kodunuz: {$this->code}\n\nBu kod {$minutes} dakika geçerlidir. Kodu kimseyle paylaşmayın.";
+        $text = "Yönetim paneli giriş doğrulama kodunuz: {$this->code}\n\n"
+            ."Bu kod {$minutes} dakika geçerlidir. Kodu kimseyle paylaşmayın.\n\n"
+            .$siteName;
 
-        $html = <<<HTML
-            <div style="font-family: Georgia, 'Times New Roman', serif; color: #161513; line-height: 1.6;">
-                <p style="margin: 0 0 16px;">Merhaba,</p>
-                <p style="margin: 0 0 16px;"><strong>{$siteName}</strong> yönetim paneline giriş için doğrulama kodunuz:</p>
-                <p style="margin: 0 0 24px; font-size: 32px; letter-spacing: 0.35em; font-weight: 700;">{$this->code}</p>
-                <p style="margin: 0 0 8px; color: #6b6560;">Bu kod {$minutes} dakika geçerlidir.</p>
-                <p style="margin: 0; color: #6b6560;">Kodu kimseyle paylaşmayın. Bu isteği siz yapmadıysanız şifrenizi değiştirin.</p>
-            </div>
-            HTML;
+        $html = MailTemplate::render([
+            'title' => 'Doğrulama kodunuz',
+            'preheader' => "Yönetim paneli kodu: {$this->code}",
+            'eyebrow' => 'Güvenli giriş',
+            'greeting' => 'Merhaba,',
+            'intro' => '<p style="margin:0;">'.$siteName.' yönetim paneline giriş için tek kullanımlık doğrulama kodunuz aşağıdadır.</p>',
+            'highlight' => '<p style="margin:0;text-align:center;font-family:Georgia,\'Times New Roman\',serif;font-size:28px;letter-spacing:0.42em;font-weight:700;color:#161513;">'.$code.'</p>'
+                .'<p style="margin:10px 0 0;text-align:center;font-family:\'Segoe UI\',Arial,sans-serif;font-size:12px;color:#6b6560;">'.$minutes.' dakika geçerlidir</p>',
+            'body' => '<p style="margin:0;">Bu kodu kimseyle paylaşmayın. Bu isteği siz yapmadıysanız şifrenizi değiştirin ve bu iletiyi dikkate almayın.</p>',
+            'closing' => 'Saygılarımızla,<br><strong>'.$siteName.'</strong>',
+        ]);
 
         return [
             'to' => [$recipient],

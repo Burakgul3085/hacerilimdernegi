@@ -247,6 +247,9 @@ class ManageSettings extends Page
                         TextInput::make('home_posts_text')->label('Yazılar açıklaması')->maxLength(200),
                         TextInput::make('home_media_title')->label('Medya başlığı')->maxLength(120),
                         TextInput::make('home_media_text')->label('Medya açıklaması')->maxLength(200),
+                        TextInput::make('home_location_eyebrow')->label('Konum üst etiketi')->maxLength(80),
+                        TextInput::make('home_location_title')->label('Konum başlığı')->maxLength(120),
+                        TextInput::make('home_location_button')->label('Harita butonu yazısı')->maxLength(40)->columnSpanFull(),
                     ]),
             ]);
     }

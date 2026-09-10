@@ -19,6 +19,7 @@ class PhpMailerClient
 
     /**
      * @param  list<string>  $to
+     * @param  array<string, string>  $embeds  cid => absolute file path
      *
      * @throws RuntimeException
      */
@@ -29,6 +30,7 @@ class PhpMailerClient
         ?string $textBody = null,
         ?string $replyTo = null,
         ?string $replyToName = null,
+        array $embeds = [],
     ): void {
         $config = $this->config();
 
@@ -58,6 +60,12 @@ class PhpMailerClient
 
             foreach (array_unique(array_filter($to)) as $address) {
                 $mail->addAddress($address);
+            }
+
+            foreach ($embeds as $cid => $path) {
+                if (is_string($path) && is_file($path)) {
+                    $mail->addEmbeddedImage($path, $cid, basename($path));
+                }
             }
 
             $mail->isHTML(true);
