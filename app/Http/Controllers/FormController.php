@@ -8,6 +8,7 @@ use App\Enums\ApplicationStatus;
 use App\Models\ContactMessage;
 use App\Models\MembershipApplication;
 use App\Models\NewsletterSubscriber;
+use App\Support\FormGuard;
 use App\Support\InstagramMedia;
 use App\Support\SiteSettings;
 use Illuminate\Http\RedirectResponse;
@@ -23,6 +24,10 @@ class FormController extends Controller
 
     public function storeMembership(Request $request): RedirectResponse
     {
+        if (FormGuard::isBot($request)) {
+            return back()->with('status', 'Başvurunuz iletildi. Size de bir onay e-postası gönderdik.');
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:180'],
@@ -50,6 +55,10 @@ class FormController extends Controller
 
     public function storeContact(Request $request): RedirectResponse
     {
+        if (FormGuard::isBot($request)) {
+            return back()->with('status', 'Mesajınız iletildi. Teşekkür ederiz.');
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:180'],
@@ -89,6 +98,10 @@ class FormController extends Controller
 
     public function newsletter(Request $request): RedirectResponse
     {
+        if (FormGuard::isBot($request)) {
+            return back()->with('status', 'E-bülten kaydınız alındı.');
+        }
+
         $data = $request->validate([
             'email' => ['required', 'email', 'max:180'],
         ]);

@@ -13,7 +13,6 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Support\SiteSettings;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -23,7 +22,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'info@hacerilimvekulturdernegi.org'],
             [
                 'name' => 'Süper yönetici',
-                'password' => Hash::make(env('ADMIN_PASSWORD', 'password')),
+                'password' => env('ADMIN_PASSWORD', 'password'),
                 'role' => UserRole::SuperAdmin,
             ],
         );

@@ -9,14 +9,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SeoController;
-use App\Support\SiteSettings;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\View;
-
-View::composer(['layouts.app', 'layouts.error', 'pages.*', 'errors.*', 'errors::*'], function ($view): void {
-    $view->with('settings', SiteSettings::all());
-    $view->with('logoUrl', SiteSettings::logoUrl());
-});
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('/hakkimizda', function () {
@@ -42,7 +35,7 @@ Route::get('/bagis', [FormController::class, 'donate'])->name('donate');
 Route::get('/iletisim', [FormController::class, 'contact'])->name('contact');
 Route::post('/iletisim', [FormController::class, 'storeContact'])->middleware('throttle:forms')->name('contact.store');
 Route::post('/bulten', [FormController::class, 'newsletter'])->middleware('throttle:forms')->name('newsletter.store');
-Route::get('/ara', SearchController::class)->name('search');
+Route::get('/ara', SearchController::class)->middleware('throttle:search')->name('search');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::redirect('/yasal/{type}', '/', 301)->whereIn('type', ['kvkk', 'gizlilik', 'cerezler']);

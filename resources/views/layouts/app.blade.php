@@ -422,8 +422,9 @@
                     @if (filled($settings['newsletter_text']))
                         <p class="mt-3 text-sm leading-relaxed text-cream/55">{{ $settings['newsletter_text'] }}</p>
                     @endif
-                    <form method="POST" action="{{ route('newsletter.store') }}" class="mt-5">
+                    <form method="POST" action="{{ route('newsletter.store') }}" class="relative mt-5">
                         @csrf
+                        <x-honeypot />
                         <label for="footer-newsletter" class="sr-only">E-posta adresiniz</label>
                         <div class="flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] py-1.5 pl-4 pr-1.5 transition focus-within:border-gold/70">
                             <input id="footer-newsletter" type="email" name="email" required placeholder="E-posta adresiniz"

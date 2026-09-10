@@ -4,7 +4,7 @@
 
 @php
     $address = $settings['address'] ?? '';
-    $mapEmbed = $settings['map_embed'] ?? '';
+    $mapEmbed = \App\Support\SiteSettings::safeMapEmbed();
     $eyebrow = $settings['home_location_eyebrow'] ?? 'Bizi ziyaret edin';
     $title = $settings['home_location_title'] ?: 'Dernek konumu';
     $button = $settings['home_location_button'] ?: 'Haritayı aç';

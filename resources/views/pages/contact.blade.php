@@ -55,9 +55,9 @@
             <x-social-links :settings="$settings" class="mt-8" />
         </div>
 
-        @if (filled($settings['map_embed']))
+        @if (filled(\App\Support\SiteSettings::safeMapEmbed()))
             <div class="reveal overflow-hidden rounded-2xl border border-line [&_iframe]:block [&_iframe]:h-full [&_iframe]:min-h-[22rem] [&_iframe]:w-full">
-                {!! $settings['map_embed'] !!}
+                {!! \App\Support\SiteSettings::safeMapEmbed() !!}
             </div>
         @endif
     </div>
@@ -72,8 +72,9 @@
                 <p class="mt-3 text-sm leading-relaxed text-muted">Soru, öneri ve iş birliği talepleriniz için formu doldurabilirsiniz.</p>
             </div>
 
-            <form method="POST" action="{{ route('contact.store') }}" class="space-y-5 p-8 lg:p-10">
+            <form method="POST" action="{{ route('contact.store') }}" class="relative space-y-5 p-8 lg:p-10">
                 @csrf
+                <x-honeypot />
 
                 <div class="grid gap-5 sm:grid-cols-2">
                     <x-field name="name" label="Ad soyad" placeholder="Ad soyad" required autocomplete="name" />

@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class PublicSiteTest extends TestCase
@@ -18,6 +21,25 @@ class PublicSiteTest extends TestCase
             ->assertSee('data-page-veil', false)
             ->assertSee('info@hacerilimvekulturdernegi.org')
             ->assertSee('https://x.com/hacerilimkultur', false);
+    }
+
+    public function test_app_layout_composer_provides_logo_and_settings(): void
+    {
+        $view = view('layouts.app');
+        app('view')->callComposer($view);
+
+        $this->assertNotEmpty($view['logoUrl']);
+        $this->assertIsArray($view['settings']);
+    }
+
+    public function test_seeded_admin_password_is_verified_without_double_hashing(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $user = User::query()->where('email', 'info@hacerilimvekulturdernegi.org')->first();
+
+        $this->assertNotNull($user);
+        $this->assertTrue(Hash::check('password', $user->password));
     }
 
     public function test_unknown_path_renders_branded_not_found_page(): void

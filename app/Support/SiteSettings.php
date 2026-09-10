@@ -322,6 +322,38 @@ class SiteSettings
         return static::imageUrl('logo') ?? asset('images/logo-mark.png');
     }
 
+    /**
+     * Harita gömme kodundan yalnızca Google Maps iframe'ini bırakır.
+     */
+    public static function safeMapEmbed(): string
+    {
+        $html = (string) static::get('map_embed');
+
+        if ($html === '' || preg_match('/<iframe\b[^>]*\bsrc=["\']([^"\']+)["\'][^>]*>/i', $html, $matches) !== 1) {
+            return '';
+        }
+
+        $src = html_entity_decode($matches[1], ENT_QUOTES);
+        $host = parse_url($src, PHP_URL_HOST);
+
+        if (! is_string($host)) {
+            return '';
+        }
+
+        $allowed = [
+            'www.google.com',
+            'maps.google.com',
+            'www.google.com.tr',
+            'maps.googleapis.com',
+        ];
+
+        if (! in_array(strtolower($host), $allowed, true)) {
+            return '';
+        }
+
+        return '<iframe src="'.e($src).'" width="100%" height="420" style="border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Dernek konumu" allowfullscreen></iframe>';
+    }
+
     public static function faviconUrl(): string
     {
         return static::imageUrl('favicon') ?? asset('images/favicon.png');

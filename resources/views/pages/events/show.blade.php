@@ -81,8 +81,9 @@
                     <p class="mt-3 text-sm leading-relaxed text-muted">Formu doldurun, dernek yönetimi sizinle iletişime geçsin.</p>
                 </div>
 
-                <form method="POST" action="{{ route('events.register', $event) }}" class="space-y-5 p-8 lg:p-10">
+                <form method="POST" action="{{ route('events.register', $event) }}" class="relative space-y-5 p-8 lg:p-10">
                     @csrf
+                    <x-honeypot />
 
                     <div class="grid gap-5 sm:grid-cols-2">
                         <x-field name="name" label="Ad soyad" placeholder="Ad soyad" required autocomplete="name" />

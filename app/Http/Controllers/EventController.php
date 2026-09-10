@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ApplicationStatus;
 use App\Models\Event;
 use App\Models\EventRegistration;
+use App\Support\FormGuard;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,6 +60,10 @@ class EventController extends Controller
     public function register(Request $request, Event $event): RedirectResponse
     {
         abort_unless($event->is_published && $event->registration_open, 404);
+
+        if (FormGuard::isBot($request)) {
+            return back()->with('status', 'Katılım başvurunuz alındı. En kısa sürede dönüş yapılacaktır.');
+        }
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],

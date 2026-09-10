@@ -17,6 +17,10 @@ class SearchController extends Controller
     {
         $term = trim((string) $request->string('q'));
 
+        if (mb_strlen($term) > 80) {
+            $term = mb_substr($term, 0, 80);
+        }
+
         return view('pages.search', [
             'term' => $term,
             'results' => $term === '' ? collect() : $this->search($term),

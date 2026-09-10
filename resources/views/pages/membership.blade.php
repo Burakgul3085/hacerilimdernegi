@@ -28,8 +28,9 @@
                 </ul>
             </div>
 
-            <form method="POST" action="{{ route('membership.store') }}" class="space-y-5 p-8 lg:p-10">
+            <form method="POST" action="{{ route('membership.store') }}" class="relative space-y-5 p-8 lg:p-10">
                 @csrf
+                <x-honeypot />
 
                 <div class="grid gap-5 sm:grid-cols-2">
                     <x-field name="name" label="Ad soyad" placeholder="Ad soyad" required autocomplete="name" />
