@@ -4,7 +4,12 @@
     <x-cover :src="$post->image" :alt="$post->title" ratio="aspect-[16/9]" />
 
     <div class="flex flex-1 flex-col p-6">
-        <p class="tag">{{ $post->type === 'announcement' ? 'Duyuru' : 'Yazı' }}</p>
+        <div class="flex flex-wrap items-center gap-2">
+            <p class="tag">{{ $post->typeLabel() }}</p>
+            @if ($post->category)
+                <p class="text-[12px] text-muted">{{ $post->category->name }}</p>
+            @endif
+        </div>
         <h3 class="mt-2 font-display text-2xl leading-snug text-forest">{{ $post->title }}</h3>
 
         @if ($post->excerpt)

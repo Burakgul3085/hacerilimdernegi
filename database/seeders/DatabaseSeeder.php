@@ -94,14 +94,20 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
+        $admin = User::query()->where('email', 'info@hacerilimvekulturdernegi.org')->first();
+
         Post::query()->updateOrCreate(
             ['slug' => 'hos-geldiniz'],
             [
                 'category_id' => $category->id,
+                'author_id' => $admin?->id,
                 'type' => 'announcement',
                 'title' => 'Web sitemiz yayında',
+                'subtitle' => 'Dernek gündemini, programları ve duyuruları buradan izleyebilirsiniz.',
                 'excerpt' => 'Dernek faaliyetlerimizi buradan takip edebilirsiniz.',
-                'body' => '<p>Programlar, duyurular ve bağış bilgileri yönetim panelinden güncellenir.</p>',
+                'location' => 'Karacaahmet, Şehitkamil / Gaziantep',
+                'featured_quote' => 'İlim, sohbet ve kültür etrafında duran bir muhit.',
+                'body' => '<p>Hâcer İlim ve Kültür Derneği’nin kurumsal web sitesi yayına alındı. Programlar, duyurular, medya arşivi ve bağış bilgileri bundan böyle buradan paylaşılacak.</p><h2>Neler takip edebilirsiniz?</h2><p>Haftalık sohbetler, dersler ve kitap tahlilleri programlar sayfasında; etkinlikler ayrı bir takvimde yer alır. Yazılar bölümünde ise dernek gündemine dair metinler ve resmî duyurular bulunur.</p><p>İçerikler yönetim panelinden güncellenir. Sorularınız için iletişim formunu kullanabilirsiniz.</p>',
                 'published_at' => now(),
                 'is_published' => true,
             ],

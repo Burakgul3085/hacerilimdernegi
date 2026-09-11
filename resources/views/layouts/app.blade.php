@@ -31,6 +31,12 @@
     $siteUrl = rtrim(\App\Support\MailTemplate::publicBaseUrl(), '/');
     $canonical = $siteUrl.request()->getPathInfo();
     $ogImage = \App\Support\SiteSettings::heroImageUrl();
+    if (isset($post) && $post instanceof \App\Models\Post) {
+        $cover = $post->coverAbsoluteUrl();
+        if (is_string($cover) && $cover !== '') {
+            $ogImage = $cover;
+        }
+    }
     if (! str_starts_with($ogImage, 'http://') && ! str_starts_with($ogImage, 'https://')) {
         $ogImage = $siteUrl.'/'.ltrim($ogImage, '/');
     }
@@ -97,7 +103,7 @@
     <link rel="alternate" hreflang="tr" href="{{ $canonical }}">
     <link rel="alternate" hreflang="x-default" href="{{ $canonical }}">
 
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:locale" content="tr_TR">
     <meta property="og:site_name" content="{{ $settings['site_name'] }}">
     <meta property="og:title" content="@yield('title', $settings['site_name'])">

@@ -1028,7 +1028,10 @@ html.js .reveal.is-visible .media-zoom {
     .donate-step,
     .donate-purpose,
     .donate-purpose-icon,
-    .donate-copy {
+    .donate-copy,
+    .post-pager-link,
+    .post-pager-link:hover,
+    .post-gallery-item:hover img {
         transform: none;
         transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
@@ -1044,6 +1047,121 @@ html.js .reveal.is-visible .media-zoom {
         opacity: 0.85;
         background-position: 50% 0;
     }
+}
+
+.post-layout {
+    display: grid;
+    gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+    .post-layout {
+        grid-template-columns: minmax(0, 1fr) 22rem;
+        gap: 4rem;
+    }
+}
+
+.post-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.post-gallery-item {
+    overflow: hidden;
+    border-radius: 0.9rem;
+    aspect-ratio: 4 / 3;
+    background: var(--color-cream-deep);
+    cursor: zoom-in;
+}
+
+.post-gallery-item img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 1.1s ease;
+}
+
+.post-gallery-item:hover img {
+    transform: scale(1.06);
+}
+
+.post-pullquote {
+    border-radius: 1.25rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    padding: 1.75rem 1.75rem 1.5rem;
+}
+
+.post-pullquote blockquote {
+    margin-top: 0.85rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2vw, 1.85rem);
+    line-height: 1.35;
+    color: var(--color-forest);
+}
+
+.post-share {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.post-pager {
+    display: grid;
+    gap: 1rem;
+    border-top: 1px solid var(--color-line);
+    padding-top: 1.75rem;
+}
+
+@media (min-width: 640px) {
+    .post-pager {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.post-pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    border-radius: 1.1rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    padding: 1.1rem 1.2rem;
+    transition: border-color 0.35s ease, transform 0.35s ease;
+}
+
+.post-pager-link:hover {
+    border-color: color-mix(in srgb, var(--color-gold) 55%, var(--color-line));
+    transform: translateY(-2px);
+}
+
+.post-pager-link-next {
+    text-align: right;
+}
+
+.post-pager-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    line-height: 1.3;
+    color: var(--color-forest);
+}
+
+.post-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    background: rgb(12 11 10 / 0.84);
+    cursor: zoom-out;
+}
+
+.post-lightbox img {
+    max-height: 90vh;
+    max-width: min(100%, 72rem);
+    border-radius: 1rem;
 }
 
 .prose-hacer {
