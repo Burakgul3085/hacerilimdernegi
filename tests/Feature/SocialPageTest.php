@@ -24,6 +24,10 @@ class SocialPageTest extends TestCase
         $this->get('/vitrin')
             ->assertOk()
             ->assertSee('Vitrin')
+            ->assertSee('Arşiv')
+            ->assertSee('Resmî hesap')
+            ->assertSee('Seçilen paylaşımlar')
+            ->assertSee('2 paylaşım')
             ->assertSee('Instagram hesabından seçilen kareler ve kısa videolar, sitede vitrin olarak durur.')
             ->assertSee('https://www.instagram.com/p/AbC123xyz/embed/', false)
             ->assertSee('https://www.instagram.com/p/AbC123xyz/embed/captioned/', false)
@@ -60,6 +64,17 @@ class SocialPageTest extends TestCase
             [['url' => 'https://www.instagram.com/p/PanelPost99/']],
             SiteSettings::list('instagram_posts'),
         );
+    }
+
+    public function test_vitrine_places_the_official_account_beside_the_title(): void
+    {
+        $this->get('/vitrin')
+            ->assertOk()
+            ->assertSee('Resmî hesap')
+            ->assertSee('@hacerilimkultur')
+            ->assertSee('https://www.instagram.com/hacerilimkultur', false)
+            ->assertSee('vitrine-account', false)
+            ->assertDontSee('Kurum arşivi');
     }
 
     public function test_legacy_live_social_and_seckiler_urls_redirect_to_the_vitrine(): void

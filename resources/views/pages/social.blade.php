@@ -6,39 +6,35 @@
 @section('content')
 
 <x-page-header
-    eyebrow="Gündem"
+    eyebrow="Arşiv"
     title="Vitrin"
     :lead="$intro"
-    :breadcrumbs="[['label' => 'Vitrin']]" />
+    :breadcrumbs="[['label' => 'Vitrin']]">
+    @if ($profileUrl)
+        <a href="{{ $profileUrl }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           data-no-veil
+           class="vitrine-account">
+            <span class="vitrine-account-mark">
+                <x-ui.icon name="instagram" class="h-5 w-5" />
+            </span>
+            <span class="min-w-0">
+                <span class="block text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">Resmî hesap</span>
+                <span class="mt-1 block truncate text-sm font-medium text-forest">{{ '@'.$profileUsername }}</span>
+            </span>
+            <x-ui.icon name="arrow-up-right" class="h-4 w-4 shrink-0 text-gold/70" />
+        </a>
+    @endif
+</x-page-header>
 
-<section class="shell py-14 lg:py-20" x-data="{ openIndex: null }" @keydown.escape.window="openIndex = null">
-    <div class="reveal mb-12 grid gap-8 border-b border-line pb-12 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-center">
-        <div>
-            <p class="eyebrow">Kurum arşivi</p>
-            <p class="mt-3 max-w-xl text-base leading-relaxed text-muted">
-                Bu sayfada derneğin resmî Instagram hesabından seçilen kareler yer alır.
-                Her kartı açarak açıklamayı ve Instagram’daki görünümü inceleyebilirsiniz.
-            </p>
-            @if ($posts !== [])
-                <p class="mt-5 text-[13px] font-medium tracking-wide text-gold">{{ count($posts) }} paylaşım</p>
-            @endif
+<section class="vitrine-board shell py-12 lg:py-16" x-data="{ openIndex: null }" @keydown.escape.window="openIndex = null">
+    @if ($posts !== [])
+        <div class="reveal mb-8 flex items-end justify-between gap-4 border-b border-line pb-5">
+            <p class="eyebrow">Seçilen paylaşımlar</p>
+            <p class="text-[13px] font-medium tracking-wide text-muted">{{ count($posts) }} paylaşım</p>
         </div>
-
-        @if ($profileUrl)
-            <a href="{{ $profileUrl }}" target="_blank" rel="noopener noreferrer" class="card card-hover flex items-center gap-4 p-5">
-                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-cream text-gold">
-                    <x-ui.icon name="instagram" class="h-5 w-5" />
-                </span>
-                <span class="min-w-0 flex-1">
-                    <span class="block text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">Resmî hesap</span>
-                    <span class="mt-1 block truncate font-medium text-forest">{{ '@'.$profileUsername }}</span>
-                </span>
-                <span class="arrow-btn">
-                    <x-ui.icon name="arrow-up-right" class="h-4 w-4" />
-                </span>
-            </a>
-        @endif
-    </div>
+    @endif
 
     @if ($posts === [])
         <x-empty-state
