@@ -25,12 +25,17 @@ class PageForm
                 TextInput::make('slug')->label('Bağlantı')->maxLength(255)->live(onBlur: true),
                 Textarea::make('excerpt')->label('Özet')->rows(3),
                 FileUpload::make('image')
-                    ->label('Görsel')
+                    ->label(fn (Get $get): string => CorporatePages::isMessage((string) $get('slug'))
+                        ? 'Başkan fotoğrafı'
+                        : 'Görsel')
                     ->image()
                     ->disk('public')
                     ->directory('pages')
                     ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
                     ->maxSize(UploadRules::MAX_IMAGE_KB)
+                    ->helperText(fn (Get $get): ?string => CorporatePages::isMessage((string) $get('slug'))
+                        ? 'İsteğe bağlı. Yüklemezseniz sitede insan simgesi görünür.'
+                        : null)
                     ->hidden(fn (Get $get): bool => CorporatePages::isBylaws((string) $get('slug')) || CorporatePages::isBoard((string) $get('slug'))),
                 FileUpload::make('document')
                     ->label('Tüzük PDF')
@@ -81,7 +86,21 @@ class PageForm
                             ->maxLength(240)
                             ->columnSpanFull(),
                     ]),
-                RichEditor::make('body')->label('İçerik')->columnSpanFull(),
+                TextInput::make('president_name')
+                    ->label('Ad soyad')
+                    ->maxLength(120)
+                    ->visible(fn (Get $get): bool => CorporatePages::isMessage((string) $get('slug'))),
+                TextInput::make('president_title')
+                    ->label('Ünvan')
+                    ->maxLength(160)
+                    ->placeholder(CorporatePages::DEFAULT_PRESIDENT_TITLE)
+                    ->helperText('Boş bırakılırsa sitede «'.CorporatePages::DEFAULT_PRESIDENT_TITLE.'» yazılır.')
+                    ->visible(fn (Get $get): bool => CorporatePages::isMessage((string) $get('slug'))),
+                RichEditor::make('body')
+                    ->label(fn (Get $get): string => CorporatePages::isMessage((string) $get('slug'))
+                        ? 'Mesaj'
+                        : 'İçerik')
+                    ->columnSpanFull(),
                 TextInput::make('seo_title')->label('SEO başlık')->maxLength(255),
                 Textarea::make('seo_description')->label('SEO açıklama')->rows(2),
                 Toggle::make('is_published')->label('Yayında')->default(true),

@@ -15,7 +15,7 @@ class Page extends Model
     use Auditable;
 
     protected $fillable = [
-        'slug', 'title', 'excerpt', 'body', 'image', 'document', 'board_members', 'seo_title', 'seo_description', 'is_published',
+        'slug', 'title', 'excerpt', 'body', 'image', 'document', 'board_members', 'president_name', 'president_title', 'seo_title', 'seo_description', 'is_published',
     ];
 
     protected function casts(): array
@@ -48,6 +48,44 @@ class Page extends Model
     public function isBoard(): bool
     {
         return CorporatePages::isBoard((string) $this->slug);
+    }
+
+    public function isMessage(): bool
+    {
+        return CorporatePages::isMessage((string) $this->slug);
+    }
+
+    public function presidentName(): ?string
+    {
+        $name = trim((string) $this->president_name);
+
+        return $name !== '' ? $name : null;
+    }
+
+    public function presidentTitle(): string
+    {
+        $title = trim((string) $this->president_title);
+
+        return $title !== '' ? $title : CorporatePages::DEFAULT_PRESIDENT_TITLE;
+    }
+
+    public function imageUrl(): ?string
+    {
+        if (blank($this->image)) {
+            return null;
+        }
+
+        $image = $this->image;
+
+        if (is_array($image)) {
+            $image = $image[0] ?? null;
+        }
+
+        if (! is_string($image) || $image === '') {
+            return null;
+        }
+
+        return Storage::disk('public')->url($image);
     }
 
     /**

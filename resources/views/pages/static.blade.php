@@ -8,14 +8,16 @@
     $isAbout = $page->slug === 'hakkimizda';
     $isBylaws = $page->isBylaws();
     $isBoard = $page->isBoard();
+    $isMessage = $page->isMessage();
     $pdfUrl = $isBylaws ? $page->documentUrl() : null;
     $boardTiers = $isBoard ? $page->boardMembersByTier() : [];
     $hasBoard = $boardTiers !== [];
+    $presidentPhoto = $isMessage ? $page->imageUrl() : null;
     $defaultBody = \App\Support\CorporatePages::definitions()[(string) $page->slug]['body'] ?? null;
-    $showBody = filled($page->body) && ! (($pdfUrl || $hasBoard) && $page->body === $defaultBody);
-    $image = (! $isBylaws && ! $isBoard && filled($page->image))
+    $showBody = filled($page->body) && ! (($pdfUrl || $hasBoard || $isMessage) && $page->body === $defaultBody);
+    $image = (! $isBylaws && ! $isBoard && ! $isMessage && filled($page->image))
         ? \Illuminate\Support\Facades\Storage::disk('public')->url($page->image)
-        : (! $isBylaws && ! $isBoard ? \App\Support\SiteSettings::aboutImageUrl() : null);
+        : (! $isBylaws && ! $isBoard && ! $isMessage ? \App\Support\SiteSettings::aboutImageUrl() : null);
     $isCorporate = \App\Support\CorporatePages::has((string) $page->slug);
     $breadcrumbs = $isCorporate
         ? [['label' => 'Kurumsal'], ['label' => $page->title]]
@@ -100,11 +102,48 @@
             @endforeach
         </div>
     </section>
+@elseif ($isMessage)
+    <section class="president-message shell pb-20 pt-10 lg:pb-28 lg:pt-12">
+        <div class="grid items-start gap-12 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)] lg:gap-16">
+            <aside class="reveal mx-auto w-full max-w-sm lg:mx-0">
+                <div @class([
+                    'president-portrait relative overflow-hidden rounded-2xl',
+                    'bg-forest' => filled($presidentPhoto),
+                    'bg-cream-deep' => blank($presidentPhoto),
+                ])>
+                    @if ($presidentPhoto)
+                        <img src="{{ $presidentPhoto }}" alt="" aria-hidden="true" class="board-photo-fill">
+                        <img src="{{ $presidentPhoto }}" alt="{{ $page->presidentName() ?: $page->title }}" loading="lazy" decoding="async"
+                             class="board-photo-fit">
+                    @else
+                        <div class="president-silhouette flex h-full w-full items-center justify-center">
+                            <x-ui.icon name="user" class="h-24 w-24 text-gold/70" />
+                        </div>
+                    @endif
+                </div>
+
+                @if ($page->presidentName())
+                    <h2 class="mt-6 font-display text-3xl leading-snug text-forest">{{ $page->presidentName() }}</h2>
+                @endif
+                <p class="{{ $page->presidentName() ? 'mt-2' : 'mt-6' }} text-[13px] leading-relaxed text-muted">
+                    {{ $page->presidentTitle() }}
+                </p>
+            </aside>
+
+            <div class="reveal min-w-0">
+                <x-ui.icon name="quote" class="h-8 w-8 text-gold" />
+
+                @if ($showBody)
+                    <div class="prose-hacer mt-5">{!! $page->body !!}</div>
+                @endif
+            </div>
+        </div>
+    </section>
 @else
 <section class="shell py-16 lg:py-24">
     <div @class([
         'grid gap-12 lg:gap-16',
-        'lg:grid-cols-[minmax(0,1fr)_24rem]' => ! $isBylaws && ! $isBoard,
+        'lg:grid-cols-[minmax(0,1fr)_24rem]' => ! $isBylaws && ! $isBoard && ! $isMessage,
     ])>
         <div class="reveal">
             @if ($showBody)
@@ -132,7 +171,7 @@
             @endif
         </div>
 
-        @unless ($isBylaws || $isBoard)
+        @unless ($isBylaws || $isBoard || $isMessage)
             <aside class="reveal lg:sticky lg:top-32 lg:self-start">
                 <div class="overflow-hidden rounded-2xl">
                     <img src="{{ $image }}" alt="{{ $page->title }}" loading="lazy" class="page-aside-photo aspect-[4/5] w-full object-cover">

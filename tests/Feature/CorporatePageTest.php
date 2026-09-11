@@ -220,4 +220,83 @@ class CorporatePageTest extends TestCase
         Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
             ->assertFormFieldIsHidden('board_members');
     }
+
+    public function test_message_page_shows_the_person_icon_and_default_title_without_a_photo(): void
+    {
+        $this->get('/baskanin-mesaji')
+            ->assertSee('Başkanın mesajı')
+            ->assertSee('Hâcer İlim ve Kültür Derneği Başkanı')
+            ->assertSee('president-silhouette', false)
+            ->assertDontSee('page-aside-photo', false)
+            ->assertDontSee('yönetim panelinden eklenecektir');
+    }
+
+    public function test_message_page_renders_the_president_portrait_and_message(): void
+    {
+        Page::query()->where('slug', 'baskanin-mesaji')->update([
+            'president_name' => 'Ayşe Yılmaz',
+            'president_title' => 'Dernek Başkanı',
+            'image' => 'pages/baskan.jpg',
+            'body' => '<p>Kıymetli ziyaretçilerimiz, hoş geldiniz.</p>',
+        ]);
+
+        $this->get('/baskanin-mesaji')
+            ->assertSeeInOrder([
+                'Ayşe Yılmaz',
+                'Dernek Başkanı',
+                'Kıymetli ziyaretçilerimiz, hoş geldiniz.',
+            ])
+            ->assertSee('/storage/pages/baskan.jpg', false)
+            ->assertSee('board-photo-fit', false)
+            ->assertDontSee('president-silhouette', false)
+            ->assertDontSee('page-aside-photo', false);
+    }
+
+    public function test_message_page_escapes_president_name_and_title(): void
+    {
+        Page::query()->where('slug', 'baskanin-mesaji')->update([
+            'president_name' => "<script>alert('xss')</script>",
+            'president_title' => '<b>Başkan</b>',
+            'body' => '<p>Güvenli metin</p>',
+        ]);
+
+        $this->get('/baskanin-mesaji')
+            ->assertSee('&lt;script&gt;', false)
+            ->assertDontSee("<script>alert('xss')</script>", false)
+            ->assertDontSee('<b>Başkan</b>', false);
+    }
+
+    public function test_editor_can_save_president_fields_from_the_page_form(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $page = Page::query()->where('slug', 'baskanin-mesaji')->firstOrFail();
+
+        Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
+            ->assertFormFieldIsVisible('president_name')
+            ->assertFormFieldIsVisible('president_title')
+            ->fillForm([
+                'president_name' => 'Ayşe Yılmaz',
+                'president_title' => 'Hâcer İlim ve Kültür Derneği Başkanı',
+                'body' => '<p>Hoş geldiniz.</p>',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $page->refresh();
+
+        $this->assertSame('Ayşe Yılmaz', $page->presidentName());
+        $this->assertSame('Hâcer İlim ve Kültür Derneği Başkanı', $page->presidentTitle());
+    }
+
+    public function test_president_fields_are_hidden_on_other_pages(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $page = Page::query()->where('slug', 'hakkimizda')->firstOrFail();
+
+        Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
+            ->assertFormFieldIsHidden('president_name')
+            ->assertFormFieldIsHidden('president_title');
+    }
 }

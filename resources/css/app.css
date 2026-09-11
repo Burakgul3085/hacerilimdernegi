@@ -124,6 +124,10 @@
         object-position: center;
     }
 
+    .president-portrait {
+        aspect-ratio: 4 / 5;
+    }
+
     .eyebrow {
         @apply text-[11px] font-semibold uppercase tracking-[0.32em] text-gold;
     }

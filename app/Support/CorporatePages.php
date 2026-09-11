@@ -11,6 +11,10 @@ final class CorporatePages
 
     public const BOARD_SLUG = 'yonetim-kadrosu';
 
+    public const MESSAGE_SLUG = 'baskanin-mesaji';
+
+    public const DEFAULT_PRESIDENT_TITLE = 'Hâcer İlim ve Kültür Derneği Başkanı';
+
     /**
      * @return array<string, array{title: string, excerpt: string, body: string}>
      */
@@ -27,7 +31,7 @@ final class CorporatePages
                 'excerpt' => 'Derneğin yönü, gayesi ve çalışma ilkeleri.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
             ],
-            'baskanin-mesaji' => [
+            self::MESSAGE_SLUG => [
                 'title' => 'Başkanın mesajı',
                 'excerpt' => 'Dernek başkanının ziyaretçilere mesajı.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
@@ -60,6 +64,11 @@ final class CorporatePages
         return $slug === self::BOARD_SLUG;
     }
 
+    public static function isMessage(string $slug): bool
+    {
+        return $slug === self::MESSAGE_SLUG;
+    }
+
     /**
      * Hakkımızda dışındaki kurumsal sayfaların güzel yolları.
      *
@@ -69,7 +78,7 @@ final class CorporatePages
     {
         return [
             'vizyon-misyon' => 'corporate.vision',
-            'baskanin-mesaji' => 'corporate.message',
+            self::MESSAGE_SLUG => 'corporate.message',
             self::BOARD_SLUG => 'corporate.board',
             self::BYLAWS_SLUG => 'corporate.bylaws',
         ];

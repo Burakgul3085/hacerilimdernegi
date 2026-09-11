@@ -46,6 +46,8 @@ class AuditLog extends Model
         'image' => 'Görsel',
         'document' => 'PDF',
         'board_members' => 'Yönetim kadrosu',
+        'president_name' => 'Başkan adı',
+        'president_title' => 'Başkan ünvanı',
         'cover' => 'Kapak',
         'gallery' => 'Galeri',
         'is_published' => 'Yayında',
