@@ -246,7 +246,7 @@
     </section>
 @endif
 
-{{-- Seçkiler ve bağış --}}
+{{-- Vitrin ve bağış --}}
 <section class="shell pb-8 pt-4 lg:pb-16">
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="cinematic-panel reveal relative overflow-hidden rounded-2xl bg-forest p-8 text-cream sm:p-10">
@@ -256,12 +256,12 @@
                     <span class="flex h-10 w-10 items-center justify-center rounded-full border border-gold/40 text-gold-light">
                         <x-ui.icon name="instagram" class="h-5 w-5" />
                     </span>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-light">Seçkiler</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-light">Vitrin</p>
                 </div>
                 <h2 class="mt-5 font-display text-3xl leading-snug sm:text-4xl">Dernekten kareler</h2>
                 <p class="mt-4 max-w-md text-sm leading-relaxed text-cream/70">{{ \App\Support\SiteSettings::socialIntro() }}</p>
                 <a href="{{ route('social') }}" class="btn btn-cream mt-8">
-                    Seçkilere bak
+                    Vitrine bak
                     <x-ui.icon name="arrow-right" class="h-4 w-4" />
                 </a>
             </div>

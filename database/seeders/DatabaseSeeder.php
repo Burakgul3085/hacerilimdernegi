@@ -11,6 +11,7 @@ use App\Models\Post;
 use App\Models\Program;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\CorporatePages;
 use App\Support\SiteSettings;
 use Illuminate\Database\Seeder;
 
@@ -38,15 +39,17 @@ class DatabaseSeeder extends Seeder
         SiteSettings::put('privacy_text', 'Gizlilik politikası: Toplanan kişisel veriler yalnızca dernek faaliyetleri için kullanılır, üçüncü kişilerle pazarlama amacıyla paylaşılmaz. Sunucu Almanya’dadır.');
         SiteSettings::put('cookie_text', 'Sitede oturum, güvenlik ve tercih çerezleri kullanılır. İstatistik için üçüncü taraf çerez eklenirse bu metin güncellenir.');
 
-        Page::query()->updateOrCreate(
-            ['slug' => 'hakkimizda'],
-            [
-                'title' => 'Hakkımızda',
-                'excerpt' => 'Gaziantep Şehitkamil’de faaliyet gösteren Hâcer İlim ve Kültür Derneği; Kur’an ve sünnet ışığında ilim, kültür ve kardeşlik çalışmalarını sürdürür.',
-                'body' => '<p>Hâcer İlim ve Kültür Derneği, 2017’den bu yana Gaziantep’te ilim ve kültür faaliyetleri yürüten bağımsız bir topluluktur.</p><p>Gayemiz; Kur’an-ı Kerim’i ve hadis-i şerifleri daha iyi anlayıp hayatımıza geçirmek, ilim ve kardeşlik etrafında faydalı çalışmalar yapmaktır.</p><h2>Faaliyetlerimiz</h2><p>Kur’an-ı Kerim ve hadis dersleri, ilmihâl dersleri, lise gençlik ve çocuk çalışmaları, seminerler, kitap tahlilleri ve kamplar düzenlenir. Programların güncel tarih ve kapsamı etkinlik takviminde duyurulur.</p><p>Adres: Karacaahmet, 38012 Nolu Cadde No: 36A, Bina 111 Kat 1 Daire 1, 27590 Şehitkamil / Gaziantep.</p>',
-                'is_published' => true,
-            ],
-        );
+        foreach (CorporatePages::definitions() as $slug => $page) {
+            Page::query()->updateOrCreate(
+                ['slug' => $slug],
+                [
+                    'title' => $page['title'],
+                    'excerpt' => $page['excerpt'],
+                    'body' => $page['body'],
+                    'is_published' => true,
+                ],
+            );
+        }
 
         $category = Category::query()->updateOrCreate(
             ['slug' => 'duyurular'],

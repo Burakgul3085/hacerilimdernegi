@@ -44,10 +44,12 @@ class SeoDiscoveryTest extends TestCase
             ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
             ->assertSee(route('home'), false)
             ->assertSee(route('about'), false)
+            ->assertSee(route('corporate.vision'), false)
+            ->assertSee(route('social'), false)
             ->assertSee(route('programs.show', $published), false)
             ->assertDontSee(route('programs.show', $draft), false)
-            ->assertDontSee('/yonetim', false)
-            ->assertDontSee('/ara', false);
+            ->assertDontSee('/yonetim</loc>', false)
+            ->assertDontSee('/ara</loc>', false);
     }
 
     public function test_search_page_is_excluded_from_indexing(): void
@@ -68,11 +70,13 @@ class SeoDiscoveryTest extends TestCase
 
     public function test_legacy_about_url_redirects_to_the_canonical_about_page(): void
     {
-        Page::query()->create([
-            'slug' => 'hakkimizda',
-            'title' => 'Hakkımızda',
-            'is_published' => true,
-        ]);
+        Page::query()->updateOrCreate(
+            ['slug' => 'hakkimizda'],
+            [
+                'title' => 'Hakkımızda',
+                'is_published' => true,
+            ],
+        );
 
         $this->get('/sayfa/hakkimizda')
             ->assertStatus(301)

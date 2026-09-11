@@ -21,10 +21,10 @@ class SocialPageTest extends TestCase
             ['url' => 'https://www.instagram.com/reel/ReelsCode99/'],
         ], JSON_UNESCAPED_UNICODE));
 
-        $this->get('/seckiler')
+        $this->get('/vitrin')
             ->assertOk()
-            ->assertSee('Seçkiler')
-            ->assertSee('Derneğin Instagram hesabından seçilen kareler ve kısa videolar.')
+            ->assertSee('Vitrin')
+            ->assertSee('Instagram hesabından seçilen kareler ve kısa videolar, sitede vitrin olarak durur.')
             ->assertSee('https://www.instagram.com/p/AbC123xyz/embed/', false)
             ->assertSee('https://www.instagram.com/p/AbC123xyz/embed/captioned/', false)
             ->assertSee('https://www.instagram.com/reel/ReelsCode99/', false)
@@ -38,11 +38,11 @@ class SocialPageTest extends TestCase
             ['url' => 'https://evil.example/p/AbC123xyz'],
         ], JSON_UNESCAPED_UNICODE));
 
-        $this->get('/seckiler')
+        $this->get('/vitrin')
             ->assertOk()
             ->assertDontSee('javascript:', false)
             ->assertDontSee('evil.example', false)
-            ->assertSee('Seçki henüz oluşmadı');
+            ->assertSee('Vitrin henüz oluşmadı');
     }
 
     public function test_settings_save_stores_instagram_post_links(): void
@@ -62,9 +62,17 @@ class SocialPageTest extends TestCase
         );
     }
 
-    public function test_legacy_live_and_social_urls_redirect_to_seckiler(): void
+    public function test_legacy_live_social_and_seckiler_urls_redirect_to_the_vitrine(): void
     {
-        $this->get('/canli')->assertRedirect('/seckiler');
-        $this->get('/sosyal')->assertRedirect('/seckiler');
+        $this->get('/canli')->assertRedirect('/vitrin');
+        $this->get('/sosyal')->assertRedirect('/vitrin');
+        $this->get('/seckiler')->assertRedirect('/vitrin');
+    }
+
+    public function test_vitrine_page_allows_instagram_embeds_in_the_content_security_policy(): void
+    {
+        $csp = (string) $this->get('/vitrin')->headers->get('Content-Security-Policy');
+
+        $this->assertStringContainsString('https://www.instagram.com', $csp);
     }
 }

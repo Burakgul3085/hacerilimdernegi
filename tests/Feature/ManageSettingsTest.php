@@ -84,6 +84,29 @@ class ManageSettingsTest extends TestCase
             ->assertSee('Panel menüsü');
     }
 
+    public function test_saving_nested_navigation_items_keeps_the_children(): void
+    {
+        $this->actingAs($this->superAdmin());
+
+        Livewire::test(ManageSettings::class)
+            ->set('data.nav_items', [[
+                'label' => 'Kurumsal',
+                'url' => '/hakkimizda',
+                'children' => [
+                    ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
+                    ['label' => 'Vizyon ve misyon', 'url' => '/vizyon-misyon'],
+                ],
+            ]])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $items = SiteSettings::list('nav_items');
+
+        $this->assertSame('Kurumsal', $items[0]['label'] ?? null);
+        $this->assertSame('Vizyon ve misyon', $items[0]['children'][1]['label'] ?? null);
+        $this->assertSame('/vizyon-misyon', $items[0]['children'][1]['url'] ?? null);
+    }
+
     public function test_every_site_setting_is_editable_in_the_panel(): void
     {
         $this->actingAs($this->superAdmin());

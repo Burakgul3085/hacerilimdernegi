@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Seçkiler')
+@section('title', 'Vitrin')
 @section('description', $intro)
 
 @section('content')
 
 <x-page-header
     eyebrow="Gündem"
-    title="Seçkiler"
+    title="Vitrin"
     :lead="$intro"
-    :breadcrumbs="[['label' => 'Seçkiler']]" />
+    :breadcrumbs="[['label' => 'Vitrin']]" />
 
 <section class="shell py-14 lg:py-20" x-data="{ openIndex: null }" @keydown.escape.window="openIndex = null">
     <div class="reveal mb-12 grid gap-8 border-b border-line pb-12 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-center">
@@ -20,7 +20,7 @@
                 Her kartı açarak açıklamayı ve Instagram’daki görünümü inceleyebilirsiniz.
             </p>
             @if ($posts !== [])
-                <p class="mt-5 text-[13px] font-medium tracking-wide text-gold">{{ count($posts) }} seçki</p>
+                <p class="mt-5 text-[13px] font-medium tracking-wide text-gold">{{ count($posts) }} paylaşım</p>
             @endif
         </div>
 
@@ -43,7 +43,7 @@
     @if ($posts === [])
         <x-empty-state
             icon="instagram"
-            title="Seçki henüz oluşmadı"
+            title="Vitrin henüz oluşmadı"
             text="Yönetim panelinden Instagram gönderi veya Reels bağlantısı eklendiğinde burada yayımlanır." />
     @else
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -55,7 +55,7 @@
                     x-on:keydown.space.prevent="openIndex = {{ $index }}"
                     role="button"
                     tabindex="0"
-                    aria-label="{{ $post->label() }} seçkisini aç">
+                    aria-label="{{ $post->label() }} paylaşımını aç">
                     <div class="relative aspect-[4/5] overflow-hidden bg-cream-deep">
                         <iframe
                             class="pointer-events-none absolute left-1/2 top-0 h-[46rem] w-[22.5rem] -translate-x-1/2 border-0"
@@ -97,7 +97,7 @@
             @click.stop>
             <div class="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
                 <div>
-                    <p class="eyebrow">Seçki</p>
+                    <p class="eyebrow">Vitrin</p>
                     <h2 id="instagram-modal-title" class="mt-1 font-display text-2xl text-forest">Paylaşım</h2>
                 </div>
                 <button type="button"

@@ -7,6 +7,7 @@ use App\Models\MediaAlbum;
 use App\Models\Page;
 use App\Models\Post;
 use App\Models\Program;
+use App\Support\CorporatePages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -96,13 +97,19 @@ class SearchController extends Controller
             ->where(fn ($query) => $query->where('title', 'like', $like)->orWhere('excerpt', 'like', $like)->orWhere('body', 'like', $like))
             ->limit(10)
             ->get()
-            ->map(fn (Page $page) => [
-                'label' => 'Sayfa',
-                'title' => $page->title,
-                'excerpt' => $page->excerpt,
-                'url' => $page->slug === 'hakkimizda' ? route('about') : route('pages.show', $page->slug),
-                'icon' => 'building',
-            ]);
+            ->map(function (Page $page): array {
+                $routeName = CorporatePages::routeName($page->slug);
+
+                return [
+                    'label' => 'Sayfa',
+                    'title' => $page->title,
+                    'excerpt' => $page->excerpt,
+                    'url' => $routeName !== null
+                        ? route($routeName)
+                        : route('pages.show', $page->slug),
+                    'icon' => 'building',
+                ];
+            });
 
         return collect()
             ->concat($programs)

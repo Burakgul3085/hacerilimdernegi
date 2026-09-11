@@ -25,13 +25,15 @@ class FrontendContentTest extends TestCase
         $post = $this->makePost();
         $album = $this->makeAlbum();
 
-        Page::query()->create([
-            'slug' => 'hakkimizda',
-            'title' => 'Hakkımızda',
-            'excerpt' => 'Dernek hakkında',
-            'body' => '<p>Kurum metni</p>',
-            'is_published' => true,
-        ]);
+        Page::query()->updateOrCreate(
+            ['slug' => 'hakkimizda'],
+            [
+                'title' => 'Hakkımızda',
+                'excerpt' => 'Dernek hakkında',
+                'body' => '<p>Kurum metni</p>',
+                'is_published' => true,
+            ],
+        );
 
         $urls = [
             '/',
@@ -44,7 +46,11 @@ class FrontendContentTest extends TestCase
             route('posts.show', $post),
             '/medya',
             route('media.show', $album),
-            '/seckiler',
+            '/vitrin',
+            '/vizyon-misyon',
+            '/baskanin-mesaji',
+            '/yonetim-kadrosu',
+            '/dernek-tuzugu',
             '/uyelik',
             '/bagis',
             '/iletisim',

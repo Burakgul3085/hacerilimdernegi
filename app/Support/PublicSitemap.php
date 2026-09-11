@@ -22,6 +22,10 @@ class PublicSitemap
         $entries = [
             $this->entry(route('home'), $now, 'daily', '1.0'),
             $this->entry(route('about'), $now, 'monthly', '0.8'),
+            $this->entry(route('corporate.vision'), $now, 'monthly', '0.6'),
+            $this->entry(route('corporate.message'), $now, 'monthly', '0.6'),
+            $this->entry(route('corporate.board'), $now, 'monthly', '0.6'),
+            $this->entry(route('corporate.bylaws'), $now, 'monthly', '0.6'),
             $this->entry(route('programs.index'), $now, 'weekly', '0.8'),
             $this->entry(route('events.index'), $now, 'weekly', '0.8'),
             $this->entry(route('posts.index'), $now, 'weekly', '0.8'),
@@ -50,7 +54,7 @@ class PublicSitemap
         }
 
         foreach (Page::query()->published()->orderBy('id')->get(['slug', 'updated_at']) as $page) {
-            if ($page->slug === 'hakkimizda') {
+            if (CorporatePages::has($page->slug)) {
                 continue;
             }
 

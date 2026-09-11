@@ -8,6 +8,11 @@
     $image = filled($page->image)
         ? \Illuminate\Support\Facades\Storage::disk('public')->url($page->image)
         : \App\Support\SiteSettings::aboutImageUrl();
+    $isAbout = $page->slug === 'hakkimizda';
+    $isCorporate = \App\Support\CorporatePages::has((string) $page->slug);
+    $breadcrumbs = $isCorporate
+        ? [['label' => 'Kurumsal'], ['label' => $page->title]]
+        : [['label' => $page->title]];
 @endphp
 
 @section('content')
@@ -16,14 +21,14 @@
     eyebrow="Kurum"
     :title="$page->title"
     :lead="$page->excerpt"
-    :breadcrumbs="[['label' => $page->title]]" />
+    :breadcrumbs="$breadcrumbs" />
 
 <section class="shell py-16 lg:py-24">
     <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-16">
         <div class="reveal">
             <div class="prose-hacer">{!! $page->body !!}</div>
 
-            @if (filled($settings['about_quote']))
+            @if ($isAbout && filled($settings['about_quote']))
                 <figure class="mt-12 rounded-2xl border border-line bg-paper p-8">
                     <x-ui.icon name="quote" class="h-7 w-7 text-gold" />
                     <blockquote class="mt-4 font-display text-2xl leading-snug text-forest sm:text-3xl">
@@ -32,7 +37,7 @@
                 </figure>
             @endif
 
-            @if (filled($stats))
+            @if ($isAbout && filled($stats))
                 <div class="mt-12 grid grid-cols-1 gap-px bg-line sm:grid-cols-3">
                     @foreach ($stats as $stat)
                         <div class="bg-cream px-5 py-7 text-center">

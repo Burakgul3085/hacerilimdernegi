@@ -52,15 +52,7 @@ class SiteSettings
             'privacy_text' => '',
             'cookie_text' => '',
 
-            'nav_items' => json_encode([
-                ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
-                ['label' => 'Programlar', 'url' => '/programlar'],
-                ['label' => 'Etkinlikler', 'url' => '/etkinlikler'],
-                ['label' => 'Yazılar', 'url' => '/yazilar'],
-                ['label' => 'Medya', 'url' => '/medya'],
-                ['label' => 'Seçkiler', 'url' => '/seckiler'],
-                ['label' => 'Üyelik', 'url' => '/uyelik'],
-            ], JSON_UNESCAPED_UNICODE),
+            'nav_items' => json_encode(static::defaultNavItems(), JSON_UNESCAPED_UNICODE),
             'nav_cta_label' => 'Bağış',
             'nav_cta_url' => '/bagis',
 
@@ -116,7 +108,7 @@ class SiteSettings
             'membership_intro' => 'Dernek çalışmalarına katılmak için formu doldurun.',
             'donate_intro' => 'Dernek faaliyetleri bağışlarınızla sürer.',
             'contact_intro' => 'Bizimle iletişime geçebilirsiniz.',
-            'live_intro' => 'Derneğin Instagram hesabından seçilen kareler ve kısa videolar.',
+            'live_intro' => 'Instagram hesabından seçilen kareler ve kısa videolar, sitede vitrin olarak durur.',
 
             'membership_card_title' => 'Birlikte daha güçlüyüz',
             'membership_card_text' => 'İlim, kültür ve kardeşlik çalışmalarında sen de yerini al.',
@@ -170,7 +162,7 @@ class SiteSettings
     /**
      * JSON olarak saklanan tekrarlı içerikleri (menü, değerler, istatistikler) diziye çevirir.
      *
-     * @return list<array<string, string>>
+     * @return list<array<string, mixed>>
      */
     public static function list(string $key): array
     {
@@ -184,39 +176,52 @@ class SiteSettings
     }
 
     /**
-     * Eski Canlı / Sosyal menü kaydını Seçkiler sayfasına taşır.
+     * Varsayılan ana menü ağacı.
+     *
+     * @return list<array{label: string, url: string, children?: list<array{label: string, url: string}>}>
+     */
+    public static function defaultNavItems(): array
+    {
+        return [
+            [
+                'label' => 'Kurumsal',
+                'url' => '/hakkimizda',
+                'children' => [
+                    ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
+                    ['label' => 'Vizyon ve misyon', 'url' => '/vizyon-misyon'],
+                    ['label' => 'Başkanın mesajı', 'url' => '/baskanin-mesaji'],
+                    ['label' => 'Yönetim kadrosu', 'url' => '/yonetim-kadrosu'],
+                    ['label' => 'Dernek tüzüğü', 'url' => '/dernek-tuzugu'],
+                ],
+            ],
+            [
+                'label' => 'Projeler',
+                'url' => '/programlar',
+                'children' => [
+                    ['label' => 'Programlar', 'url' => '/programlar'],
+                    ['label' => 'Medya', 'url' => '/medya'],
+                ],
+            ],
+            ['label' => 'Yazılar', 'url' => '/yazilar'],
+            ['label' => 'Vitrin', 'url' => '/vitrin'],
+            ['label' => 'Üyelik', 'url' => '/uyelik'],
+        ];
+    }
+
+    /**
+     * Eski düz menüyü ve Seçkiler / Canlı / Sosyal kayıtlarını güncel ağaca taşır.
      * Ana sayfa bağlantısını her zaman ilk sırada tutar.
      *
-     * @return list<array<string, string>>
+     * @return list<array{label: string, url: string, children?: list<array{label: string, url: string}>}>
      */
     public static function navItems(): array
     {
-        $items = array_values(array_filter(
-            array_map(function (array $item): array {
-                $url = rtrim((string) ($item['url'] ?? ''), '/');
-
-                if (in_array($url, ['/canli', '/sosyal'], true)) {
-                    $label = (string) ($item['label'] ?? '');
-
-                    if (in_array($label, ['Canlı', 'Sosyal', ''], true)) {
-                        $label = 'Seçkiler';
-                    }
-
-                    return [
-                        'label' => $label,
-                        'url' => '/seckiler',
-                    ];
-                }
-
-                return $item;
-            }, static::list('nav_items')),
-            function (array $item): bool {
-                $url = rtrim((string) ($item['url'] ?? ''), '/') ?: '/';
-                $label = (string) ($item['label'] ?? '');
-
-                return $url !== '/' && $label !== 'Ana sayfa';
-            },
-        ));
+        $stored = static::list('nav_items');
+        $items = static::isLegacyFlatNav($stored)
+            ? static::defaultNavItems()
+            : array_values(array_filter(
+                array_map(fn (array $item): ?array => static::normalizeNavItem($item), $stored),
+            ));
 
         array_unshift($items, [
             'label' => 'Ana sayfa',
@@ -227,7 +232,7 @@ class SiteSettings
     }
 
     /**
-     * Eski canlı yayın ve Sosyal giriş yazılarını Seçkiler metnine çevirir.
+     * Eski canlı yayın, Sosyal ve Seçkiler giriş yazılarını Vitrin metnine çevirir.
      */
     public static function socialIntro(): string
     {
@@ -236,6 +241,7 @@ class SiteSettings
         $legacy = [
             'Ders ve sohbet yayınları bu sayfadan takip edilir.',
             'Instagram paylaşımlarımız bu sayfada yer alır.',
+            'Derneğin Instagram hesabından seçilen kareler ve kısa videolar.',
         ];
 
         if (in_array($intro, $legacy, true)) {
@@ -243,6 +249,84 @@ class SiteSettings
         }
 
         return $intro;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $items
+     */
+    private static function isLegacyFlatNav(array $items): bool
+    {
+        $urls = array_map(
+            fn (array $item): string => rtrim((string) ($item['url'] ?? ''), '/') ?: '/',
+            $items,
+        );
+        sort($urls);
+
+        return $urls === ['/etkinlikler', '/hakkimizda', '/medya', '/programlar', '/seckiler', '/uyelik', '/yazilar'];
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array{label: string, url: string, children?: list<array{label: string, url: string}>}|null
+     */
+    private static function normalizeNavItem(array $item): ?array
+    {
+        $label = trim((string) ($item['label'] ?? ''));
+        $url = static::remapNavUrl((string) ($item['url'] ?? ''));
+        $children = [];
+
+        foreach ($item['children'] ?? [] as $child) {
+            if (! is_array($child)) {
+                continue;
+            }
+
+            $normalized = static::normalizeNavItem($child);
+
+            if ($normalized !== null) {
+                unset($normalized['children']);
+                $children[] = $normalized;
+            }
+        }
+
+        if ($label === '' || $label === 'Ana sayfa' || $url === '/') {
+            return null;
+        }
+
+        $label = static::remapNavLabel($label, $url);
+
+        if ($children === [] && ($url === '' || $url === '#')) {
+            return null;
+        }
+
+        $normalized = [
+            'label' => $label,
+            'url' => $url !== '' ? $url : ($children[0]['url'] ?? '#'),
+        ];
+
+        if ($children !== []) {
+            $normalized['children'] = $children;
+        }
+
+        return $normalized;
+    }
+
+    private static function remapNavUrl(string $url): string
+    {
+        $url = rtrim($url, '/') ?: '';
+
+        return match ($url) {
+            '/canli', '/sosyal', '/seckiler' => '/vitrin',
+            default => $url,
+        };
+    }
+
+    private static function remapNavLabel(string $label, string $url): string
+    {
+        if ($url === '/vitrin' && in_array($label, ['Canlı', 'Sosyal', 'Seçkiler', ''], true)) {
+            return 'Vitrin';
+        }
+
+        return $label;
     }
 
     public static function put(string $key, mixed $value): void

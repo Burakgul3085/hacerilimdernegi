@@ -30,7 +30,7 @@ class SecurityHeaders
             "img-src 'self' data: blob: https:",
             "font-src 'self' data:",
             "connect-src 'self'",
-            "frame-src 'self' https://www.google.com https://maps.google.com https://www.google.com.tr https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
+            "frame-src 'self' https://www.google.com https://maps.google.com https://www.google.com.tr https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.instagram.com",
         ]));
 
         if ($request->secure()) {

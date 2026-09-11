@@ -12,6 +12,20 @@
         return $currentPath === $url || str_starts_with($currentPath, $url.'/');
     };
 
+    $navItems = array_map(function (array $item) use ($isActive): array {
+        $children = array_map(function (array $child) use ($isActive): array {
+            $child['active'] = $isActive($child['url'] ?? '');
+
+            return $child;
+        }, $item['children'] ?? []);
+
+        $item['children'] = $children;
+        $item['active'] = $isActive($item['url'] ?? '')
+            || collect($children)->contains(fn (array $child): bool => $child['active']);
+
+        return $item;
+    }, $navItems);
+
     $ctaLabel = $settings['nav_cta_label'] ?? 'Bağış';
     $ctaUrl = $settings['nav_cta_url'] ?: route('donate');
     $siteUrl = rtrim(\App\Support\MailTemplate::publicBaseUrl(), '/');
@@ -222,11 +236,7 @@
                 </a>
 
                 <nav class="hidden items-center gap-6 xl:flex" aria-label="Ana menü">
-                    @foreach ($navItems as $item)
-                        <a href="{{ $item['url'] ?? '#' }}" class="nav-link" data-active="{{ $isActive($item['url'] ?? '') ? '1' : '0' }}">
-                            {{ $item['label'] ?? '' }}
-                        </a>
-                    @endforeach
+                    <x-site-nav-items :items="$navItems" variant="desktop" />
                 </nav>
 
                 <div class="flex items-center gap-2 sm:gap-3">
@@ -288,15 +298,7 @@
             <div class="shell py-14 lg:py-16">
                 <nav class="mb-8 border-b border-white/10 pb-8 xl:hidden" aria-label="Mobil menü">
                     <ul class="grid gap-1 sm:grid-cols-2">
-                        @foreach ($navItems as $item)
-                            <li>
-                                <a href="{{ $item['url'] ?? '#' }}"
-                                   class="flex items-center justify-between rounded-xl px-3 py-2.5 font-display text-xl text-cream transition hover:bg-white/5">
-                                    {{ $item['label'] ?? '' }}
-                                    <x-ui.icon name="chevron-right" class="h-4 w-4 text-gold" />
-                                </a>
-                            </li>
-                        @endforeach
+                        <x-site-nav-items :items="$navItems" variant="mobile" />
                         <li>
                             <a href="{{ route('contact') }}"
                                class="flex items-center justify-between rounded-xl px-3 py-2.5 font-display text-xl text-cream transition hover:bg-white/5">

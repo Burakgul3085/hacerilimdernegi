@@ -102,7 +102,19 @@ class ManageSettings extends Page
 
         foreach ($state as $key => $value) {
             if (in_array($key, SiteSettings::LIST_KEYS, true)) {
-                SiteSettings::put($key, json_encode(array_values($value ?? []), JSON_UNESCAPED_UNICODE));
+                $items = array_values($value ?? []);
+
+                if ($key === 'nav_items') {
+                    $items = array_map(function (mixed $item): mixed {
+                        if (is_array($item) && isset($item['children']) && is_array($item['children'])) {
+                            $item['children'] = array_values($item['children']);
+                        }
+
+                        return $item;
+                    }, $items);
+                }
+
+                SiteSettings::put($key, json_encode($items, JSON_UNESCAPED_UNICODE));
 
                 continue;
             }
@@ -148,7 +160,7 @@ class ManageSettings extends Page
             ->icon(Heroicon::OutlinedBars3)
             ->schema([
                 Section::make('Ana menü')
-                    ->description('Sıralamayı sürükleyerek değiştirebilirsiniz. Bağlantılar "/programlar" gibi site içi yol veya tam adres olabilir.')
+                    ->description('Sıralamayı sürükleyerek değiştirebilirsiniz. Üst başlıkların altına alt bağlantı eklenebilir; alt bağlantısı olan satırda üst yol boş bırakılabilir.')
                     ->schema([
                         Repeater::make('nav_items')
                             ->label('Menü bağlantıları')
@@ -156,11 +168,25 @@ class ManageSettings extends Page
                             ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
                             ->collapsed()
                             ->reorderableWithDragAndDrop()
-                            ->columns(2)
                             ->schema([
                                 TextInput::make('label')->label('Başlık')->required()->maxLength(60),
-                                TextInput::make('url')->label('Bağlantı')->required()->maxLength(255),
-                            ]),
+                                TextInput::make('url')->label('Bağlantı')->maxLength(255)
+                                    ->helperText('Alt başlık varsa boş bırakılabilir. Site içi yol: /programlar'),
+                                Repeater::make('children')
+                                    ->label('Alt başlıklar')
+                                    ->addActionLabel('Alt başlık ekle')
+                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
+                                    ->collapsed()
+                                    ->reorderableWithDragAndDrop()
+                                    ->defaultItems(0)
+                                    ->schema([
+                                        TextInput::make('label')->label('Başlık')->required()->maxLength(60),
+                                        TextInput::make('url')->label('Bağlantı')->required()->maxLength(255),
+                                    ])
+                                    ->columns(2)
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
                     ]),
 
                 Section::make('Menü butonu')
@@ -281,7 +307,7 @@ class ManageSettings extends Page
                         Textarea::make('membership_intro')->label('Üyelik')->rows(2),
                         Textarea::make('donate_intro')->label('Bağış')->rows(2),
                         Textarea::make('contact_intro')->label('İletişim')->rows(2),
-                        Textarea::make('live_intro')->label('Seçkiler')->rows(2),
+                        Textarea::make('live_intro')->label('Vitrin')->rows(2),
                     ]),
 
                 Section::make('Üyelik kartı')
@@ -348,11 +374,11 @@ class ManageSettings extends Page
 
     private function broadcastAndDonationTab(): Tab
     {
-        return Tab::make('Seçkiler ve bağış')
+        return Tab::make('Vitrin ve bağış')
             ->icon(Heroicon::OutlinedCamera)
             ->schema([
                 Section::make('Instagram vitrini')
-                    ->description('Profil adresi Seçkiler sayfasında görünür. Gönderi veya Reels linklerini sırayla ekleyin; kartlara tıklanınca Instagram gömülü görünümü açılır.')
+                    ->description('Profil adresi Vitrin sayfasında görünür. Gönderi veya Reels linklerini sırayla ekleyin; kartlara tıklanınca Instagram gömülü görünümü açılır.')
                     ->schema([
                         Repeater::make('instagram_posts')
                             ->label('Paylaşımlar')
