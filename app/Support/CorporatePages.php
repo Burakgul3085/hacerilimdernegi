@@ -9,6 +9,8 @@ final class CorporatePages
 {
     public const BYLAWS_SLUG = 'dernek-tuzugu';
 
+    public const BOARD_SLUG = 'yonetim-kadrosu';
+
     /**
      * @return array<string, array{title: string, excerpt: string, body: string}>
      */
@@ -30,7 +32,7 @@ final class CorporatePages
                 'excerpt' => 'Dernek başkanının ziyaretçilere mesajı.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
             ],
-            'yonetim-kadrosu' => [
+            self::BOARD_SLUG => [
                 'title' => 'Yönetim kadrosu',
                 'excerpt' => 'Dernek yönetiminde görev alan isimler.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
@@ -53,6 +55,11 @@ final class CorporatePages
         return $slug === self::BYLAWS_SLUG;
     }
 
+    public static function isBoard(string $slug): bool
+    {
+        return $slug === self::BOARD_SLUG;
+    }
+
     /**
      * Hakkımızda dışındaki kurumsal sayfaların güzel yolları.
      *
@@ -63,7 +70,7 @@ final class CorporatePages
         return [
             'vizyon-misyon' => 'corporate.vision',
             'baskanin-mesaji' => 'corporate.message',
-            'yonetim-kadrosu' => 'corporate.board',
+            self::BOARD_SLUG => 'corporate.board',
             self::BYLAWS_SLUG => 'corporate.bylaws',
         ];
     }

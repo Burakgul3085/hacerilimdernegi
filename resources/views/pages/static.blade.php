@@ -7,12 +7,15 @@
     $stats = \App\Support\SiteSettings::list('stats');
     $isAbout = $page->slug === 'hakkimizda';
     $isBylaws = $page->isBylaws();
+    $isBoard = $page->isBoard();
     $pdfUrl = $isBylaws ? $page->documentUrl() : null;
-    $defaultBylawsBody = \App\Support\CorporatePages::definitions()[\App\Support\CorporatePages::BYLAWS_SLUG]['body'];
-    $showBody = filled($page->body) && ! ($pdfUrl && $page->body === $defaultBylawsBody);
-    $image = (! $isBylaws && filled($page->image))
+    $boardTiers = $isBoard ? $page->boardMembersByTier() : [];
+    $hasBoard = $boardTiers !== [];
+    $defaultBody = \App\Support\CorporatePages::definitions()[(string) $page->slug]['body'] ?? null;
+    $showBody = filled($page->body) && ! (($pdfUrl || $hasBoard) && $page->body === $defaultBody);
+    $image = (! $isBylaws && ! $isBoard && filled($page->image))
         ? \Illuminate\Support\Facades\Storage::disk('public')->url($page->image)
-        : (! $isBylaws ? \App\Support\SiteSettings::aboutImageUrl() : null);
+        : (! $isBylaws && ! $isBoard ? \App\Support\SiteSettings::aboutImageUrl() : null);
     $isCorporate = \App\Support\CorporatePages::has((string) $page->slug);
     $breadcrumbs = $isCorporate
         ? [['label' => 'Kurumsal'], ['label' => $page->title]]
@@ -47,11 +50,61 @@
             <a href="{{ $pdfUrl }}" class="btn btn-outline btn-sm" download>PDF'yi indir</a>
         </div>
     </section>
+@elseif ($hasBoard)
+    <section class="board-directory shell pb-20 pt-10 lg:pb-28 lg:pt-12">
+        @if ($showBody)
+            <div class="prose-hacer mx-auto mb-14 max-w-2xl text-center">{!! $page->body !!}</div>
+        @endif
+
+        <div class="flex flex-col">
+            @foreach ($boardTiers as $tierValue => $members)
+                @php
+                    $tier = \App\Enums\BoardTier::tryFrom((int) $tierValue);
+                    $featured = $tier === \App\Enums\BoardTier::President;
+                @endphp
+
+                @if (! $loop->first)
+                    <div class="board-spine mx-auto" aria-hidden="true"></div>
+                @endif
+
+                <div>
+                    @if ($tier)
+                        <p class="eyebrow text-center">{{ $tier->label() }}</p>
+                    @endif
+
+                    <div @class([
+                        'mt-7 flex flex-wrap justify-center gap-6',
+                    ])>
+                        @foreach ($members as $index => $member)
+                            @php
+                                $cardWidth = match ($tier) {
+                                    \App\Enums\BoardTier::President => 'w-full max-w-sm',
+                                    \App\Enums\BoardTier::VicePresident => 'w-full max-w-[20rem]',
+                                    \App\Enums\BoardTier::Officer => 'w-full max-w-[18rem]',
+                                    default => 'w-full max-w-[16.5rem]',
+                                };
+                            @endphp
+                            <x-board-member
+                                class="reveal {{ $cardWidth }}"
+                                style="--reveal-delay: {{ $index * 80 }}ms"
+                                :name="$member['name']"
+                                :title="$member['title']"
+                                :photo="$member['photo']"
+                                :bio="$member['bio']"
+                                :initials="$member['initials']"
+                                :featured="$featured"
+                            />
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
 @else
 <section class="shell py-16 lg:py-24">
     <div @class([
         'grid gap-12 lg:gap-16',
-        'lg:grid-cols-[minmax(0,1fr)_24rem]' => ! $isBylaws,
+        'lg:grid-cols-[minmax(0,1fr)_24rem]' => ! $isBylaws && ! $isBoard,
     ])>
         <div class="reveal">
             @if ($showBody)
@@ -79,10 +132,10 @@
             @endif
         </div>
 
-        @unless ($isBylaws)
+        @unless ($isBylaws || $isBoard)
             <aside class="reveal lg:sticky lg:top-32 lg:self-start">
                 <div class="overflow-hidden rounded-2xl">
-                    <img src="{{ $image }}" alt="{{ $page->title }}" loading="lazy" class="aspect-[4/5] w-full object-cover">
+                    <img src="{{ $image }}" alt="{{ $page->title }}" loading="lazy" class="page-aside-photo aspect-[4/5] w-full object-cover">
                 </div>
 
                 <div class="card mt-4 p-6">
