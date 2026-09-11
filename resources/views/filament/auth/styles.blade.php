@@ -1,4 +1,57 @@
 <style>
+    .hacer-admin-auth.fi-body {
+        --hacer-ink: #161513;
+        --hacer-gold: #8a7a62;
+        --hacer-gold-soft: rgb(138 122 98 / 0.18);
+        --hacer-cream: #fbf6ec;
+        --hacer-paper: #fffcf8;
+        --hacer-line: #e6dfd3;
+        --hacer-muted: #6b6560;
+        background: #161513 !important;
+    }
+
+    .hacer-login-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+        background: #161513;
+    }
+
+    .hacer-login-bg__video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 38%;
+        transform: scale(1.02);
+        filter: saturate(1.06) contrast(1.02);
+    }
+
+    .hacer-login-bg__veil {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(
+                180deg,
+                rgb(22 21 19 / 0.1) 0%,
+                rgb(251 246 236 / 0.06) 46%,
+                rgb(22 21 19 / 0.28) 100%
+            ),
+            radial-gradient(
+                ellipse at 50% 42%,
+                transparent 18%,
+                rgb(22 21 19 / 0.22) 100%
+            );
+    }
+
+    .hacer-admin-auth .fi-simple-layout,
+    .hacer-admin-auth .fi-simple-main-ctn {
+        position: relative;
+        z-index: 1;
+        background: transparent;
+    }
+
     .hacer-admin-auth .fi-simple-main {
         --hacer-ink: #161513;
         --hacer-gold: #8a7a62;
@@ -7,6 +60,26 @@
         --hacer-paper: #fffcf8;
         --hacer-line: #e6dfd3;
         --hacer-muted: #6b6560;
+        background: rgb(255 252 248 / 0.88) !important;
+        backdrop-filter: blur(22px) saturate(1.2);
+        -webkit-backdrop-filter: blur(22px) saturate(1.2);
+        box-shadow:
+            0 28px 80px rgb(22 21 19 / 0.28),
+            0 0 0 1px rgb(255 255 255 / 0.55);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .hacer-login-bg__video {
+            display: none;
+        }
+
+        .hacer-login-bg {
+            background: #f4eee3;
+        }
+
+        .hacer-login-bg__veil {
+            background: rgb(251 246 236 / 0.55);
+        }
     }
 
     .hacer-login-links {

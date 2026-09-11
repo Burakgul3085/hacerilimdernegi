@@ -40,6 +40,20 @@ class AdminPasswordResetTest extends TestCase
             ->assertSee('/yonetim/password-reset/request', false);
     }
 
+    public function test_login_page_renders_the_background_video(): void
+    {
+        $this->get('/yonetim/login')
+            ->assertOk()
+            ->assertSee('hacer-login-bg', false)
+            ->assertSee('/videos/admin-login-bg.mp4', false)
+            ->assertSee('autoplay', false);
+
+        $this->get('/yonetim/password-reset/request')
+            ->assertOk()
+            ->assertDontSee('hacer-login-bg', false)
+            ->assertDontSee('/videos/admin-login-bg.mp4', false);
+    }
+
     public function test_reset_link_is_sent_to_the_mailer_recipient_not_the_login_email(): void
     {
         Notification::fake();
