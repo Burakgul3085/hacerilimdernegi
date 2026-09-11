@@ -22,10 +22,12 @@ class NavigationMenuTest extends TestCase
             ->assertSee('Dernek tüzüğü')
             ->assertSee('Projeler')
             ->assertSee('Programlar')
+            ->assertSee('Etkinlikler')
+            ->assertSee('/etkinlikler', false)
             ->assertSee('Medya')
+            ->assertSee('/medya', false)
             ->assertSee('Vitrin')
             ->assertSee('/vitrin', false)
-            ->assertDontSee('>Etkinlikler<', false)
             ->assertDontSee('>Seçkiler<', false);
     }
 
@@ -45,9 +47,41 @@ class NavigationMenuTest extends TestCase
             ->assertOk()
             ->assertSee('Kurumsal')
             ->assertSee('Projeler')
+            ->assertSee('Etkinlikler')
+            ->assertSee('/etkinlikler', false)
+            ->assertSee('Medya')
             ->assertSee('Vitrin')
             ->assertSee('/vitrin', false)
-            ->assertDontSee('>Etkinlikler<', false)
             ->assertDontSee('/seckiler', false);
+    }
+
+    public function test_projects_menu_with_media_child_is_corrected_to_events(): void
+    {
+        SiteSettings::put('nav_items', json_encode([
+            [
+                'label' => 'Kurumsal',
+                'url' => '/hakkimizda',
+                'children' => [
+                    ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
+                ],
+            ],
+            [
+                'label' => 'Projeler',
+                'url' => '/programlar',
+                'children' => [
+                    ['label' => 'Programlar', 'url' => '/programlar'],
+                    ['label' => 'Medya', 'url' => '/medya'],
+                ],
+            ],
+            ['label' => 'Yazılar', 'url' => '/yazilar'],
+            ['label' => 'Vitrin', 'url' => '/vitrin'],
+            ['label' => 'Üyelik', 'url' => '/uyelik'],
+        ], JSON_UNESCAPED_UNICODE));
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Etkinlikler')
+            ->assertSee('/etkinlikler', false)
+            ->assertSeeInOrder(['Yazılar', 'Medya', 'Vitrin']);
     }
 }

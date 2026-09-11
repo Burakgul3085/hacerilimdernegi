@@ -230,12 +230,12 @@
         @endif
 
         <header class="site-header">
-            <div class="shell flex h-[5.25rem] items-center justify-between gap-6 lg:h-24">
+            <div class="shell flex h-[5.25rem] items-center justify-between gap-8 lg:h-24">
                 <a href="{{ route('home') }}" class="flex shrink-0 items-center" aria-label="{{ $settings['site_name'] }}">
-                    <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-14 w-auto max-w-[240px] object-contain lg:h-16 lg:max-w-[280px]">
+                    <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-14 w-auto max-w-[220px] object-contain lg:h-[3.75rem] lg:max-w-[240px]">
                 </a>
 
-                <nav class="hidden items-center gap-6 xl:flex" aria-label="Ana menü">
+                <nav class="hidden items-center gap-7 xl:flex xl:gap-8" aria-label="Ana menü">
                     <x-site-nav-items :items="$navItems" variant="desktop" />
                 </nav>
 

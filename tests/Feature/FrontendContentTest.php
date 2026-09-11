@@ -162,7 +162,7 @@ class FrontendContentTest extends TestCase
             ->assertSee('is-compact', false)
             ->assertSee('site-topbar', false)
             ->assertSee('hero-copy', false)
-            ->assertSee('h-14 w-auto max-w-[240px]', false)
+            ->assertSee('h-14 w-auto max-w-[220px]', false)
             ->assertDontSee('site-chrome-spacer', false);
     }
 

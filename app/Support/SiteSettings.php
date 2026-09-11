@@ -199,10 +199,11 @@ class SiteSettings
                 'url' => '/programlar',
                 'children' => [
                     ['label' => 'Programlar', 'url' => '/programlar'],
-                    ['label' => 'Medya', 'url' => '/medya'],
+                    ['label' => 'Etkinlikler', 'url' => '/etkinlikler'],
                 ],
             ],
             ['label' => 'Yazılar', 'url' => '/yazilar'],
+            ['label' => 'Medya', 'url' => '/medya'],
             ['label' => 'Vitrin', 'url' => '/vitrin'],
             ['label' => 'Üyelik', 'url' => '/uyelik'],
         ];
@@ -217,7 +218,7 @@ class SiteSettings
     public static function navItems(): array
     {
         $stored = static::list('nav_items');
-        $items = static::isLegacyFlatNav($stored)
+        $items = static::shouldReplaceStoredNav($stored)
             ? static::defaultNavItems()
             : array_values(array_filter(
                 array_map(fn (array $item): ?array => static::normalizeNavItem($item), $stored),
@@ -252,9 +253,11 @@ class SiteSettings
     }
 
     /**
+     * Eski düz menüyü veya Medya’yı Projeler altına koyan yanlış ağacı güncel menüyle değiştirir.
+     *
      * @param  list<array<string, mixed>>  $items
      */
-    private static function isLegacyFlatNav(array $items): bool
+    private static function shouldReplaceStoredNav(array $items): bool
     {
         $urls = array_map(
             fn (array $item): string => rtrim((string) ($item['url'] ?? ''), '/') ?: '/',
@@ -262,7 +265,31 @@ class SiteSettings
         );
         sort($urls);
 
-        return $urls === ['/etkinlikler', '/hakkimizda', '/medya', '/programlar', '/seckiler', '/uyelik', '/yazilar'];
+        if ($urls === ['/etkinlikler', '/hakkimizda', '/medya', '/programlar', '/seckiler', '/uyelik', '/yazilar']) {
+            return true;
+        }
+
+        foreach ($items as $item) {
+            if (($item['label'] ?? '') !== 'Projeler') {
+                continue;
+            }
+
+            $childUrls = [];
+
+            foreach ($item['children'] ?? [] as $child) {
+                if (! is_array($child)) {
+                    continue;
+                }
+
+                $childUrls[] = rtrim((string) ($child['url'] ?? ''), '/') ?: '/';
+            }
+
+            if (in_array('/medya', $childUrls, true) && ! in_array('/etkinlikler', $childUrls, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

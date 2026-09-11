@@ -8,22 +8,32 @@
         @if (($item['children'] ?? []) !== [])
             <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
                 <button type="button"
-                        class="nav-link inline-flex cursor-pointer items-center gap-1 bg-transparent p-0"
+                        class="nav-link inline-flex cursor-pointer items-center gap-1.5 bg-transparent p-0"
                         data-active="{{ ($item['active'] ?? false) ? '1' : '0' }}"
                         @click="open = !open"
                         @keydown.escape="open = false"
                         :aria-expanded="open"
                         aria-haspopup="true">
                     {{ $item['label'] ?? '' }}
-                    <x-ui.icon name="chevron-down" class="h-3.5 w-3.5 text-gold/80" />
+                    <x-ui.icon name="chevron-down" class="nav-caret h-3 w-3" x-bind:class="open && 'is-open'" />
                 </button>
-                <div x-show="open" x-cloak x-transition.opacity class="absolute left-0 top-full z-50 min-w-[14rem] pt-3">
-                    <div class="rounded-2xl border border-line bg-paper py-2 shadow-lift">
+                <div class="nav-dropdown-anchor"
+                     x-show="open"
+                     x-cloak
+                     x-transition:enter="nav-dropdown-enter"
+                     x-transition:enter-start="nav-dropdown-enter-start"
+                     x-transition:enter-end="nav-dropdown-enter-end"
+                     x-transition:leave="nav-dropdown-leave"
+                     x-transition:leave-start="nav-dropdown-leave-start"
+                     x-transition:leave-end="nav-dropdown-leave-end">
+                    <div class="nav-dropdown">
                         @foreach ($item['children'] as $child)
                             <a href="{{ $child['url'] ?? '#' }}"
-                               class="block px-4 py-2 text-sm font-medium text-forest/80 transition hover:bg-cream hover:text-forest"
+                               class="nav-dropdown-link"
+                               data-active="{{ ($child['active'] ?? false) ? '1' : '0' }}"
                                @if ($child['active'] ?? false) aria-current="page" @endif>
-                                {{ $child['label'] ?? '' }}
+                                <span>{{ $child['label'] ?? '' }}</span>
+                                <x-ui.icon name="arrow-up-right" class="nav-dropdown-arrow h-3.5 w-3.5" />
                             </a>
                         @endforeach
                     </div>
@@ -45,13 +55,18 @@
                             @click="open = !open"
                             :aria-expanded="open">
                         {{ $item['label'] ?? '' }}
-                        <x-ui.icon name="chevron-down" class="h-4 w-4 text-gold transition" x-bind:class="open && 'rotate-180'" />
+                        <x-ui.icon name="chevron-down" class="h-4 w-4 text-gold transition duration-300" x-bind:class="open && 'rotate-180'" />
                     </button>
-                    <ul x-show="open" x-cloak class="mt-1 space-y-1 border-l border-white/10 pb-2 pl-4">
+                    <ul x-show="open"
+                        x-cloak
+                        x-transition:enter="transition duration-200 ease-out"
+                        x-transition:enter-start="opacity-0 -translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        class="mt-1 space-y-0.5 border-l border-gold/30 pb-2 pl-3">
                         @foreach ($item['children'] as $child)
                             <li>
                                 <a href="{{ $child['url'] ?? '#' }}"
-                                   class="block rounded-lg px-3 py-2 text-sm text-cream/75 transition hover:bg-white/5 hover:text-cream">
+                                   class="block rounded-lg px-3 py-2 text-[15px] tracking-wide text-cream/75 transition duration-300 hover:bg-white/5 hover:text-cream">
                                     {{ $child['label'] ?? '' }}
                                 </a>
                             </li>
