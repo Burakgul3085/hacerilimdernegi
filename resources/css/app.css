@@ -769,6 +769,140 @@ html.js .reveal.is-visible .media-zoom {
     transform: translateY(-0.25rem);
 }
 
+.donate-trust {
+    transition:
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.4s ease;
+}
+
+.donate-trust:hover {
+    background-color: var(--color-cream);
+    transform: translateY(-0.25rem);
+}
+
+.donate-trust-icon {
+    transition:
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.4s ease,
+        background-color 0.4s ease,
+        color 0.4s ease;
+}
+
+.donate-trust:hover .donate-trust-icon {
+    border-color: var(--color-gold);
+    background-color: var(--color-forest);
+    color: var(--color-cream);
+    transform: scale(1.08);
+}
+
+.donate-certificate {
+    box-shadow: var(--shadow-soft);
+}
+
+.donate-certificate-shine {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--color-gold-light) 35%, var(--color-gold) 50%, var(--color-gold-light) 65%, transparent 100%);
+    background-size: 220% 100%;
+    animation: donate-gold-line 5.5s ease-in-out infinite;
+}
+
+.donate-iban {
+    transition: border-color 0.4s ease, box-shadow 0.45s ease;
+}
+
+.donate-iban:hover {
+    border-color: rgb(138 122 98 / 0.55);
+    box-shadow: 0 16px 36px -28px rgb(22 21 19 / 0.45);
+}
+
+.donate-iban-value {
+    overflow-wrap: anywhere;
+}
+
+.donate-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    color: var(--color-forest);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition:
+        background-color 0.35s ease,
+        color 0.35s ease,
+        border-color 0.35s ease,
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.donate-copy:hover {
+    border-color: var(--color-forest);
+    background: var(--color-forest);
+    color: var(--color-cream);
+    transform: translateY(-1px);
+}
+
+.donate-step,
+.donate-purpose {
+    transition:
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.4s ease,
+        box-shadow 0.45s ease;
+}
+
+.donate-step:hover,
+.donate-purpose:hover {
+    transform: translateY(-0.3rem);
+    border-color: rgb(138 122 98 / 0.55);
+    box-shadow: var(--shadow-soft);
+}
+
+.donate-step-index {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    line-height: 1;
+    color: var(--color-gold);
+    letter-spacing: 0.08em;
+}
+
+.donate-purpose-icon {
+    transition:
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.4s ease,
+        color 0.4s ease,
+        border-color 0.4s ease;
+}
+
+.donate-purpose:hover .donate-purpose-icon {
+    border-color: var(--color-gold);
+    background-color: var(--color-forest);
+    color: var(--color-cream);
+    transform: scale(1.08);
+}
+
+@keyframes donate-gold-line {
+    0%,
+    100% {
+        background-position: 100% 0;
+        opacity: 0.55;
+    }
+
+    50% {
+        background-position: 0 0;
+        opacity: 1;
+    }
+}
+
 .cinematic-panel {
     transition:
         transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
@@ -836,9 +970,22 @@ html.js .reveal.is-visible .media-zoom {
     .stat-cell,
     .cinematic-panel,
     .social-icon,
-    .social-icon:hover {
+    .social-icon:hover,
+    .donate-trust,
+    .donate-trust:hover,
+    .donate-trust-icon,
+    .donate-step,
+    .donate-purpose,
+    .donate-purpose-icon,
+    .donate-copy {
         transform: none;
         transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .donate-certificate-shine {
+        animation: none;
+        opacity: 0.85;
+        background-position: 50% 0;
     }
 }
 

@@ -276,6 +276,7 @@
             </div>
             <h2 class="mt-5 font-display text-3xl leading-snug text-forest sm:text-4xl">Bağış</h2>
             <p class="mt-4 max-w-md text-sm leading-relaxed text-muted">{{ $settings['donate_intro'] }}</p>
+            <p class="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">Havale / EFT · Kart ödemesi yoktur</p>
             <a href="{{ route('donate') }}" class="btn btn-solid mt-8 self-start">
                 Bağış bilgileri
                 <x-ui.icon name="arrow-right" class="h-4 w-4" />

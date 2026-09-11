@@ -82,7 +82,8 @@ class ManageSettings extends Page
                         $this->homepageTab(),
                         $this->pageContentTab(),
                         $this->contactTab(),
-                        $this->broadcastAndDonationTab(),
+                        $this->broadcastTab(),
+                        $this->donationTab(),
                         $this->mailerTab(),
                         $this->legalTab(),
                     ]),
@@ -305,7 +306,6 @@ class ManageSettings extends Page
                         Textarea::make('posts_intro')->label('Yazılar')->rows(2),
                         Textarea::make('media_intro')->label('Medya')->rows(2),
                         Textarea::make('membership_intro')->label('Üyelik')->rows(2),
-                        Textarea::make('donate_intro')->label('Bağış')->rows(2),
                         Textarea::make('contact_intro')->label('İletişim')->rows(2),
                         Textarea::make('live_intro')->label('Vitrin')->rows(2),
                     ]),
@@ -372,9 +372,9 @@ class ManageSettings extends Page
             ]);
     }
 
-    private function broadcastAndDonationTab(): Tab
+    private function broadcastTab(): Tab
     {
-        return Tab::make('Vitrin ve bağış')
+        return Tab::make('Vitrin')
             ->icon(Heroicon::OutlinedCamera)
             ->schema([
                 Section::make('Instagram vitrini')
@@ -402,18 +402,57 @@ class ManageSettings extends Page
                                     ]),
                             ]),
                     ]),
+            ]);
+    }
 
-                Section::make('Bağış bilgileri')
+    private function donationTab(): Tab
+    {
+        return Tab::make('Bağış')
+            ->icon(Heroicon::OutlinedGift)
+            ->schema([
+                Section::make('Sayfa metni')
+                    ->schema([
+                        Textarea::make('donate_intro')->label('Giriş yazısı')->rows(3)
+                            ->helperText('Bağış sayfasının başlığının altında ve ana sayfadaki bağış kartında görünür.'),
+                    ]),
+
+                Section::make('Hesap bilgileri')
+                    ->description('Ziyaretçi bu bilgileri kopyalayıp banka havalesi veya EFT ile gönderir. Site üzerinden kart tahsilatı yoktur.')
                     ->columns(2)
                     ->schema([
                         Toggle::make('bank_details_are_demo')
                             ->label('Banka bilgileri demo')
-                            ->helperText('Açıkken bağış sayfasında "ödeme yapmayınız" uyarısı gösterilir.')
+                            ->helperText('Açıkken bağış sayfasında "ödeme yapmayınız" uyarısı gösterilir. Gerçek IBAN girildiğinde kapatın.')
                             ->columnSpanFull(),
                         TextInput::make('bank_account_name')->label('Hesap adı')->maxLength(180),
                         TextInput::make('bank_name')->label('Banka')->maxLength(120),
-                        TextInput::make('iban')->label('IBAN')->maxLength(64)->columnSpanFull(),
-                        Textarea::make('donation_note')->label('Bağış notu')->rows(3)->columnSpanFull(),
+                        TextInput::make('bank_branch')->label('Şube')->maxLength(120)
+                            ->helperText('Boş bırakılırsa sitede gösterilmez.'),
+                        TextInput::make('iban')->label('IBAN')->maxLength(64)
+                            ->helperText('Boşluksuz veya boşluklu yazılabilir; sitede dört haneli gruplar halinde gösterilir.'),
+                        Textarea::make('donation_reference')->label('Havale açıklaması')->rows(2)->columnSpanFull()
+                            ->helperText('Ziyaretçiye, dekont açıklamasına ne yazması gerektiğini söyler.'),
+                        Textarea::make('donation_note')->label('Ek not')->rows(3)->columnSpanFull()
+                            ->helperText('Hesap kartının altında görünür. Boş bırakılırsa gizlenir.'),
+                    ]),
+
+                Section::make('Bağışın kullanımı')
+                    ->description('Bağış sayfasındaki “nereye gider” kartları. Tümü silinirse bölüm gizlenir.')
+                    ->schema([
+                        TextInput::make('donation_purposes_title')->label('Bölüm başlığı')->maxLength(80),
+                        Repeater::make('donation_purposes')
+                            ->label('Kalemler')
+                            ->addActionLabel('Kalem ekle')
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                            ->collapsed()
+                            ->reorderableWithDragAndDrop()
+                            ->defaultItems(0)
+                            ->columns(3)
+                            ->schema([
+                                Select::make('icon')->label('İkon')->options(Icons::selectableOptions())->searchable()->default('gift')->required(),
+                                TextInput::make('title')->label('Başlık')->required()->maxLength(40),
+                                TextInput::make('text')->label('Açıklama')->maxLength(140),
+                            ]),
                     ]),
             ]);
     }

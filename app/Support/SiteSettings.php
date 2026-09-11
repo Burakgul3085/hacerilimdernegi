@@ -15,7 +15,7 @@ class SiteSettings
      *
      * @var list<string>
      */
-    public const LIST_KEYS = ['nav_items', 'value_pillars', 'stats', 'instagram_posts'];
+    public const LIST_KEYS = ['nav_items', 'value_pillars', 'stats', 'instagram_posts', 'donation_purposes'];
 
     /**
      * @return array<string, mixed>
@@ -41,8 +41,16 @@ class SiteSettings
             'instagram_posts' => json_encode([], JSON_UNESCAPED_UNICODE),
             'bank_account_name' => 'Hâcer İlim ve Kültür Derneği',
             'bank_name' => 'Demo Bankası',
+            'bank_branch' => '',
             'bank_details_are_demo' => '1',
             'donation_note' => 'Banka ve IBAN bilgileri henüz dernek yönetimi tarafından bildirilmedi. Aşağıdaki bilgiler yalnızca tasarım ön izlemesi içindir; bu bilgilere ödeme yapmayınız.',
+            'donation_reference' => 'Havale veya EFT açıklamasına adınızı soyadınızı yazmanız yeterlidir.',
+            'donation_purposes_title' => 'Bağışlarınız nereye gider',
+            'donation_purposes' => json_encode([
+                ['icon' => 'book', 'title' => 'İlim programları', 'text' => 'Ders, sohbet ve kitap tahlillerinin sürdürülebilmesi.'],
+                ['icon' => 'users', 'title' => 'Topluluk çalışmaları', 'text' => 'Gönüllü faaliyetler ve kardeşlik muhitinin ayakta durması.'],
+                ['icon' => 'building', 'title' => 'Kurumsal giderler', 'text' => 'Mekan, yayın ve iletişim gibi dernek işletme ihtiyaçları.'],
+            ], JSON_UNESCAPED_UNICODE),
             'iban' => 'DEMO — GERÇEK IBAN BEKLENİYOR',
             'logo' => '',
             'favicon' => '',
@@ -106,7 +114,7 @@ class SiteSettings
             'posts_intro' => 'Dernek gündemine dair yazılar ve resmî duyurular.',
             'media_intro' => 'Program ve etkinliklerimizden fotoğraf, video ve ses kayıtları.',
             'membership_intro' => 'Dernek çalışmalarına katılmak için formu doldurun.',
-            'donate_intro' => 'Dernek faaliyetleri bağışlarınızla sürer.',
+            'donate_intro' => 'İlim, sohbet ve kültür çalışmalarımız bağışlarınızla sürer. Katkınız derneğin resmî hesabına banka havalesi veya EFT ile iletilir.',
             'contact_intro' => 'Bizimle iletişime geçebilirsiniz.',
             'live_intro' => 'Instagram hesabından seçilen kareler ve kısa videolar, sitede vitrin olarak durur.',
 
@@ -426,6 +434,46 @@ class SiteSettings
         }
 
         return 'https://wa.me/'.$digits;
+    }
+
+    /**
+     * IBAN’ı ekranda dört karakterlik gruplara böler; geçerli değilse orijinal metni bırakır.
+     */
+    public static function formattedIban(string $iban): string
+    {
+        $iban = trim($iban);
+
+        if ($iban === '') {
+            return '';
+        }
+
+        $compact = strtoupper((string) preg_replace('/\s+/', '', $iban));
+
+        if (preg_match('/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/', $compact) !== 1) {
+            return $iban;
+        }
+
+        return implode(' ', str_split($compact, 4));
+    }
+
+    /**
+     * Panoya kopyalanacak IBAN; geçerli değilse trim edilmiş orijinal metin.
+     */
+    public static function ibanCopyValue(string $iban): string
+    {
+        $iban = trim($iban);
+
+        if ($iban === '') {
+            return '';
+        }
+
+        $compact = strtoupper((string) preg_replace('/[^A-Za-z0-9]/', '', $iban));
+
+        if (preg_match('/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/', $compact) === 1) {
+            return $compact;
+        }
+
+        return $iban;
     }
 
     /**

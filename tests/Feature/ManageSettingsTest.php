@@ -66,6 +66,37 @@ class ManageSettingsTest extends TestCase
         );
     }
 
+    public function test_saving_donation_fields_appears_on_the_public_page(): void
+    {
+        $this->actingAs($this->superAdmin());
+
+        Livewire::test(ManageSettings::class)
+            ->set('data.bank_details_are_demo', false)
+            ->set('data.bank_account_name', 'Hâcer İlim ve Kültür Derneği')
+            ->set('data.bank_name', 'Ziraat Bankası')
+            ->set('data.bank_branch', 'Şehitkamil Şubesi')
+            ->set('data.iban', 'TR330006100519786457841326')
+            ->set('data.donation_reference', 'Açıklamaya ad soyad yazınız')
+            ->set('data.donation_purposes_title', 'Katkınızın yönü')
+            ->set('data.donation_purposes', [
+                ['icon' => 'book', 'title' => 'Panel ilim kalemi', 'text' => 'Panel ilim açıklaması'],
+            ])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        auth()->logout();
+
+        $this->get('/bagis')
+            ->assertOk()
+            ->assertDontSee('Demo banka bilgisi')
+            ->assertSee('Ziraat Bankası')
+            ->assertSee('Şehitkamil Şubesi')
+            ->assertSee('TR33 0006 1005 1978 6457 8413 26')
+            ->assertSee('Açıklamaya ad soyad yazınız')
+            ->assertSee('Katkınızın yönü')
+            ->assertSee('Panel ilim kalemi');
+    }
+
     public function test_saved_settings_appear_on_the_public_site(): void
     {
         $this->actingAs($this->superAdmin());

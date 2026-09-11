@@ -111,7 +111,16 @@ class FormController extends Controller
 
     public function donate(): View
     {
-        return view('pages.donate', ['settings' => SiteSettings::all()]);
+        $iban = (string) SiteSettings::get('iban', '');
+
+        return view('pages.donate', [
+            'settings' => SiteSettings::all(),
+            'ibanDisplay' => SiteSettings::formattedIban($iban),
+            'ibanCopy' => SiteSettings::ibanCopyValue($iban),
+            'donationPurposes' => SiteSettings::list('donation_purposes'),
+            'whatsappChatUrl' => SiteSettings::whatsappChatUrl(),
+            'bankDetailsAreDemo' => ((string) SiteSettings::get('bank_details_are_demo', '1')) === '1',
+        ]);
     }
 
     public function social(): View
