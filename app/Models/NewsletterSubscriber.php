@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class NewsletterSubscriber extends Model
 {
-    use Auditable;
+    use Auditable, Notifiable;
 
     protected $fillable = ['email', 'confirmed_at', 'ip_address'];
 
@@ -16,5 +17,10 @@ class NewsletterSubscriber extends Model
         return [
             'confirmed_at' => 'datetime',
         ];
+    }
+
+    public function routeNotificationForMail(): string
+    {
+        return $this->email;
     }
 }
