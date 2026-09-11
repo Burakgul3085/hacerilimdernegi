@@ -41,6 +41,7 @@ Route::post('/uyelik', [FormController::class, 'storeMembership'])->middleware('
 Route::get('/bagis', [FormController::class, 'donate'])->name('donate');
 Route::get('/iletisim', [FormController::class, 'contact'])->name('contact');
 Route::post('/iletisim', [FormController::class, 'storeContact'])->middleware('throttle:forms')->name('contact.store');
+Route::post('/iletisim/whatsapp', [FormController::class, 'storeWhatsapp'])->middleware('throttle:forms')->name('contact.whatsapp');
 Route::post('/bulten', [FormController::class, 'newsletter'])->middleware('throttle:forms')->name('newsletter.store');
 Route::get('/ara', SearchController::class)->middleware('throttle:search')->name('search');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');

@@ -34,6 +34,23 @@ class SiteSettingsWhatsappTest extends TestCase
         $this->assertNull(SiteSettings::whatsappMeUrl($number));
     }
 
+    public function test_builds_a_corporate_whatsapp_message_with_the_senders_details(): void
+    {
+        $this->assertSame(
+            "Esselamu aleyküm,\n\nHâcer İlim ve Kültür Derneği iletişim sayfasından yazıyorum.\n\nAdım: Ayşe Yılmaz\nTelefonum: 0532 111 22 33\n\nMesajım:\nProgramlar hakkında bilgi almak istiyorum.\n\nHayırlı çalışmalar dilerim.",
+            SiteSettings::whatsappMessageText('Ayşe Yılmaz', 'Programlar hakkında bilgi almak istiyorum.', '0532 111 22 33'),
+        );
+    }
+
+    public function test_omits_the_phone_line_when_the_sender_does_not_leave_a_number(): void
+    {
+        $text = SiteSettings::whatsappMessageText('Ayşe', 'Merhaba');
+
+        $this->assertStringContainsString('Adım: Ayşe', $text);
+        $this->assertStringContainsString('Merhaba', $text);
+        $this->assertStringNotContainsString('Telefonum:', $text);
+    }
+
     /**
      * @return array<string, array{0: string}>
      */

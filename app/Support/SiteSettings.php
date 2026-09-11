@@ -428,6 +428,50 @@ class SiteSettings
         return 'https://wa.me/'.$digits;
     }
 
+    /**
+     * WhatsApp’ta açılacak kurumsal mesaj metni.
+     */
+    public static function whatsappMessageText(string $name, string $message, ?string $senderPhone = null): string
+    {
+        $name = trim($name);
+        $message = trim($message);
+        $senderPhone = trim((string) $senderPhone);
+
+        $lines = [
+            'Esselamu aleyküm,',
+            '',
+            'Hâcer İlim ve Kültür Derneği iletişim sayfasından yazıyorum.',
+            '',
+            'Adım: '.$name,
+        ];
+
+        if ($senderPhone !== '') {
+            $lines[] = 'Telefonum: '.$senderPhone;
+        }
+
+        $lines[] = '';
+        $lines[] = 'Mesajım:';
+        $lines[] = $message;
+        $lines[] = '';
+        $lines[] = 'Hayırlı çalışmalar dilerim.';
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Paneldeki dernek numarasına hazır metinle WhatsApp sohbeti açar.
+     */
+    public static function whatsappComposeUrl(string $name, string $message, ?string $senderPhone = null): ?string
+    {
+        $base = static::whatsappChatUrl();
+
+        if ($base === null) {
+            return null;
+        }
+
+        return $base.'?text='.rawurlencode(static::whatsappMessageText($name, $message, $senderPhone));
+    }
+
     public static function logoUrl(): string
     {
         return static::imageUrl('logo') ?? asset('images/logo-mark.png');

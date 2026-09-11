@@ -50,7 +50,10 @@ class FormController extends Controller
 
     public function contact(): View
     {
-        return view('pages.contact', ['settings' => SiteSettings::all()]);
+        return view('pages.contact', [
+            'settings' => SiteSettings::all(),
+            'whatsappChatUrl' => SiteSettings::whatsappChatUrl(),
+        ]);
     }
 
     public function storeContact(Request $request): RedirectResponse
@@ -76,6 +79,34 @@ class FormController extends Controller
         app(ProcessContactMessage::class)->handle($message);
 
         return back()->with('status', 'Mesajınız iletildi. Teşekkür ederiz.');
+    }
+
+    public function storeWhatsapp(Request $request): RedirectResponse
+    {
+        if (FormGuard::isBot($request)) {
+            return back()->with('status', 'Mesajınız WhatsApp’a iletildi.');
+        }
+
+        $data = $request->validate([
+            'wa_name' => ['required', 'string', 'max:120'],
+            'wa_phone' => ['nullable', 'string', 'max:40'],
+            'wa_message' => ['required', 'string', 'max:1500'],
+            'kvkk_accepted' => ['accepted'],
+        ]);
+
+        $url = SiteSettings::whatsappComposeUrl(
+            $data['wa_name'],
+            $data['wa_message'],
+            $data['wa_phone'] ?? null,
+        );
+
+        if ($url === null) {
+            return back()->withErrors([
+                'wa_message' => 'WhatsApp hattı henüz tanımlı değil. E-posta formunu kullanabilirsiniz.',
+            ]);
+        }
+
+        return redirect()->away($url);
     }
 
     public function donate(): View

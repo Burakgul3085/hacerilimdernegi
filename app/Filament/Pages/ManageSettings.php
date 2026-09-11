@@ -350,7 +350,7 @@ class ManageSettings extends Page
                     ->schema([
                         Textarea::make('address')->label('Adres')->rows(2)->columnSpanFull(),
                         TextInput::make('phone')->label('Telefon')->tel()->maxLength(40)
-                            ->helperText('Bu numara ana sayfadaki yeşil WhatsApp düğmesine ve alt kısımdaki WhatsApp ikonuna gider.'),
+                            ->helperText('Bu numara ana sayfadaki yeşil WhatsApp düğmesine, alt kısımdaki WhatsApp ikonuna ve iletişim sayfasındaki WhatsApp formuna gider.'),
                         TextInput::make('email')->label('E-posta')->email()->maxLength(180),
                         TextInput::make('domain')->label('Alan adı')->maxLength(255)
                             ->helperText('Yalnızca alan adı; "https://" olmadan yazın.'),
