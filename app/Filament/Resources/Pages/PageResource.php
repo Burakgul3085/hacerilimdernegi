@@ -22,7 +22,7 @@ class PageResource extends Resource
 
     protected static ?string $model = Page::class;
 
-    protected static ?string $navigationLabel = 'Sayfalar';
+    protected static ?string $navigationLabel = 'Kurumsal';
 
     protected static ?string $modelLabel = 'sayfa';
 

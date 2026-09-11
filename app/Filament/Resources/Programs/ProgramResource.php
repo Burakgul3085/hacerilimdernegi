@@ -28,7 +28,7 @@ class ProgramResource extends Resource
 
     protected static ?string $pluralModelLabel = 'programlar';
 
-    protected static string|UnitEnum|null $navigationGroup = 'İçerik';
+    protected static string|UnitEnum|null $navigationGroup = 'Projeler';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 

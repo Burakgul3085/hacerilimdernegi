@@ -28,7 +28,7 @@ class EventResource extends Resource
 
     protected static ?string $pluralModelLabel = 'etkinlikler';
 
-    protected static string|UnitEnum|null $navigationGroup = 'İçerik';
+    protected static string|UnitEnum|null $navigationGroup = 'Projeler';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
