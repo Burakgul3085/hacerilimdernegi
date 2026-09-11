@@ -6,6 +6,7 @@ use App\Filament\Resources\Posts\Schemas\PostForm;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -315,6 +316,16 @@ class PostPageTest extends TestCase
         $this->assertSame($category->id, $second['category_id']);
         $this->assertNull($empty['category_id']);
         $this->assertDatabaseCount('categories', 1);
+    }
+
+    public function test_admin_panel_does_not_register_a_categories_page(): void
+    {
+        $resources = Filament::getPanel('admin')->getResources();
+
+        $this->assertNotContains(
+            'App\\Filament\\Resources\\Categories\\CategoryResource',
+            $resources,
+        );
     }
 
     public function test_custom_type_renders_the_typed_label(): void
