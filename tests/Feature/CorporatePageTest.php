@@ -247,7 +247,10 @@ class CorporatePageTest extends TestCase
                 'Kıymetli ziyaretçilerimiz, hoş geldiniz.',
             ])
             ->assertSee('/storage/pages/baskan.jpg', false)
-            ->assertSee('board-photo-fit', false)
+            ->assertSee('president-portrait-image', false)
+            ->assertSee('object-cover', false)
+            ->assertDontSee('board-photo-fill', false)
+            ->assertDontSee('board-photo-fit', false)
             ->assertDontSee('president-silhouette', false)
             ->assertDontSee('page-aside-photo', false);
     }
@@ -264,6 +267,21 @@ class CorporatePageTest extends TestCase
             ->assertSee('&lt;script&gt;', false)
             ->assertDontSee("<script>alert('xss')</script>", false)
             ->assertDontSee('<b>Başkan</b>', false);
+    }
+
+    public function test_message_page_keeps_long_unbroken_text_inside_the_message_column(): void
+    {
+        $run = str_repeat('ahsaak', 40);
+
+        Page::query()->where('slug', 'baskanin-mesaji')->update([
+            'president_name' => 'Ayşe Yılmaz',
+            'body' => '<p>'.$run.'</p>',
+        ]);
+
+        $this->get('/baskanin-mesaji')
+            ->assertSee($run)
+            ->assertSee('president-message-body', false)
+            ->assertSee('overflow-x-clip', false);
     }
 
     public function test_editor_can_save_president_fields_from_the_page_form(): void

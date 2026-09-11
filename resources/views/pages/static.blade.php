@@ -103,18 +103,16 @@
         </div>
     </section>
 @elseif ($isMessage)
-    <section class="president-message shell pb-20 pt-10 lg:pb-28 lg:pt-12">
-        <div class="grid items-start gap-12 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)] lg:gap-16">
-            <aside class="reveal mx-auto w-full max-w-sm lg:mx-0">
+    <section class="president-message shell overflow-x-clip pb-20 pt-10 lg:pb-28 lg:pt-12">
+        <div class="grid min-w-0 items-start gap-10 lg:grid-cols-[minmax(0,18.5rem)_minmax(0,1fr)] lg:gap-16">
+            <aside class="reveal mx-auto w-full max-w-[18.5rem] min-w-0 lg:mx-0">
                 <div @class([
-                    'president-portrait relative overflow-hidden rounded-2xl',
-                    'bg-forest' => filled($presidentPhoto),
+                    'president-portrait relative aspect-[4/5] w-full overflow-hidden rounded-2xl',
                     'bg-cream-deep' => blank($presidentPhoto),
                 ])>
                     @if ($presidentPhoto)
-                        <img src="{{ $presidentPhoto }}" alt="" aria-hidden="true" class="board-photo-fill">
                         <img src="{{ $presidentPhoto }}" alt="{{ $page->presidentName() ?: $page->title }}" loading="lazy" decoding="async"
-                             class="board-photo-fit">
+                             class="president-portrait-image absolute inset-0 h-full w-full object-cover object-center">
                     @else
                         <div class="president-silhouette flex h-full w-full items-center justify-center">
                             <x-ui.icon name="user" class="h-24 w-24 text-gold/70" />
@@ -130,11 +128,11 @@
                 </p>
             </aside>
 
-            <div class="reveal min-w-0">
+            <div class="reveal min-w-0 max-w-2xl">
                 <x-ui.icon name="quote" class="h-8 w-8 text-gold" />
 
                 @if ($showBody)
-                    <div class="prose-hacer mt-5">{!! $page->body !!}</div>
+                    <div class="prose-hacer president-message-body mt-5 max-w-full break-words">{!! $page->body !!}</div>
                 @endif
             </div>
         </div>

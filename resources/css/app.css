@@ -128,6 +128,30 @@
         aspect-ratio: 4 / 5;
     }
 
+    .president-portrait::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        box-shadow: inset 0 0 0 1px rgb(138 122 98 / 0.28);
+    }
+
+    .president-portrait-image {
+        display: block;
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .president-message-body,
+    .president-message-body * {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        max-width: 100%;
+    }
+
     .eyebrow {
         @apply text-[11px] font-semibold uppercase tracking-[0.32em] text-gold;
     }
