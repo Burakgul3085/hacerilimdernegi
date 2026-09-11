@@ -15,7 +15,7 @@ class Page extends Model
     use Auditable;
 
     protected $fillable = [
-        'slug', 'title', 'excerpt', 'body', 'image', 'document', 'board_members', 'president_name', 'president_title', 'seo_title', 'seo_description', 'is_published',
+        'slug', 'title', 'excerpt', 'body', 'image', 'document', 'board_members', 'president_name', 'president_title', 'vision', 'mission', 'seo_title', 'seo_description', 'is_published',
     ];
 
     protected function casts(): array
@@ -53,6 +53,21 @@ class Page extends Model
     public function isMessage(): bool
     {
         return CorporatePages::isMessage((string) $this->slug);
+    }
+
+    public function isVision(): bool
+    {
+        return CorporatePages::isVision((string) $this->slug);
+    }
+
+    public function visionHtml(): ?string
+    {
+        return $this->filledHtml($this->vision);
+    }
+
+    public function missionHtml(): ?string
+    {
+        return $this->filledHtml($this->mission);
     }
 
     public function presidentName(): ?string
@@ -154,6 +169,21 @@ class Page extends Model
         }
 
         return Storage::disk('public')->url($this->document);
+    }
+
+    private function filledHtml(mixed $html): ?string
+    {
+        if (! is_string($html)) {
+            return null;
+        }
+
+        $html = trim($html);
+
+        if ($html === '' || trim(strip_tags($html)) === '') {
+            return null;
+        }
+
+        return $html;
     }
 
     private static function initialsFromName(string $name): string

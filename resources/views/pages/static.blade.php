@@ -9,15 +9,18 @@
     $isBylaws = $page->isBylaws();
     $isBoard = $page->isBoard();
     $isMessage = $page->isMessage();
+    $isVision = $page->isVision();
     $pdfUrl = $isBylaws ? $page->documentUrl() : null;
     $boardTiers = $isBoard ? $page->boardMembersByTier() : [];
     $hasBoard = $boardTiers !== [];
     $presidentPhoto = $isMessage ? $page->imageUrl() : null;
+    $visionHtml = $isVision ? $page->visionHtml() : null;
+    $missionHtml = $isVision ? $page->missionHtml() : null;
     $defaultBody = \App\Support\CorporatePages::definitions()[(string) $page->slug]['body'] ?? null;
-    $showBody = filled($page->body) && ! (($pdfUrl || $hasBoard || $isMessage) && $page->body === $defaultBody);
-    $image = (! $isBylaws && ! $isBoard && ! $isMessage && filled($page->image))
+    $showBody = filled($page->body) && ! (($pdfUrl || $hasBoard || $isMessage || $isVision) && $page->body === $defaultBody);
+    $image = (! $isBylaws && ! $isBoard && ! $isMessage && ! $isVision && filled($page->image))
         ? \Illuminate\Support\Facades\Storage::disk('public')->url($page->image)
-        : (! $isBylaws && ! $isBoard && ! $isMessage ? \App\Support\SiteSettings::aboutImageUrl() : null);
+        : (! $isBylaws && ! $isBoard && ! $isMessage && ! $isVision ? \App\Support\SiteSettings::aboutImageUrl() : null);
     $isCorporate = \App\Support\CorporatePages::has((string) $page->slug);
     $breadcrumbs = $isCorporate
         ? [['label' => 'Kurumsal'], ['label' => $page->title]]
@@ -102,6 +105,38 @@
             @endforeach
         </div>
     </section>
+@elseif ($isVision)
+    <section class="vision-mission relative overflow-hidden pb-20 pt-10 lg:pb-28 lg:pt-14">
+        <div class="vision-mission-glow" aria-hidden="true"></div>
+
+        <div class="shell relative">
+            <div class="vision-mission-grid">
+                <x-vision-card
+                    title="Vizyon"
+                    index="01"
+                    icon="sparkles"
+                    eyebrow="Yönümüz"
+                    :html="$visionHtml"
+                    delay="0ms"
+                    direction="left"
+                />
+
+                <div class="vision-mission-spine" aria-hidden="true">
+                    <span></span>
+                </div>
+
+                <x-vision-card
+                    title="Misyon"
+                    index="02"
+                    icon="heart"
+                    eyebrow="Gayemiz"
+                    :html="$missionHtml"
+                    delay="140ms"
+                    direction="right"
+                />
+            </div>
+        </div>
+    </section>
 @elseif ($isMessage)
     <section class="president-message shell overflow-x-clip pb-20 pt-10 lg:pb-28 lg:pt-12">
         <div class="president-message-grid grid min-w-0 items-center gap-10 lg:grid-cols-[minmax(0,18.5rem)_minmax(0,1fr)] lg:gap-16">
@@ -141,7 +176,7 @@
 <section class="shell py-16 lg:py-24">
     <div @class([
         'grid gap-12 lg:gap-16',
-        'lg:grid-cols-[minmax(0,1fr)_24rem]' => ! $isBylaws && ! $isBoard && ! $isMessage,
+        'lg:grid-cols-[minmax(0,1fr)_24rem]' => ! $isBylaws && ! $isBoard && ! $isMessage && ! $isVision,
     ])>
         <div class="reveal">
             @if ($showBody)
@@ -169,7 +204,7 @@
             @endif
         </div>
 
-        @unless ($isBylaws || $isBoard || $isMessage)
+        @unless ($isBylaws || $isBoard || $isMessage || $isVision)
             <aside class="reveal lg:sticky lg:top-32 lg:self-start">
                 <div class="overflow-hidden rounded-2xl">
                     <img src="{{ $image }}" alt="{{ $page->title }}" loading="lazy" class="page-aside-photo aspect-[4/5] w-full object-cover">

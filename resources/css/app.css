@@ -129,6 +129,115 @@
         max-width: 100%;
     }
 
+    .vision-mission-glow {
+        position: absolute;
+        inset: 8% 6% auto;
+        height: 18rem;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse at 22% 40%, rgb(138 122 98 / 0.16), transparent 58%),
+            radial-gradient(ellipse at 78% 55%, rgb(212 203 190 / 0.28), transparent 62%);
+        filter: blur(8px);
+        animation: vision-glow 14s ease-in-out infinite;
+    }
+
+    .vision-mission-grid {
+        display: grid;
+        gap: 1.75rem;
+    }
+
+    @media (min-width: 1024px) {
+        .vision-mission-grid {
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            align-items: stretch;
+            gap: 1.25rem;
+        }
+    }
+
+    .vision-card {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        min-height: 22rem;
+        padding: 2rem 1.75rem 2.25rem;
+        border: 1px solid var(--color-line);
+        border-radius: 1.5rem;
+        background: rgb(255 252 248 / 0.88);
+        box-shadow: var(--shadow-soft);
+    }
+
+    @media (min-width: 640px) {
+        .vision-card {
+            padding: 2.75rem 2.5rem 2.85rem;
+        }
+    }
+
+    .vision-card::before {
+        content: '';
+        position: absolute;
+        inset: auto -30% 35% auto;
+        width: 14rem;
+        height: 14rem;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgb(138 122 98 / 0.16), transparent 68%);
+        pointer-events: none;
+        z-index: -1;
+        animation: vision-card-orb 16s ease-in-out infinite;
+    }
+
+    .vision-card-index {
+        position: absolute;
+        top: 1.15rem;
+        right: 1.25rem;
+        font-family: var(--font-display);
+        font-size: 3.4rem;
+        line-height: 1;
+        letter-spacing: -0.06em;
+        color: rgb(138 122 98 / 0.16);
+        pointer-events: none;
+    }
+
+    .vision-card-icon {
+        display: inline-flex;
+        height: 3.15rem;
+        width: 3.15rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        border: 1px solid var(--color-line);
+        color: var(--color-gold);
+        background: var(--color-cream);
+        animation: vision-icon-pulse 4.8s ease-in-out infinite;
+    }
+
+    .vision-card-body,
+    .vision-card-body * {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        max-width: 100%;
+    }
+
+    .vision-mission-spine {
+        display: none;
+    }
+
+    @media (min-width: 1024px) {
+        .vision-mission-spine {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.5rem;
+        }
+
+        .vision-mission-spine span {
+            display: block;
+            width: 1px;
+            height: min(70%, 22rem);
+            background: linear-gradient(to bottom, transparent, var(--color-gold), transparent);
+            animation: vision-spine 3.6s ease-in-out infinite;
+        }
+    }
+
     .eyebrow {
         @apply text-[11px] font-semibold uppercase tracking-[0.32em] text-gold;
     }
@@ -823,6 +932,56 @@ html.js .reveal.is-visible .media-zoom {
     }
 }
 
+@keyframes vision-glow {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.85;
+    }
+
+    50% {
+        transform: translate3d(0, 1.25rem, 0) scale(1.08);
+        opacity: 1;
+    }
+}
+
+@keyframes vision-card-orb {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    50% {
+        transform: translate3d(-2.5rem, 1.5rem, 0);
+    }
+}
+
+@keyframes vision-icon-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgb(138 122 98 / 0.12);
+        transform: scale(1);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgb(138 122 98 / 0);
+        transform: scale(1.04);
+    }
+}
+
+@keyframes vision-spine {
+    0%,
+    100% {
+        opacity: 0.45;
+        transform: scaleY(0.92);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
 .value-pillar {
     transition:
         transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1102,6 +1261,13 @@ html.js .reveal.is-visible .media-zoom {
         animation: none;
     }
 
+    .vision-mission-glow,
+    .vision-card::before,
+    .vision-card-icon,
+    .vision-mission-spine span {
+        animation: none;
+    }
+
     .btn,
     .btn svg,
     .btn:hover,
@@ -1111,6 +1277,8 @@ html.js .reveal.is-visible .media-zoom {
     .value-pillar:hover,
     .stat-cell,
     .cinematic-panel,
+    .vision-card,
+    .vision-card:hover,
     .social-icon,
     .social-icon:hover,
     .donate-trust,

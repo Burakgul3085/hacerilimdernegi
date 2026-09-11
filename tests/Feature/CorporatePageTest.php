@@ -49,13 +49,17 @@ class CorporatePageTest extends TestCase
         Page::query()->where('slug', 'vizyon-misyon')->update([
             'is_published' => false,
             'body' => '<p>Gizli taslak</p>',
+            'vision' => '<p>Gizli vizyon</p>',
+            'mission' => '<p>Gizli misyon</p>',
         ]);
 
         $this->get('/vizyon-misyon')
             ->assertOk()
             ->assertSee('Vizyon ve misyon')
             ->assertSee('Derneğin yönü, gayesi ve çalışma ilkeleri.')
-            ->assertDontSee('Gizli taslak');
+            ->assertDontSee('Gizli taslak')
+            ->assertDontSee('Gizli vizyon')
+            ->assertDontSee('Gizli misyon');
     }
 
     public function test_bylaws_page_does_not_show_the_decorative_image(): void
@@ -319,5 +323,82 @@ class CorporatePageTest extends TestCase
         Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
             ->assertFormFieldIsHidden('president_name')
             ->assertFormFieldIsHidden('president_title');
+    }
+
+    public function test_vision_page_does_not_show_the_decorative_image(): void
+    {
+        $this->get('/vizyon-misyon')
+            ->assertSee('Vizyon ve misyon')
+            ->assertSee('vision-mission', false)
+            ->assertSee('Yazı henüz eklenmedi')
+            ->assertDontSee('page-aside-photo', false)
+            ->assertDontSee('yönetim panelinden eklenecektir');
+    }
+
+    public function test_vision_page_renders_vision_and_mission_copy(): void
+    {
+        Page::query()->where('slug', 'vizyon-misyon')->update([
+            'vision' => '<p>İlim ve kardeşlikte örnek bir topluluk olmak.</p>',
+            'mission' => '<p>Kur’an ve sünnet ışığında faydalı çalışmalar yürütmek.</p>',
+        ]);
+
+        $this->get('/vizyon-misyon')
+            ->assertSeeInOrder([
+                'Vizyon',
+                'İlim ve kardeşlikte örnek bir topluluk olmak.',
+                'Misyon',
+                'Kur’an ve sünnet ışığında faydalı çalışmalar yürütmek.',
+            ])
+            ->assertSee('vision-card', false)
+            ->assertDontSee('vision-card-empty', false)
+            ->assertDontSee('Yazı henüz eklenmedi')
+            ->assertDontSee('page-aside-photo', false);
+    }
+
+    public function test_vision_page_treats_empty_rich_text_as_missing(): void
+    {
+        Page::query()->where('slug', 'vizyon-misyon')->update([
+            'vision' => '<p><br></p>',
+            'mission' => '<p>Gayemiz ilimdir.</p>',
+        ]);
+
+        $this->get('/vizyon-misyon')
+            ->assertSee('Gayemiz ilimdir.')
+            ->assertSee('vision-card-empty', false)
+            ->assertSee('Yazı henüz eklenmedi');
+    }
+
+    public function test_editor_can_save_vision_and_mission_from_the_page_form(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $page = Page::query()->where('slug', 'vizyon-misyon')->firstOrFail();
+
+        Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
+            ->assertFormFieldIsVisible('vision')
+            ->assertFormFieldIsVisible('mission')
+            ->assertFormFieldIsHidden('body')
+            ->fillForm([
+                'vision' => '<p>Ufuk metni</p>',
+                'mission' => '<p>Gaye metni</p>',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $page->refresh();
+
+        $this->assertStringContainsString('Ufuk metni', (string) $page->visionHtml());
+        $this->assertStringContainsString('Gaye metni', (string) $page->missionHtml());
+    }
+
+    public function test_vision_fields_are_hidden_on_other_pages(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $page = Page::query()->where('slug', 'hakkimizda')->firstOrFail();
+
+        Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
+            ->assertFormFieldIsHidden('vision')
+            ->assertFormFieldIsHidden('mission');
     }
 }

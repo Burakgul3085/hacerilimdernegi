@@ -48,6 +48,8 @@ class AuditLog extends Model
         'board_members' => 'Yönetim kadrosu',
         'president_name' => 'Başkan adı',
         'president_title' => 'Başkan ünvanı',
+        'vision' => 'Vizyon',
+        'mission' => 'Misyon',
         'cover' => 'Kapak',
         'gallery' => 'Galeri',
         'is_published' => 'Yayında',

@@ -13,6 +13,8 @@ final class CorporatePages
 
     public const MESSAGE_SLUG = 'baskanin-mesaji';
 
+    public const VISION_SLUG = 'vizyon-misyon';
+
     public const DEFAULT_PRESIDENT_TITLE = 'Hâcer İlim ve Kültür Derneği Başkanı';
 
     /**
@@ -26,7 +28,7 @@ final class CorporatePages
                 'excerpt' => 'Gaziantep Şehitkamil’de faaliyet gösteren Hâcer İlim ve Kültür Derneği; Kur’an ve sünnet ışığında ilim, kültür ve kardeşlik çalışmalarını sürdürür.',
                 'body' => '<p>Hâcer İlim ve Kültür Derneği, 2017’den bu yana Gaziantep’te ilim ve kültür faaliyetleri yürüten bağımsız bir topluluktur.</p><p>Gayemiz; Kur’an-ı Kerim’i ve hadis-i şerifleri daha iyi anlayıp hayatımıza geçirmek, ilim ve kardeşlik etrafında faydalı çalışmalar yapmaktır.</p><h2>Faaliyetlerimiz</h2><p>Kur’an-ı Kerim ve hadis dersleri, ilmihâl dersleri, lise gençlik ve çocuk çalışmaları, seminerler, kitap tahlilleri ve kamplar düzenlenir. Programların güncel tarih ve kapsamı etkinlik takviminde duyurulur.</p><p>Adres: Karacaahmet, 38012 Nolu Cadde No: 36A, Bina 111 Kat 1 Daire 1, 27590 Şehitkamil / Gaziantep.</p>',
             ],
-            'vizyon-misyon' => [
+            self::VISION_SLUG => [
                 'title' => 'Vizyon ve misyon',
                 'excerpt' => 'Derneğin yönü, gayesi ve çalışma ilkeleri.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
@@ -69,6 +71,11 @@ final class CorporatePages
         return $slug === self::MESSAGE_SLUG;
     }
 
+    public static function isVision(string $slug): bool
+    {
+        return $slug === self::VISION_SLUG;
+    }
+
     /**
      * Hakkımızda dışındaki kurumsal sayfaların güzel yolları.
      *
@@ -77,7 +84,7 @@ final class CorporatePages
     public static function prettyRoutes(): array
     {
         return [
-            'vizyon-misyon' => 'corporate.vision',
+            self::VISION_SLUG => 'corporate.vision',
             self::MESSAGE_SLUG => 'corporate.message',
             self::BOARD_SLUG => 'corporate.board',
             self::BYLAWS_SLUG => 'corporate.bylaws',

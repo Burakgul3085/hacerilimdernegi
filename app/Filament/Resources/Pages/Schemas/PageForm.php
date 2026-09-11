@@ -36,7 +36,9 @@ class PageForm
                     ->helperText(fn (Get $get): ?string => CorporatePages::isMessage((string) $get('slug'))
                         ? 'İsteğe bağlı. Yüklemezseniz sitede insan simgesi görünür.'
                         : null)
-                    ->hidden(fn (Get $get): bool => CorporatePages::isBylaws((string) $get('slug')) || CorporatePages::isBoard((string) $get('slug'))),
+                    ->hidden(fn (Get $get): bool => CorporatePages::isBylaws((string) $get('slug'))
+                        || CorporatePages::isBoard((string) $get('slug'))
+                        || CorporatePages::isVision((string) $get('slug'))),
                 FileUpload::make('document')
                     ->label('Tüzük PDF')
                     ->acceptedFileTypes(UploadRules::PDF_MIMES)
@@ -96,10 +98,21 @@ class PageForm
                     ->placeholder(CorporatePages::DEFAULT_PRESIDENT_TITLE)
                     ->helperText('Boş bırakılırsa sitede «'.CorporatePages::DEFAULT_PRESIDENT_TITLE.'» yazılır.')
                     ->visible(fn (Get $get): bool => CorporatePages::isMessage((string) $get('slug'))),
+                RichEditor::make('vision')
+                    ->label('Vizyon')
+                    ->helperText('Derneğin yönü ve gelecek ufku. Sitede soldaki kartta görünür.')
+                    ->visible(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
+                    ->columnSpanFull(),
+                RichEditor::make('mission')
+                    ->label('Misyon')
+                    ->helperText('Derneğin gayesi ve çalışma ilkeleri. Sitede sağdaki kartta görünür.')
+                    ->visible(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
+                    ->columnSpanFull(),
                 RichEditor::make('body')
                     ->label(fn (Get $get): string => CorporatePages::isMessage((string) $get('slug'))
                         ? 'Mesaj'
                         : 'İçerik')
+                    ->hidden(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
                     ->columnSpanFull(),
                 TextInput::make('seo_title')->label('SEO başlık')->maxLength(255),
                 Textarea::make('seo_description')->label('SEO açıklama')->rows(2),
