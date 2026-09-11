@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Support\CorporatePages;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Page extends Model
@@ -12,7 +14,7 @@ class Page extends Model
     use Auditable;
 
     protected $fillable = [
-        'slug', 'title', 'excerpt', 'body', 'image', 'seo_title', 'seo_description', 'is_published',
+        'slug', 'title', 'excerpt', 'body', 'image', 'document', 'seo_title', 'seo_description', 'is_published',
     ];
 
     protected function casts(): array
@@ -34,5 +36,19 @@ class Page extends Model
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('is_published', true);
+    }
+
+    public function isBylaws(): bool
+    {
+        return CorporatePages::isBylaws((string) $this->slug);
+    }
+
+    public function documentUrl(): ?string
+    {
+        if (blank($this->document)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->document);
     }
 }

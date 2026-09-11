@@ -7,6 +7,8 @@ namespace App\Support;
  */
 final class CorporatePages
 {
+    public const BYLAWS_SLUG = 'dernek-tuzugu';
+
     /**
      * @return array<string, array{title: string, excerpt: string, body: string}>
      */
@@ -33,7 +35,7 @@ final class CorporatePages
                 'excerpt' => 'Dernek yönetiminde görev alan isimler.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
             ],
-            'dernek-tuzugu' => [
+            self::BYLAWS_SLUG => [
                 'title' => 'Dernek tüzüğü',
                 'excerpt' => 'Hâcer İlim ve Kültür Derneği tüzüğü.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
@@ -44,6 +46,11 @@ final class CorporatePages
     public static function has(string $slug): bool
     {
         return array_key_exists($slug, self::definitions());
+    }
+
+    public static function isBylaws(string $slug): bool
+    {
+        return $slug === self::BYLAWS_SLUG;
     }
 
     /**
@@ -57,7 +64,7 @@ final class CorporatePages
             'vizyon-misyon' => 'corporate.vision',
             'baskanin-mesaji' => 'corporate.message',
             'yonetim-kadrosu' => 'corporate.board',
-            'dernek-tuzugu' => 'corporate.bylaws',
+            self::BYLAWS_SLUG => 'corporate.bylaws',
         ];
     }
 

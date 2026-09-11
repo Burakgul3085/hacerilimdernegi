@@ -52,4 +52,27 @@ class CorporatePageTest extends TestCase
             ->assertSee('Derneğin yönü, gayesi ve çalışma ilkeleri.')
             ->assertDontSee('Gizli taslak');
     }
+
+    public function test_bylaws_page_does_not_show_the_decorative_image(): void
+    {
+        $this->get('/dernek-tuzugu')
+            ->assertSee('Dernek tüzüğü')
+            ->assertDontSee('bylaws-pdf', false)
+            ->assertDontSee('aspect-[4/5]', false);
+    }
+
+    public function test_bylaws_page_embeds_the_uploaded_pdf(): void
+    {
+        Page::query()->where('slug', 'dernek-tuzugu')->update([
+            'document' => 'pages/documents/tuzuk.pdf',
+        ]);
+
+        $this->get('/dernek-tuzugu')
+            ->assertSee('Dernek tüzüğü')
+            ->assertSee('bylaws-pdf', false)
+            ->assertSee('/storage/pages/documents/tuzuk.pdf', false)
+            ->assertSee("PDF'yi indir", false)
+            ->assertDontSee('yönetim panelinden eklenecektir')
+            ->assertDontSee('aspect-[4/5]', false);
+    }
 }

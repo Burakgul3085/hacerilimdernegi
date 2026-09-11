@@ -5,10 +5,14 @@
 
 @php
     $stats = \App\Support\SiteSettings::list('stats');
-    $image = filled($page->image)
-        ? \Illuminate\Support\Facades\Storage::disk('public')->url($page->image)
-        : \App\Support\SiteSettings::aboutImageUrl();
     $isAbout = $page->slug === 'hakkimizda';
+    $isBylaws = $page->isBylaws();
+    $pdfUrl = $isBylaws ? $page->documentUrl() : null;
+    $defaultBylawsBody = \App\Support\CorporatePages::definitions()[\App\Support\CorporatePages::BYLAWS_SLUG]['body'];
+    $showBody = filled($page->body) && ! ($pdfUrl && $page->body === $defaultBylawsBody);
+    $image = (! $isBylaws && filled($page->image))
+        ? \Illuminate\Support\Facades\Storage::disk('public')->url($page->image)
+        : (! $isBylaws ? \App\Support\SiteSettings::aboutImageUrl() : null);
     $isCorporate = \App\Support\CorporatePages::has((string) $page->slug);
     $breadcrumbs = $isCorporate
         ? [['label' => 'Kurumsal'], ['label' => $page->title]]
@@ -24,9 +28,28 @@
     :breadcrumbs="$breadcrumbs" />
 
 <section class="shell py-16 lg:py-24">
-    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-16">
+    <div @class([
+        'grid gap-12 lg:gap-16',
+        'lg:grid-cols-[minmax(0,1fr)_24rem]' => ! $isBylaws,
+    ])>
         <div class="reveal">
-            <div class="prose-hacer">{!! $page->body !!}</div>
+            @if ($showBody)
+                <div @class(['prose-hacer', 'mb-10' => filled($pdfUrl)])>{!! $page->body !!}</div>
+            @endif
+
+            @if ($pdfUrl)
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-wrap items-center justify-end gap-3">
+                        <a href="{{ $pdfUrl }}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">PDF'yi aç</a>
+                        <a href="{{ $pdfUrl }}" class="btn btn-outline btn-sm" download>PDF'yi indir</a>
+                    </div>
+                    <iframe
+                        src="{{ $pdfUrl }}#navpanes=1&toolbar=1&view=FitH"
+                        title="{{ $page->title }}"
+                        class="bylaws-pdf h-[min(90vh,64rem)] w-full overflow-hidden rounded-2xl border border-line bg-forest-deep"
+                    ></iframe>
+                </div>
+            @endif
 
             @if ($isAbout && filled($settings['about_quote']))
                 <figure class="mt-12 rounded-2xl border border-line bg-paper p-8">
@@ -49,27 +72,29 @@
             @endif
         </div>
 
-        <aside class="reveal lg:sticky lg:top-32 lg:self-start">
-            <div class="overflow-hidden rounded-2xl">
-                <img src="{{ $image }}" alt="{{ $page->title }}" loading="lazy" class="aspect-[4/5] w-full object-cover">
-            </div>
+        @unless ($isBylaws)
+            <aside class="reveal lg:sticky lg:top-32 lg:self-start">
+                <div class="overflow-hidden rounded-2xl">
+                    <img src="{{ $image }}" alt="{{ $page->title }}" loading="lazy" class="aspect-[4/5] w-full object-cover">
+                </div>
 
-            <div class="card mt-4 p-6">
-                <p class="eyebrow">İletişim</p>
-                <ul class="mt-4 space-y-3">
-                    @if (filled($settings['address']))
-                        <li><x-meta icon="pin">{{ $settings['address'] }}</x-meta></li>
-                    @endif
-                    @if (filled($settings['phone']))
-                        <li><x-meta icon="phone">{{ $settings['phone'] }}</x-meta></li>
-                    @endif
-                    @if (filled($settings['email']))
-                        <li><x-meta icon="mail">{{ $settings['email'] }}</x-meta></li>
-                    @endif
-                </ul>
-                <a href="{{ route('contact') }}" class="btn btn-outline btn-sm mt-6 w-full">İletişime geçin</a>
-            </div>
-        </aside>
+                <div class="card mt-4 p-6">
+                    <p class="eyebrow">İletişim</p>
+                    <ul class="mt-4 space-y-3">
+                        @if (filled($settings['address']))
+                            <li><x-meta icon="pin">{{ $settings['address'] }}</x-meta></li>
+                        @endif
+                        @if (filled($settings['phone']))
+                            <li><x-meta icon="phone">{{ $settings['phone'] }}</x-meta></li>
+                        @endif
+                        @if (filled($settings['email']))
+                            <li><x-meta icon="mail">{{ $settings['email'] }}</x-meta></li>
+                        @endif
+                    </ul>
+                    <a href="{{ route('contact') }}" class="btn btn-outline btn-sm mt-6 w-full">İletişime geçin</a>
+                </div>
+            </aside>
+        @endunless
     </div>
 </section>
 

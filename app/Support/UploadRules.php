@@ -10,7 +10,11 @@ class UploadRules
 
     public const AUDIO_MIMES = ['audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/ogg'];
 
+    public const PDF_MIMES = ['application/pdf'];
+
     public const MAX_IMAGE_KB = 2048;
 
     public const MAX_AUDIO_KB = 10240;
+
+    public const MAX_PDF_KB = 20480;
 }
