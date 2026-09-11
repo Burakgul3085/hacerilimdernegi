@@ -535,16 +535,39 @@ body.overflow-hidden .site-float {
 }
 
 .site-header {
-    border-bottom: 1px solid rgb(230 223 211 / 0.42);
-    background: rgb(255 252 248 / 0.38);
-    backdrop-filter: blur(20px) saturate(1.4);
-    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border-bottom: 1px solid rgb(230 223 211 / 0.7);
+    background: var(--color-paper);
     overflow: visible;
 }
 
-.site-chrome.is-scrolled .site-header {
+.site-header button.site-header-icon {
+    background: var(--color-paper);
+}
+
+.site-header-search {
+    background: var(--color-paper);
+}
+
+.page-home .site-header {
+    border-bottom-color: rgb(230 223 211 / 0.42);
+    background: rgb(255 252 248 / 0.38);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+}
+
+.page-home .site-chrome.is-scrolled .site-header {
     background: rgb(255 252 248 / 0.58);
     border-bottom-color: rgb(230 223 211 / 0.7);
+}
+
+.page-home .site-header button.site-header-icon {
+    background: rgb(255 252 248 / 0.4);
+}
+
+.page-home .site-header-search {
+    background: rgb(255 252 248 / 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
 }
 
 .site-chrome-spacer {

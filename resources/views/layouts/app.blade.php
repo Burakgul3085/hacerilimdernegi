@@ -253,14 +253,14 @@
                     <a href="{{ route('contact') }}" class="nav-link hidden xl:inline" data-active="{{ $isActive('/iletisim') ? '1' : '0' }}">İletişim</a>
 
                     <button type="button" @click="search = !search; menu = false; topbarHidden = false; $nextTick(() => search && $refs.searchInput?.focus())"
-                            class="flex h-10 w-10 items-center justify-center rounded-full border border-line/80 bg-paper/40 text-forest transition hover:border-gold hover:text-gold"
+                            class="site-header-icon flex h-10 w-10 items-center justify-center rounded-full border border-line/80 bg-paper text-forest transition hover:border-gold hover:text-gold"
                             :aria-expanded="search" aria-controls="site-search">
                         <span class="sr-only">Arama</span>
                         <x-ui.icon name="search" class="h-[18px] w-[18px]" />
                     </button>
 
                     <button type="button" @click="menu = !menu; search = false; topbarHidden = false"
-                            class="flex h-10 w-10 items-center justify-center rounded-full border border-line/80 bg-paper/40 text-forest transition hover:border-gold hover:text-gold"
+                            class="site-header-icon flex h-10 w-10 items-center justify-center rounded-full border border-line/80 bg-paper text-forest transition hover:border-gold hover:text-gold"
                             :aria-expanded="menu" aria-controls="site-tray">
                         <span class="sr-only">Menüyü aç</span>
                         <x-ui.icon name="menu" class="h-[18px] w-[18px]" />
@@ -268,7 +268,7 @@
                 </div>
             </div>
 
-            <div id="site-search" x-show="search" x-cloak x-transition.opacity class="border-t border-line/50 bg-paper/70 backdrop-blur-xl">
+            <div id="site-search" x-show="search" x-cloak x-transition.opacity class="site-header-search border-t border-line/50">
                 <form action="{{ route('search') }}" method="GET" class="shell flex items-center gap-3 py-4">
                     <x-ui.icon name="search" class="h-5 w-5 shrink-0 text-gold" />
                     <label for="site-search-input" class="sr-only">Sitede ara</label>

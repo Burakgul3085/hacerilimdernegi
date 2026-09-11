@@ -154,6 +154,7 @@ class FrontendContentTest extends TestCase
     public function test_home_overlays_the_hero_with_a_glass_header(): void
     {
         $this->get('/')
+            ->assertSee('page-home', false)
             ->assertSee('has-topbar', false)
             ->assertSee('site-chrome', false)
             ->assertSee('site-header', false)
@@ -164,6 +165,17 @@ class FrontendContentTest extends TestCase
             ->assertSee('hero-copy', false)
             ->assertSee('h-14 w-auto max-w-[220px]', false)
             ->assertDontSee('site-chrome-spacer', false);
+    }
+
+    public function test_inner_pages_use_a_solid_header_instead_of_the_home_glass(): void
+    {
+        $this->get('/vitrin')
+            ->assertSee('site-header', false)
+            ->assertDontSee('page-home', false);
+
+        $this->get('/uyelik')
+            ->assertSee('site-header', false)
+            ->assertDontSee('page-home', false);
     }
 
     public function test_home_page_wires_cinematic_scroll_and_hover_markup(): void
