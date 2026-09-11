@@ -1062,50 +1062,46 @@ html.js .reveal.is-visible .media-zoom {
 }
 
 .post-cover {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     width: 100%;
+    padding: 0;
+    border: 0;
     overflow: hidden;
     border-radius: 1rem;
-    background: var(--color-cream-deep);
+    background: transparent;
     cursor: zoom-in;
 }
 
-.post-cover-img {
+.post-cover-img,
+.post-media-img {
     display: block;
-    width: auto;
+    width: 100%;
     height: auto;
-    max-width: 100%;
-    max-height: min(42rem, 78vh);
-    object-fit: contain;
-    object-position: center;
+    vertical-align: top;
 }
 
 .post-gallery {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.75rem;
+    align-items: start;
 }
 
 .post-gallery-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
     overflow: hidden;
     border-radius: 0.9rem;
-    aspect-ratio: 4 / 3;
-    background: var(--color-cream-deep);
+    background: transparent;
     cursor: zoom-in;
 }
 
 .post-gallery-item img {
-    max-height: 100%;
-    max-width: 100%;
-    width: auto;
+    display: block;
+    width: 100%;
     height: auto;
-    object-fit: contain;
-    object-position: center;
 }
 
 .post-pullquote {

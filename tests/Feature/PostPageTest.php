@@ -80,7 +80,9 @@ class PostPageTest extends TestCase
             ->assertSee('og:type" content="article', false)
             ->assertSee('property="og:image" content="'.$post->coverAbsoluteUrl().'"', false)
             ->assertSee('post-cover-img', false)
-            ->assertDontSee('object-cover', false);
+            ->assertSee('post-gallery-item', false)
+            ->assertDontSee('object-cover', false)
+            ->assertDontSee('aspect-[16/9]', false);
     }
 
     public function test_related_posts_prefer_the_same_type(): void
@@ -183,12 +185,16 @@ class PostPageTest extends TestCase
             'slug' => 'duyurular-listesi',
             'type' => 'announcement',
         ]);
-        $this->makePost(['category_id' => $category->id]);
+        $this->makePost([
+            'category_id' => $category->id,
+            'image' => 'posts/cover.jpg',
+        ]);
 
         $this->get(route('posts.index'))
             ->assertOk()
             ->assertSee('Duyurular')
-            ->assertSee('object-contain', false);
+            ->assertSee('post-media-img', false)
+            ->assertDontSee('aspect-[16/9]', false);
     }
 
     public function test_typed_admin_fields_create_a_category_and_render_on_the_page(): void

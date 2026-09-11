@@ -62,7 +62,7 @@
                     <img src="{{ $coverUrl }}" alt="{{ $post->title }}" class="post-cover-img" loading="lazy" decoding="async">
                 </button>
             @else
-                <x-cover :src="$post->image" :alt="$post->title" ratio="aspect-[16/9]" rounded="rounded-2xl" fit="contain" />
+                <x-cover :src="$post->image" :alt="$post->title" rounded="rounded-2xl" fit="contain" />
             @endif
 
             @if ($galleryUrls->isNotEmpty())
