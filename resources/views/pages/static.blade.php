@@ -5,7 +5,7 @@
 
 @php
     $stats = \App\Support\SiteSettings::list('stats');
-    $isAbout = $page->slug === 'hakkimizda';
+    $isAbout = $page->isAbout();
     $isBylaws = $page->isBylaws();
     $isBoard = $page->isBoard();
     $isMessage = $page->isMessage();
@@ -16,11 +16,12 @@
     $presidentPhoto = $isMessage ? $page->imageUrl() : null;
     $visionHtml = $isVision ? $page->visionHtml() : null;
     $missionHtml = $isVision ? $page->missionHtml() : null;
+    $aboutImage = $isAbout ? ($page->imageUrl() ?: \App\Support\SiteSettings::aboutImageUrl()) : null;
     $defaultBody = \App\Support\CorporatePages::definitions()[(string) $page->slug]['body'] ?? null;
     $showBody = filled($page->body) && ! (($pdfUrl || $hasBoard || $isMessage || $isVision) && $page->body === $defaultBody);
-    $image = (! $isBylaws && ! $isBoard && ! $isMessage && ! $isVision && filled($page->image))
+    $image = (! $isBylaws && ! $isBoard && ! $isMessage && ! $isVision && ! $isAbout && filled($page->image))
         ? \Illuminate\Support\Facades\Storage::disk('public')->url($page->image)
-        : (! $isBylaws && ! $isBoard && ! $isMessage && ! $isVision ? \App\Support\SiteSettings::aboutImageUrl() : null);
+        : (! $isBylaws && ! $isBoard && ! $isMessage && ! $isVision && ! $isAbout ? \App\Support\SiteSettings::aboutImageUrl() : null);
     $isCorporate = \App\Support\CorporatePages::has((string) $page->slug);
     $breadcrumbs = $isCorporate
         ? [['label' => 'Kurumsal'], ['label' => $page->title]]
@@ -137,6 +138,110 @@
             </div>
         </div>
     </section>
+@elseif ($isAbout)
+    <section class="about-story relative overflow-hidden pb-10 pt-10 lg:pb-14 lg:pt-14">
+        <div class="about-story-glow" aria-hidden="true"></div>
+
+        <div class="shell relative">
+            <div class="about-story-grid">
+                <div class="about-story-copy reveal reveal-left">
+                    <p class="eyebrow">Kuruluş</p>
+                    @if ($showBody)
+                        <div class="prose-hacer about-story-body mt-5">{!! $page->body !!}</div>
+                    @endif
+                </div>
+
+                <aside class="about-story-media reveal reveal-right">
+                    <div class="about-portrait-frame">
+                        <div class="about-portrait">
+                            <img src="{{ $aboutImage }}" alt="{{ $page->title }}" loading="lazy" decoding="async"
+                                 class="about-portrait-image media-zoom">
+                        </div>
+                    </div>
+
+                    @if (filled($settings['address']) || filled($settings['phone']) || filled($settings['email']))
+                        <div class="about-place">
+                            <p class="eyebrow">İletişim</p>
+                            <ul class="mt-4 space-y-3">
+                                @if (filled($settings['address']))
+                                    <li><x-meta icon="pin">{{ $settings['address'] }}</x-meta></li>
+                                @endif
+                                @if (filled($settings['phone']))
+                                    <li><x-meta icon="phone">{{ $settings['phone'] }}</x-meta></li>
+                                @endif
+                                @if (filled($settings['email']))
+                                    <li><x-meta icon="mail">{{ $settings['email'] }}</x-meta></li>
+                                @endif
+                            </ul>
+                            <a href="{{ route('contact') }}" class="btn btn-outline btn-sm mt-5 w-full">İletişime geçin</a>
+                        </div>
+                    @endif
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    @if (filled($settings['about_quote']))
+        <section class="about-quote-band">
+            <figure class="shell reveal reveal-scale">
+                <div class="about-quote-mark" aria-hidden="true">
+                    <span></span>
+                    <x-ui.icon name="quote" class="h-7 w-7 text-gold" />
+                    <span></span>
+                </div>
+                <blockquote class="about-quote-text">“{{ $settings['about_quote'] }}”</blockquote>
+                <figcaption class="about-quote-cite">Hâcer İlim ve Kültür Derneği</figcaption>
+            </figure>
+        </section>
+    @endif
+
+    @if (filled($stats))
+        <section class="about-stats">
+            <div class="shell">
+                <div class="about-stats-grid">
+                    @foreach ($stats as $stat)
+                        <div class="about-stat reveal" style="--reveal-delay: {{ $loop->index * 90 }}ms">
+                            <p class="about-stat-value" data-count="{{ $stat['value'] ?? '' }}">{{ $stat['value'] ?? '' }}</p>
+                            <p class="about-stat-label">{{ $stat['label'] ?? '' }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    <section class="about-paths shell pb-20 pt-14 lg:pb-28 lg:pt-20">
+        <p class="eyebrow reveal">Kurumsal</p>
+        <h2 class="display-3 mt-3 reveal">Daha yakından tanıyın</h2>
+        <p class="lead mt-3 max-w-xl reveal">Yönümüz, başkanın sözü ve yönetim yapısı.</p>
+
+        <div class="mt-10 grid gap-5 lg:grid-cols-3">
+            <x-about-path
+                title="Vizyon ve misyon"
+                text="Derneğin yönü, gayesi ve çalışma ilkeleri."
+                :href="route('corporate.vision')"
+                icon="sparkles"
+                index="01"
+                delay="0ms"
+            />
+            <x-about-path
+                title="Başkanın mesajı"
+                text="Dernek başkanının ziyaretçilere sözü."
+                :href="route('corporate.message')"
+                icon="quote"
+                index="02"
+                delay="90ms"
+            />
+            <x-about-path
+                title="Yönetim kadrosu"
+                text="Görev dağılımı ve kurumsal yapı."
+                :href="route('corporate.board')"
+                icon="users"
+                index="03"
+                delay="180ms"
+            />
+        </div>
+    </section>
 @elseif ($isMessage)
     <section class="president-message shell overflow-x-clip pb-20 pt-10 lg:pb-28 lg:pt-12">
         <div class="president-message-grid grid min-w-0 items-center gap-10 lg:grid-cols-[minmax(0,18.5rem)_minmax(0,1fr)] lg:gap-16">
@@ -176,35 +281,15 @@
 <section class="shell py-16 lg:py-24">
     <div @class([
         'grid gap-12 lg:gap-16',
-        'lg:grid-cols-[minmax(0,1fr)_24rem]' => ! $isBylaws && ! $isBoard && ! $isMessage && ! $isVision,
+        'lg:grid-cols-[minmax(0,1fr)_24rem]' => ! $isBylaws && ! $isBoard,
     ])>
         <div class="reveal">
             @if ($showBody)
                 <div class="prose-hacer">{!! $page->body !!}</div>
             @endif
-
-            @if ($isAbout && filled($settings['about_quote']))
-                <figure class="mt-12 rounded-2xl border border-line bg-paper p-8">
-                    <x-ui.icon name="quote" class="h-7 w-7 text-gold" />
-                    <blockquote class="mt-4 font-display text-2xl leading-snug text-forest sm:text-3xl">
-                        “{{ $settings['about_quote'] }}”
-                    </blockquote>
-                </figure>
-            @endif
-
-            @if ($isAbout && filled($stats))
-                <div class="mt-12 grid grid-cols-1 gap-px bg-line sm:grid-cols-3">
-                    @foreach ($stats as $stat)
-                        <div class="bg-cream px-5 py-7 text-center">
-                            <p class="font-display text-4xl text-forest">{{ $stat['value'] ?? '' }}</p>
-                            <p class="mt-2 text-[12px] leading-relaxed text-muted">{{ $stat['label'] ?? '' }}</p>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
         </div>
 
-        @unless ($isBylaws || $isBoard || $isMessage || $isVision)
+        @unless ($isBylaws || $isBoard)
             <aside class="reveal lg:sticky lg:top-32 lg:self-start">
                 <div class="overflow-hidden rounded-2xl">
                     <img src="{{ $image }}" alt="{{ $page->title }}" loading="lazy" class="page-aside-photo aspect-[4/5] w-full object-cover">

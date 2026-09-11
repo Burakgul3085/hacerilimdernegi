@@ -24,7 +24,7 @@ class PageController extends Controller
             abort_unless(CorporatePages::has($slug), 404);
 
             $definition = CorporatePages::definitions()[$slug];
-            $excerpt = $slug === 'hakkimizda'
+            $excerpt = CorporatePages::isAbout($slug)
                 ? (string) SiteSettings::get('about_excerpt')
                 : $definition['excerpt'];
 
@@ -32,7 +32,7 @@ class PageController extends Controller
                 'title' => $definition['title'],
                 'slug' => $slug,
                 'excerpt' => $excerpt,
-                'body' => $slug === 'hakkimizda'
+                'body' => CorporatePages::isAbout($slug)
                     ? '<p>'.e($excerpt).'</p>'
                     : $definition['body'],
             ]);

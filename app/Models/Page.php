@@ -60,6 +60,11 @@ class Page extends Model
         return CorporatePages::isVision((string) $this->slug);
     }
 
+    public function isAbout(): bool
+    {
+        return CorporatePages::isAbout((string) $this->slug);
+    }
+
     public function visionHtml(): ?string
     {
         return $this->filledHtml($this->vision);

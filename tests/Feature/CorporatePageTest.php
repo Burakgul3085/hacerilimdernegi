@@ -7,6 +7,7 @@ use App\Enums\UserRole;
 use App\Filament\Resources\Pages\Pages\EditPage;
 use App\Models\Page;
 use App\Models\User;
+use App\Support\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -400,5 +401,33 @@ class CorporatePageTest extends TestCase
         Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
             ->assertFormFieldIsHidden('vision')
             ->assertFormFieldIsHidden('mission');
+    }
+
+    public function test_about_page_renders_the_story_layout(): void
+    {
+        $this->get('/hakkimizda')
+            ->assertSee('Hakkımızda')
+            ->assertSee('about-story', false)
+            ->assertSee('about-portrait', false)
+            ->assertSee('about-quote-band', false)
+            ->assertSee('about-quote-cite', false)
+            ->assertSee('about-path-index', false)
+            ->assertSee('İlim, hayatı güzelleştirir')
+            ->assertSee('2017')
+            ->assertSee('about-paths', false)
+            ->assertSee(route('corporate.vision'), false)
+            ->assertSee(route('corporate.message'), false)
+            ->assertSee(route('corporate.board'), false)
+            ->assertSee('İletişime geçin')
+            ->assertDontSee('page-aside-photo', false);
+    }
+
+    public function test_about_page_escapes_the_featured_quote(): void
+    {
+        SiteSettings::put('about_quote', "<script>alert('xss')</script>");
+
+        $this->get('/hakkimizda')
+            ->assertSee('&lt;script&gt;', false)
+            ->assertDontSee("<script>alert('xss')</script>", false);
     }
 }

@@ -15,6 +15,8 @@ final class CorporatePages
 
     public const VISION_SLUG = 'vizyon-misyon';
 
+    public const ABOUT_SLUG = 'hakkimizda';
+
     public const DEFAULT_PRESIDENT_TITLE = 'Hâcer İlim ve Kültür Derneği Başkanı';
 
     /**
@@ -23,7 +25,7 @@ final class CorporatePages
     public static function definitions(): array
     {
         return [
-            'hakkimizda' => [
+            self::ABOUT_SLUG => [
                 'title' => 'Hakkımızda',
                 'excerpt' => 'Gaziantep Şehitkamil’de faaliyet gösteren Hâcer İlim ve Kültür Derneği; Kur’an ve sünnet ışığında ilim, kültür ve kardeşlik çalışmalarını sürdürür.',
                 'body' => '<p>Hâcer İlim ve Kültür Derneği, 2017’den bu yana Gaziantep’te ilim ve kültür faaliyetleri yürüten bağımsız bir topluluktur.</p><p>Gayemiz; Kur’an-ı Kerim’i ve hadis-i şerifleri daha iyi anlayıp hayatımıza geçirmek, ilim ve kardeşlik etrafında faydalı çalışmalar yapmaktır.</p><h2>Faaliyetlerimiz</h2><p>Kur’an-ı Kerim ve hadis dersleri, ilmihâl dersleri, lise gençlik ve çocuk çalışmaları, seminerler, kitap tahlilleri ve kamplar düzenlenir. Programların güncel tarih ve kapsamı etkinlik takviminde duyurulur.</p><p>Adres: Karacaahmet, 38012 Nolu Cadde No: 36A, Bina 111 Kat 1 Daire 1, 27590 Şehitkamil / Gaziantep.</p>',
@@ -76,6 +78,11 @@ final class CorporatePages
         return $slug === self::VISION_SLUG;
     }
 
+    public static function isAbout(string $slug): bool
+    {
+        return $slug === self::ABOUT_SLUG;
+    }
+
     /**
      * Hakkımızda dışındaki kurumsal sayfaların güzel yolları.
      *
@@ -93,7 +100,7 @@ final class CorporatePages
 
     public static function routeName(string $slug): ?string
     {
-        if ($slug === 'hakkimizda') {
+        if ($slug === self::ABOUT_SLUG) {
             return 'about';
         }
 
