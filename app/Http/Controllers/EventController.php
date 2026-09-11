@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\ProcessEventRegistration;
 use App\Enums\ApplicationStatus;
 use App\Models\Event;
 use App\Models\EventRegistration;
@@ -62,7 +63,7 @@ class EventController extends Controller
         abort_unless($event->is_published && $event->registration_open, 404);
 
         if (FormGuard::isBot($request)) {
-            return back()->with('status', 'Katılım başvurunuz alındı. En kısa sürede dönüş yapılacaktır.');
+            return back()->with('status', 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.');
         }
 
         $data = $request->validate([
@@ -73,14 +74,16 @@ class EventController extends Controller
             'kvkk_accepted' => ['accepted'],
         ]);
 
-        EventRegistration::query()->create([
+        $registration = EventRegistration::query()->create([
             ...$data,
             'event_id' => $event->id,
             'kvkk_accepted' => true,
             'status' => ApplicationStatus::Pending,
         ]);
 
-        return back()->with('status', 'Katılım başvurunuz alındı. En kısa sürede dönüş yapılacaktır.');
+        app(ProcessEventRegistration::class)->handle($registration);
+
+        return back()->with('status', 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.');
     }
 
     /**

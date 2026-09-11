@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\EventRegistrations;
 
 use App\Filament\Concerns\AuthorizesByRole;
-use App\Filament\Resources\EventRegistrations\Pages\CreateEventRegistration;
 use App\Filament\Resources\EventRegistrations\Pages\EditEventRegistration;
 use App\Filament\Resources\EventRegistrations\Pages\ListEventRegistrations;
 use App\Filament\Resources\EventRegistrations\Schemas\EventRegistrationForm;
@@ -14,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class EventRegistrationResource extends Resource
@@ -37,6 +37,11 @@ class EventRegistrationResource extends Resource
         return static::editorRoles();
     }
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return EventRegistrationForm::configure($schema);
@@ -47,11 +52,15 @@ class EventRegistrationResource extends Resource
         return EventRegistrationsTable::configure($table);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['event']);
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => ListEventRegistrations::route('/'),
-            'create' => CreateEventRegistration::route('/create'),
             'edit' => EditEventRegistration::route('/{record}/edit'),
         ];
     }
