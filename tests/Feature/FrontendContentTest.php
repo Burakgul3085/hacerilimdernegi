@@ -218,8 +218,19 @@ class FrontendContentTest extends TestCase
             ->assertSee('https://wa.me/905426588530', false);
 
         $this->get('/hakkimizda')
-            ->assertDontSee('site-float', false)
+            ->assertSee('site-float', false)
+            ->assertSee('images/icons/mouse.svg', false)
+            ->assertSee('scrollToTop', false)
             ->assertSee('https://wa.me/905426588530', false);
+    }
+
+    public function test_inner_pages_include_the_scroll_to_top_button(): void
+    {
+        $this->get('/vitrin')
+            ->assertSee('site-float', false)
+            ->assertSee('site-float-top', false)
+            ->assertSee('images/icons/mouse.svg', false)
+            ->assertSee('scrollToTop', false);
     }
 
     public function test_home_hides_the_whatsapp_button_when_no_phone_number_is_set(): void

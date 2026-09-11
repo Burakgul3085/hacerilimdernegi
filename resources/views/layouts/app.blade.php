@@ -506,30 +506,28 @@
 
     <x-legal-modal />
 
-    @if (request()->routeIs('home'))
-        <div class="site-float" :class="cookies ? 'bottom-28' : 'bottom-6'">
-            <button type="button"
-                    class="site-float-top"
-                    x-show="chromeScrolled"
-                    x-cloak
-                    x-transition.opacity
-                    @click="scrollToTop()"
-                    aria-label="Sayfanın başına dön">
-                <img src="{{ asset('images/icons/mouse.svg') }}" alt="" class="h-7 w-7" aria-hidden="true">
-            </button>
+    <div class="site-float" :class="cookies ? 'bottom-28' : 'bottom-6'">
+        <button type="button"
+                class="site-float-top"
+                x-show="chromeScrolled"
+                x-cloak
+                x-transition.opacity
+                @click="scrollToTop()"
+                aria-label="Sayfanın başına dön">
+            <img src="{{ asset('images/icons/mouse.svg') }}" alt="" class="h-7 w-7" aria-hidden="true">
+        </button>
 
-            @if ($whatsappChatUrl)
-                <a href="{{ $whatsappChatUrl }}"
-                   class="site-float-whatsapp"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   aria-label="WhatsApp ile yazın">
-                    <span class="site-float-whatsapp-ping" aria-hidden="true"></span>
-                    <span class="site-float-whatsapp-ping site-float-whatsapp-ping-delay" aria-hidden="true"></span>
-                    <x-ui.icon name="whatsapp" class="relative z-10 h-7 w-7" />
-                </a>
-            @endif
-        </div>
-    @endif
+        @if ($whatsappChatUrl)
+            <a href="{{ $whatsappChatUrl }}"
+               class="site-float-whatsapp"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="WhatsApp ile yazın">
+                <span class="site-float-whatsapp-ping" aria-hidden="true"></span>
+                <span class="site-float-whatsapp-ping site-float-whatsapp-ping-delay" aria-hidden="true"></span>
+                <x-ui.icon name="whatsapp" class="relative z-10 h-7 w-7" />
+            </a>
+        @endif
+    </div>
 </body>
 </html>
