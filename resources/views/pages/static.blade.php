@@ -104,15 +104,15 @@
     </section>
 @elseif ($isMessage)
     <section class="president-message shell overflow-x-clip pb-20 pt-10 lg:pb-28 lg:pt-12">
-        <div class="grid min-w-0 items-start gap-10 lg:grid-cols-[minmax(0,18.5rem)_minmax(0,1fr)] lg:gap-16">
+        <div class="president-message-grid grid min-w-0 items-center gap-10 lg:grid-cols-[minmax(0,18.5rem)_minmax(0,1fr)] lg:gap-16">
             <aside class="reveal mx-auto w-full max-w-[18.5rem] min-w-0 lg:mx-0">
                 <div @class([
-                    'president-portrait relative aspect-[4/5] w-full overflow-hidden rounded-2xl',
-                    'bg-cream-deep' => blank($presidentPhoto),
+                    'president-portrait relative w-full overflow-hidden rounded-2xl',
+                    'bg-cream-deep aspect-[4/5]' => blank($presidentPhoto),
                 ])>
                     @if ($presidentPhoto)
                         <img src="{{ $presidentPhoto }}" alt="{{ $page->presidentName() ?: $page->title }}" loading="lazy" decoding="async"
-                             class="president-portrait-image absolute inset-0 h-full w-full object-cover object-center">
+                             class="president-portrait-image">
                     @else
                         <div class="president-silhouette flex h-full w-full items-center justify-center">
                             <x-ui.icon name="user" class="h-24 w-24 text-gold/70" />

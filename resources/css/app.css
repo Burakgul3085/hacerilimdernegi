@@ -105,15 +105,12 @@
         box-shadow: inset 0 0 0 1px rgb(138 122 98 / 0.38);
     }
 
-    .board-photo-fit {
+    .board-photo-fit,
+    .president-portrait-image {
         display: block;
         width: 100%;
         max-width: 100%;
         height: auto;
-    }
-
-    .president-portrait {
-        aspect-ratio: 4 / 5;
     }
 
     .president-portrait::after {
@@ -123,14 +120,6 @@
         z-index: 1;
         pointer-events: none;
         box-shadow: inset 0 0 0 1px rgb(138 122 98 / 0.28);
-    }
-
-    .president-portrait-image {
-        display: block;
-        height: 100%;
-        width: 100%;
-        object-fit: cover;
-        object-position: center;
     }
 
     .president-message-body,
