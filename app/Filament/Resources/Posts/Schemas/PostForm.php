@@ -2,11 +2,12 @@
 
 namespace App\Filament\Resources\Posts\Schemas;
 
+use App\Models\Category;
+use App\Models\Post;
 use App\Support\UploadRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -22,18 +23,17 @@ class PostForm
                 Section::make('Yazı')
                     ->columns(2)
                     ->schema([
-                        Select::make('type')
+                        TextInput::make('type')
                             ->label('Tür')
-                            ->options([
-                                'article' => 'Yazı',
-                                'announcement' => 'Duyuru',
-                            ])
-                            ->required(),
-                        Select::make('category_id')
+                            ->required()
+                            ->maxLength(80)
+                            ->placeholder('Yazı, Duyuru veya kendi türünüz')
+                            ->helperText('Listeden seçmek zorunda değilsiniz. İstediğiniz türü yazın.'),
+                        TextInput::make('category_name')
                             ->label('Kategori')
-                            ->relationship('category', 'name')
-                            ->searchable()
-                            ->preload(),
+                            ->maxLength(120)
+                            ->placeholder('Kategori adını yazın')
+                            ->helperText('Yeni bir ad yazarsanız otomatik oluşturulur.'),
                         TextInput::make('title')
                             ->label('Başlık')
                             ->required()
@@ -49,11 +49,11 @@ class PostForm
                         TextInput::make('location')
                             ->label('Yer')
                             ->maxLength(255),
-                        Select::make('author_id')
+                        TextInput::make('author_name')
                             ->label('Yazar')
-                            ->relationship('author', 'name')
-                            ->searchable()
-                            ->preload(),
+                            ->maxLength(120)
+                            ->placeholder('Yazar adını yazın')
+                            ->helperText('Kullanıcı listesine bağlı değildir. İstediğiniz adı yazın.'),
                         Textarea::make('excerpt')
                             ->label('Özet')
                             ->rows(3)
@@ -68,7 +68,8 @@ class PostForm
                             ->disk('public')
                             ->directory('posts')
                             ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
-                            ->maxSize(UploadRules::MAX_IMAGE_KB),
+                            ->maxSize(UploadRules::MAX_IMAGE_KB)
+                            ->helperText('Görsel kırpılmaz. Sitede çerçeveye sığdırılır.'),
                         FileUpload::make('gallery')
                             ->label('Galeri')
                             ->image()
@@ -79,7 +80,7 @@ class PostForm
                             ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
                             ->maxSize(UploadRules::MAX_IMAGE_KB)
                             ->maxFiles(8)
-                            ->helperText('Kapak dışındaki ek görseller. En fazla 8 görsel.'),
+                            ->helperText('Kapak dışındaki ek görseller. Kırpılmaz, çerçeveye sığdırılır. En fazla 8 görsel.'),
                     ]),
                 Section::make('İçerik')
                     ->columns(2)
@@ -108,5 +109,36 @@ class PostForm
                         Toggle::make('is_published')->label('Yayında')->default(true),
                     ]),
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function persistableData(array $data): array
+    {
+        $data['type'] = Post::normalizeType(is_string($data['type'] ?? null) ? $data['type'] : null);
+        $data['category_id'] = Category::findOrCreateIdByName(
+            is_string($data['category_name'] ?? null) ? $data['category_name'] : null,
+        );
+        unset($data['category_name']);
+
+        $authorName = trim((string) ($data['author_name'] ?? ''));
+        $data['author_name'] = $authorName === '' ? null : $authorName;
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function fillableData(array $data, Post $record): array
+    {
+        $data['type'] = $record->typeLabel();
+        $data['category_name'] = $record->category?->name;
+        $data['author_name'] = $record->author_name ?: $record->author?->name;
+
+        return $data;
     }
 }

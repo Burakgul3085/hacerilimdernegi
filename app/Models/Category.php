@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
@@ -22,5 +23,36 @@ class Category extends Model
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
+    }
+
+    public static function findOrCreateIdByName(?string $name): ?int
+    {
+        $name = trim((string) $name);
+
+        if ($name === '') {
+            return null;
+        }
+
+        $slug = Str::slug($name);
+
+        if ($slug === '') {
+            $slug = Str::lower(Str::random(8));
+        }
+
+        $category = static::query()
+            ->where(function (Builder $query) use ($name, $slug): void {
+                $query->where('name', $name)->orWhere('slug', $slug);
+            })
+            ->first();
+
+        if ($category) {
+            return $category->id;
+        }
+
+        return static::query()->create([
+            'name' => $name,
+            'slug' => $slug,
+            'type' => 'post',
+        ])->id;
     }
 }

@@ -1,7 +1,7 @@
 @props(['post'])
 
 <a href="{{ route('posts.show', $post) }}" class="group card card-hover flex flex-col overflow-hidden">
-    <x-cover :src="$post->image" :alt="$post->title" ratio="aspect-[16/9]" />
+    <x-cover :src="$post->image" :alt="$post->title" ratio="aspect-[16/9]" fit="contain" />
 
     <div class="flex flex-1 flex-col p-6">
         <div class="flex flex-wrap items-center gap-2">

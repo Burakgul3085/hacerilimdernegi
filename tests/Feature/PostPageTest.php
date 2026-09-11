@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Posts\Schemas\PostForm;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
@@ -77,7 +78,9 @@ class PostPageTest extends TestCase
             ->assertSee('https://wa.me/?text=', false)
             ->assertSee('data-url="'.route('posts.show', $post, absolute: true).'"', false)
             ->assertSee('og:type" content="article', false)
-            ->assertSee('property="og:image" content="'.$post->coverAbsoluteUrl().'"', false);
+            ->assertSee('property="og:image" content="'.$post->coverAbsoluteUrl().'"', false)
+            ->assertSee('post-cover-img', false)
+            ->assertDontSee('object-cover', false);
     }
 
     public function test_related_posts_prefer_the_same_type(): void
@@ -137,6 +140,8 @@ class PostPageTest extends TestCase
         $post = $this->makePost([
             'title' => 'Güvenli başlık',
             'slug' => 'guvenli-baslik',
+            'type' => '<script>alert("type")</script>',
+            'author_name' => '<img src=x onerror=alert(2)>',
             'subtitle' => '<script>alert("sub")</script>',
             'excerpt' => '<img src=x onerror=alert(1)>',
             'location' => '<b>Salon</b>',
@@ -148,7 +153,9 @@ class PostPageTest extends TestCase
         $this->get(route('posts.show', $post))
             ->assertOk()
             ->assertDontSee('<script>alert("sub")</script>', false)
+            ->assertDontSee('<script>alert("type")</script>', false)
             ->assertDontSee('<img src=x onerror=alert(1)>', false)
+            ->assertDontSee('<img src=x onerror=alert(2)>', false)
             ->assertDontSee('<b>Salon</b>', false)
             ->assertDontSee('<script>alert("quote")</script>', false)
             ->assertDontSee('<script>alert("src")</script>', false)
@@ -180,7 +187,82 @@ class PostPageTest extends TestCase
 
         $this->get(route('posts.index'))
             ->assertOk()
-            ->assertSee('Duyurular');
+            ->assertSee('Duyurular')
+            ->assertSee('object-contain', false);
+    }
+
+    public function test_typed_admin_fields_create_a_category_and_render_on_the_page(): void
+    {
+        $data = PostForm::persistableData([
+            'type' => 'Duyuru',
+            'category_name' => 'Yeni Kategori',
+            'author_name' => 'Misafir Hoca',
+            'title' => 'Özel duyuru',
+            'slug' => 'ozel-duyuru',
+            'excerpt' => 'Özet',
+            'body' => '<p>Gövde</p>',
+            'is_published' => true,
+            'published_at' => now()->subHour(),
+        ]);
+
+        $post = Post::query()->create($data);
+
+        $this->assertSame('announcement', $post->type);
+        $this->assertSame('Misafir Hoca', $post->author_name);
+        $this->assertDatabaseHas('categories', ['name' => 'Yeni Kategori']);
+        $this->assertArrayNotHasKey('category_name', $data);
+
+        $this->get(route('posts.show', $post))
+            ->assertOk()
+            ->assertSee('Duyuru')
+            ->assertSee('Yeni Kategori')
+            ->assertSee('Misafir Hoca');
+
+        $this->get(route('posts.index', ['tur' => 'announcement']))
+            ->assertOk()
+            ->assertSee('Özel duyuru');
+    }
+
+    public function test_typed_category_reuses_an_existing_record(): void
+    {
+        $category = Category::query()->create([
+            'name' => 'Duyurular',
+            'slug' => 'duyurular',
+            'type' => 'post',
+        ]);
+
+        $first = PostForm::persistableData([
+            'type' => 'Yazı',
+            'category_name' => 'Duyurular',
+        ]);
+        $second = PostForm::persistableData([
+            'type' => 'Yazı',
+            'category_name' => 'Duyurular',
+        ]);
+        $empty = PostForm::persistableData([
+            'type' => 'Yazı',
+            'category_name' => '  ',
+        ]);
+
+        $this->assertSame($category->id, $first['category_id']);
+        $this->assertSame($category->id, $second['category_id']);
+        $this->assertNull($empty['category_id']);
+        $this->assertDatabaseCount('categories', 1);
+    }
+
+    public function test_custom_type_renders_the_typed_label(): void
+    {
+        $post = $this->makePost([
+            'type' => 'Basın bülteni',
+            'author_name' => 'Misafir Hoca',
+            'slug' => 'basin-bulteni',
+        ]);
+
+        $this->get(route('posts.show', $post))
+            ->assertOk()
+            ->assertSee('Basın bülteni')
+            ->assertSee('Misafir Hoca')
+            ->assertSee('Yazı bilgileri');
     }
 
     /**

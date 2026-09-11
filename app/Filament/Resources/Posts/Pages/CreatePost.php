@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Posts\Pages;
 
 use App\Filament\Resources\Posts\PostResource;
+use App\Filament\Resources\Posts\Schemas\PostForm;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreatePost extends CreateRecord
@@ -15,8 +16,6 @@ class CreatePost extends CreateRecord
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['author_id'] ??= auth()->id();
-
-        return $data;
+        return PostForm::persistableData($data);
     }
 }

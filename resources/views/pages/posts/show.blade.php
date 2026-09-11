@@ -13,14 +13,14 @@
     $sourceLabel = filled($post->source_label) ? $post->source_label : 'Kaynağı aç';
     $articleSchema = [
         '@context' => 'https://schema.org',
-        '@type' => $post->type === 'announcement' ? 'NewsArticle' : 'Article',
+        '@type' => $post->isAnnouncement() ? 'NewsArticle' : 'Article',
         'headline' => $post->title,
         'description' => $post->excerpt ?: \Illuminate\Support\Str::limit(strip_tags((string) $post->body), 160),
         'datePublished' => $post->published_at?->toIso8601String(),
         'dateModified' => $post->updated_at?->toIso8601String(),
         'author' => [
             '@type' => 'Person',
-            'name' => $post->author?->name ?: ($settings['site_name'] ?? 'Hâcer İlim ve Kültür Derneği'),
+            'name' => $post->byline() ?: ($settings['site_name'] ?? 'Hâcer İlim ve Kültür Derneği'),
         ],
         'publisher' => [
             '@type' => 'Organization',
@@ -54,18 +54,16 @@
 <article class="shell py-14 lg:py-20">
     <div class="post-layout">
         <div class="reveal min-w-0" x-data="{ lightbox: null }" @keydown.escape.window="lightbox = null">
-            <div class="overflow-hidden rounded-2xl">
-                @if ($coverUrl)
-                    <button type="button"
-                            class="group block w-full cursor-zoom-in"
-                            data-src="{{ $coverUrl }}"
-                            x-on:click="lightbox = $el.dataset.src">
-                        <x-cover :src="$post->image" :alt="$post->title" ratio="aspect-[16/9]" />
-                    </button>
-                @else
-                    <x-cover :src="$post->image" :alt="$post->title" ratio="aspect-[16/9]" rounded="rounded-2xl" />
-                @endif
-            </div>
+            @if ($coverUrl)
+                <button type="button"
+                        class="post-cover"
+                        data-src="{{ $coverUrl }}"
+                        x-on:click="lightbox = $el.dataset.src">
+                    <img src="{{ $coverUrl }}" alt="{{ $post->title }}" class="post-cover-img" loading="lazy" decoding="async">
+                </button>
+            @else
+                <x-cover :src="$post->image" :alt="$post->title" ratio="aspect-[16/9]" rounded="rounded-2xl" fit="contain" />
+            @endif
 
             @if ($galleryUrls->isNotEmpty())
                 <div class="post-gallery mt-3">
@@ -134,12 +132,12 @@
 
         <aside class="reveal space-y-4 lg:sticky lg:top-32 lg:self-start">
             <div class="card p-6">
-                <p class="eyebrow">{{ $post->type === 'announcement' ? 'Duyuru bilgileri' : 'Yazı bilgileri' }}</p>
+                <p class="eyebrow">{{ $post->isAnnouncement() ? 'Duyuru bilgileri' : 'Yazı bilgileri' }}</p>
                 <ul class="mt-4 space-y-3.5">
                     <li><x-meta icon="calendar">{{ $post->published_at?->translatedFormat('d F Y') ?: $post->created_at->translatedFormat('d F Y') }}</x-meta></li>
                     <li><x-meta icon="clock">{{ $post->readingMinutes() }} dk okuma</x-meta></li>
-                    @if ($post->author)
-                        <li><x-meta icon="mic">{{ $post->author->name }}</x-meta></li>
+                    @if ($post->byline())
+                        <li><x-meta icon="mic">{{ $post->byline() }}</x-meta></li>
                     @endif
                     @if ($post->category)
                         <li><x-meta icon="star">{{ $post->category->name }}</x-meta></li>
@@ -190,7 +188,7 @@
 
             @if ($related->isNotEmpty())
                 <div class="card p-6">
-                    <p class="eyebrow">{{ $post->type === 'announcement' ? 'Diğer duyurular' : 'Benzer yazılar' }}</p>
+                    <p class="eyebrow">{{ $post->isAnnouncement() ? 'Diğer duyurular' : 'Benzer yazılar' }}</p>
                     <ul class="mt-4 divide-y divide-line">
                         @foreach ($related as $item)
                             <li>

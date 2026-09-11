@@ -3,16 +3,21 @@
     'alt' => '',
     'ratio' => 'aspect-[4/3]',
     'rounded' => '',
+    'fit' => 'cover',
 ])
 
 @php
     $url = filled($src) ? \Illuminate\Support\Facades\Storage::disk('public')->url($src) : null;
+    $contain = $fit === 'contain';
+    $imgClass = $contain
+        ? 'h-full w-full object-contain object-center'
+        : 'h-full w-full object-cover transition duration-[1100ms] ease-out group-hover:scale-[1.08]';
 @endphp
 
 <div {{ $attributes->merge(['class' => trim($ratio.' '.$rounded.' relative overflow-hidden bg-cream-deep')]) }}>
     @if ($url)
         <img src="{{ $url }}" alt="{{ $alt }}" loading="lazy" decoding="async"
-             class="h-full w-full object-cover transition duration-[1100ms] ease-out group-hover:scale-[1.08]">
+             class="{{ $imgClass }}">
     @else
         <div class="grain flex h-full w-full items-center justify-center">
             <img src="{{ \App\Support\SiteSettings::logoUrl() }}" alt="" aria-hidden="true"

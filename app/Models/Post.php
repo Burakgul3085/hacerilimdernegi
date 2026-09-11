@@ -17,6 +17,7 @@ class Post extends Model
     protected $fillable = [
         'category_id',
         'author_id',
+        'author_name',
         'type',
         'title',
         'subtitle',
@@ -48,6 +49,8 @@ class Post extends Model
             if (blank($post->slug) && filled($post->title)) {
                 $post->slug = Str::slug($post->title);
             }
+
+            $post->type = self::normalizeType($post->type);
         });
     }
 
@@ -78,9 +81,49 @@ class Post extends Model
         return $this->published_at === null || $this->published_at->lte(now());
     }
 
+    public static function normalizeType(?string $type): string
+    {
+        $type = trim((string) $type);
+
+        if ($type === '') {
+            return 'article';
+        }
+
+        $key = str_replace([' ', '-', '_'], '', Str::lower(Str::ascii($type)));
+
+        return match ($key) {
+            'yazi', 'yazilar', 'article', 'articles' => 'article',
+            'duyuru', 'duyurular', 'announcement', 'announcements' => 'announcement',
+            default => $type,
+        };
+    }
+
+    public static function labelForType(?string $type): string
+    {
+        return match (self::normalizeType($type)) {
+            'announcement' => 'Duyuru',
+            'article' => 'Yazı',
+            default => trim((string) $type),
+        };
+    }
+
     public function typeLabel(): string
     {
-        return $this->type === 'announcement' ? 'Duyuru' : 'Yazı';
+        return self::labelForType($this->type);
+    }
+
+    public function isAnnouncement(): bool
+    {
+        return self::normalizeType($this->type) === 'announcement';
+    }
+
+    public function byline(): ?string
+    {
+        if (filled($this->author_name)) {
+            return $this->author_name;
+        }
+
+        return $this->author?->name;
     }
 
     public function readingMinutes(): int

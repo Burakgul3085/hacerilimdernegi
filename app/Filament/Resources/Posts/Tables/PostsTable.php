@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Posts\Tables;
 
+use App\Models\Post;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -16,7 +17,10 @@ class PostsTable
         return $table
             ->columns([
                 TextColumn::make('title')->label('Başlık')->searchable(),
-                TextColumn::make('type')->label('Tür')->badge(),
+                TextColumn::make('type')
+                    ->label('Tür')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => Post::labelForType($state)),
                 TextColumn::make('category.name')->label('Kategori'),
                 IconColumn::make('is_published')->label('Yayında')->boolean(),
                 TextColumn::make('published_at')->label('Tarih')->date('d.m.Y'),

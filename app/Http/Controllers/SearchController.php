@@ -72,7 +72,7 @@ class SearchController extends Controller
             ->limit(10)
             ->get()
             ->map(fn (Post $post) => [
-                'label' => $post->type === 'announcement' ? 'Duyuru' : 'Yazı',
+                'label' => $post->typeLabel(),
                 'title' => $post->title,
                 'excerpt' => $post->excerpt,
                 'url' => route('posts.show', $post),
