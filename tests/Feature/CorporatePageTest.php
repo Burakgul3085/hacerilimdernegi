@@ -145,7 +145,7 @@ class CorporatePageTest extends TestCase
             ])
             ->assertSee('/storage/pages/board/ayse.jpg', false)
             ->assertSee('board-photo-fit', false)
-            ->assertSee('board-photo-fill', false)
+            ->assertDontSee('board-photo-fill', false)
             ->assertDontSee('object-cover', false)
             ->assertSee('board-directory', false)
             ->assertDontSee('Görünmemeli')

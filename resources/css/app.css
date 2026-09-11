@@ -105,23 +105,11 @@
         box-shadow: inset 0 0 0 1px rgb(138 122 98 / 0.38);
     }
 
-    .board-photo-fill {
-        position: absolute;
-        inset: 0;
-        height: 100%;
-        width: 100%;
-        object-fit: cover;
-        filter: blur(22px);
-        transform: scale(1.18);
-    }
-
     .board-photo-fit {
-        position: relative;
-        z-index: 1;
-        height: 100%;
+        display: block;
         width: 100%;
-        object-fit: scale-down;
-        object-position: center;
+        max-width: 100%;
+        height: auto;
     }
 
     .president-portrait {

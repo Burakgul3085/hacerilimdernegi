@@ -11,16 +11,14 @@
     $photoUrl = filled($photo) ? \Illuminate\Support\Facades\Storage::disk('public')->url($photo) : null;
 @endphp
 
-<article {{ $attributes->merge(['class' => 'board-card card card-hover overflow-hidden'.($featured ? ' board-card-featured' : '')]) }}>
+<article {{ $attributes->merge(['class' => 'board-card card card-hover min-w-0 overflow-hidden'.($featured ? ' board-card-featured' : '')]) }}>
     <div @class([
-        'board-photo relative overflow-hidden',
-        'bg-forest' => filled($photoUrl),
+        'board-photo relative w-full overflow-hidden',
         'bg-cream-deep' => blank($photoUrl),
-        'aspect-[4/5]' => $featured,
-        'aspect-square' => ! $featured,
+        'aspect-[4/5]' => blank($photoUrl) && $featured,
+        'aspect-square' => blank($photoUrl) && ! $featured,
     ])>
         @if ($photoUrl)
-            <img src="{{ $photoUrl }}" alt="" aria-hidden="true" class="board-photo-fill">
             <img src="{{ $photoUrl }}" alt="{{ $name }}" loading="lazy" decoding="async"
                  class="board-photo-fit">
         @else
