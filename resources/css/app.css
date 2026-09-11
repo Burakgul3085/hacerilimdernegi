@@ -285,30 +285,8 @@
         line-height: 1.8;
     }
 
-    .about-story-media {
-        padding-right: 0.75rem;
-        padding-bottom: 0.75rem;
-    }
-
-    .about-portrait-frame {
-        position: relative;
-    }
-
-    .about-portrait-frame::before {
-        content: '';
-        position: absolute;
-        top: 1.15rem;
-        left: 1.15rem;
-        right: -0.7rem;
-        bottom: -0.7rem;
-        border: 1px solid rgb(138 122 98 / 0.48);
-        border-radius: 1.65rem;
-        pointer-events: none;
-    }
-
     .about-portrait {
         position: relative;
-        z-index: 1;
         overflow: hidden;
         border-radius: 1.5rem;
         box-shadow: var(--shadow-soft);
@@ -325,9 +303,7 @@
     .about-portrait-image {
         display: block;
         width: 100%;
-        aspect-ratio: 4 / 5;
-        object-fit: cover;
-        object-position: center top;
+        height: auto;
     }
 
     .about-place {

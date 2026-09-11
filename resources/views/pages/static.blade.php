@@ -152,11 +152,9 @@
                 </div>
 
                 <aside class="about-story-media reveal reveal-right">
-                    <div class="about-portrait-frame">
-                        <div class="about-portrait">
-                            <img src="{{ $aboutImage }}" alt="{{ $page->title }}" loading="lazy" decoding="async"
-                                 class="about-portrait-image media-zoom">
-                        </div>
+                    <div class="about-portrait">
+                        <img src="{{ $aboutImage }}" alt="{{ $page->title }}" loading="lazy" decoding="async"
+                             class="about-portrait-image media-zoom">
                     </div>
 
                     @if (filled($settings['address']) || filled($settings['phone']) || filled($settings['email']))
