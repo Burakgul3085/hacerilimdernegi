@@ -18,11 +18,15 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
         $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
-        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+
+        if (! $this->isCrossOriginRedirect($request, $response)) {
+            $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        }
+
         $response->headers->set('Content-Security-Policy', implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",
-            "form-action 'self'",
+            "form-action 'self' https://wa.me https://api.whatsapp.com https://web.whatsapp.com",
             "frame-ancestors 'self'",
             "object-src 'none'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -38,5 +42,26 @@ class SecurityHeaders
         }
 
         return $response;
+    }
+
+    private function isCrossOriginRedirect(Request $request, Response $response): bool
+    {
+        if (! $response->isRedirection()) {
+            return false;
+        }
+
+        $location = $response->headers->get('Location');
+
+        if (! is_string($location) || $location === '') {
+            return false;
+        }
+
+        $absolute = str_starts_with($location, 'http://') || str_starts_with($location, 'https://')
+            ? $location
+            : $request->getSchemeAndHttpHost().$location;
+
+        $host = parse_url($absolute, PHP_URL_HOST);
+
+        return is_string($host) && $host !== '' && $host !== $request->getHost();
     }
 }

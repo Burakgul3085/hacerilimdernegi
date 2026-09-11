@@ -104,7 +104,7 @@
                     <p class="mt-3 text-sm leading-relaxed text-muted">Mesajınız derneğin kayıtlı hattında hazır bir selam metniyle açılır; göndermek sizin onayınıza kalır.</p>
                 </div>
 
-                <form method="POST" action="{{ route('contact.whatsapp') }}" class="relative space-y-5 p-8 lg:p-10">
+                <form method="POST" action="{{ route('contact.whatsapp') }}" target="_blank" rel="noopener noreferrer" class="relative space-y-5 p-8 lg:p-10">
                     @csrf
                     <x-honeypot id="whatsapp-website" />
 

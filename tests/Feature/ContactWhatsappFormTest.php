@@ -19,7 +19,8 @@ class ContactWhatsappFormTest extends TestCase
             ->assertOk()
             ->assertSee('WhatsApp ile yazın')
             ->assertSee('WhatsApp’ta aç')
-            ->assertSee(route('contact.whatsapp', absolute: false), false);
+            ->assertSee(route('contact.whatsapp', absolute: false), false)
+            ->assertSee('method="POST" action="'.route('contact.whatsapp').'" target="_blank"', false);
     }
 
     public function test_contact_page_hides_the_whatsapp_form_when_no_phone_number_is_set(): void
@@ -47,6 +48,7 @@ class ContactWhatsappFormTest extends TestCase
 
         $location = (string) $response->headers->get('Location');
         $this->assertStringStartsWith('https://wa.me/905426588530?text=', $location);
+        $this->assertFalse($response->headers->has('Cross-Origin-Opener-Policy'));
 
         parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
         $text = $query['text'] ?? '';
@@ -56,6 +58,13 @@ class ContactWhatsappFormTest extends TestCase
         $this->assertStringContainsString('0532 111 22 33', $text);
         $this->assertStringContainsString('Programlar hakkında bilgi almak istiyorum.', $text);
         $this->assertSame(0, ContactMessage::query()->count());
+    }
+
+    public function test_contact_page_content_security_policy_allows_whatsapp_form_targets(): void
+    {
+        $csp = (string) $this->get(route('contact'))->headers->get('Content-Security-Policy');
+
+        $this->assertStringContainsString("form-action 'self' https://wa.me https://api.whatsapp.com https://web.whatsapp.com", $csp);
     }
 
     public function test_whatsapp_form_requires_kvkk_consent(): void
