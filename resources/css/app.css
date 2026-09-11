@@ -61,6 +61,16 @@
         @apply mx-auto w-full max-w-[78rem] px-5 sm:px-8;
     }
 
+    /* Tüzük PDF: yükseklik Tailwind derlemesine bağlı kalmasın, tam görünsün. */
+    .bylaws-pdf {
+        display: block;
+        width: 100%;
+        height: min(85vh, 56rem);
+        min-height: 35rem;
+        border: 0;
+        background: #323639;
+    }
+
     .eyebrow {
         @apply text-[11px] font-semibold uppercase tracking-[0.32em] text-gold;
     }

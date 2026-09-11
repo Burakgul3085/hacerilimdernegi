@@ -71,7 +71,9 @@ class CorporatePageTest extends TestCase
             ->assertSee('Dernek tüzüğü')
             ->assertSee('bylaws-pdf', false)
             ->assertSee('/storage/pages/documents/tuzuk.pdf', false)
+            ->assertSee('min-height: 35rem', false)
             ->assertSee("PDF'yi indir", false)
+            ->assertDontSee('view=FitH', false)
             ->assertDontSee('yönetim panelinden eklenecektir')
             ->assertDontSee('aspect-[4/5]', false);
     }

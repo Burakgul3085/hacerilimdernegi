@@ -27,6 +27,27 @@
     :lead="$page->excerpt"
     :breadcrumbs="$breadcrumbs" />
 
+@if ($pdfUrl)
+    <section class="shell pb-16 pt-8 lg:pb-24 lg:pt-10">
+        @if ($showBody)
+            <div class="prose-hacer mb-8">{!! $page->body !!}</div>
+        @endif
+
+        <div class="overflow-hidden rounded-2xl border border-line bg-forest-deep shadow-soft">
+            <iframe
+                src="{{ $pdfUrl }}"
+                title="{{ $page->title }}"
+                class="bylaws-pdf"
+                style="height: min(85vh, 56rem); min-height: 35rem; width: 100%; border: 0; display: block;"
+            ></iframe>
+        </div>
+
+        <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <a href="{{ $pdfUrl }}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">PDF'yi aç</a>
+            <a href="{{ $pdfUrl }}" class="btn btn-outline btn-sm" download>PDF'yi indir</a>
+        </div>
+    </section>
+@else
 <section class="shell py-16 lg:py-24">
     <div @class([
         'grid gap-12 lg:gap-16',
@@ -34,21 +55,7 @@
     ])>
         <div class="reveal">
             @if ($showBody)
-                <div @class(['prose-hacer', 'mb-10' => filled($pdfUrl)])>{!! $page->body !!}</div>
-            @endif
-
-            @if ($pdfUrl)
-                <div class="flex flex-col gap-4">
-                    <div class="flex flex-wrap items-center justify-end gap-3">
-                        <a href="{{ $pdfUrl }}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">PDF'yi aç</a>
-                        <a href="{{ $pdfUrl }}" class="btn btn-outline btn-sm" download>PDF'yi indir</a>
-                    </div>
-                    <iframe
-                        src="{{ $pdfUrl }}#navpanes=1&toolbar=1&view=FitH"
-                        title="{{ $page->title }}"
-                        class="bylaws-pdf h-[min(90vh,64rem)] w-full overflow-hidden rounded-2xl border border-line bg-forest-deep"
-                    ></iframe>
-                </div>
+                <div class="prose-hacer">{!! $page->body !!}</div>
             @endif
 
             @if ($isAbout && filled($settings['about_quote']))
@@ -97,6 +104,7 @@
         @endunless
     </div>
 </section>
+@endif
 
 @if (filled($settings['cta_title']))
     <section class="shell pb-8">
