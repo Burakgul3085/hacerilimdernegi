@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
 class ContactMessage extends Model
 {
-    use Notifiable;
+    use Auditable, Notifiable;
 
     protected $fillable = [
         'name',

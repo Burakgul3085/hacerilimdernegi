@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Enums\ApplicationStatus;
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
 class MembershipApplication extends Model
 {
-    use Notifiable;
+    use Auditable, Notifiable;
 
     protected $fillable = [
         'name',

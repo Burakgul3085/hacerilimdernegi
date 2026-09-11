@@ -3,6 +3,8 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Concerns\AuthorizesByRole;
+use App\Models\AuditLog;
+use App\Models\Setting;
 use App\Support\Icons;
 use App\Support\InstagramMedia;
 use App\Support\PhpMailerClient;
@@ -122,6 +124,8 @@ class ManageSettings extends Page
 
             SiteSettings::put($key, is_bool($value) ? $value : (string) ($value ?? ''));
         }
+
+        AuditLog::record('updated', Setting::class, null, 'Site ayarları');
 
         Notification::make()->title('Ayarlar kaydedildi')->success()->send();
     }
