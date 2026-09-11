@@ -12,9 +12,9 @@
 @endphp
 
 @if ($contain && $url)
-    <div {{ $attributes->merge(['class' => trim($rounded.' overflow-hidden')]) }}>
+    <div {{ $attributes->merge(['class' => trim($rounded.' flex justify-center overflow-hidden')]) }}>
         <img src="{{ $url }}" alt="{{ $alt }}" loading="lazy" decoding="async"
-             class="post-media-img block h-auto w-full">
+             class="post-media-img">
     </div>
 @else
     <div {{ $attributes->merge(['class' => trim($ratio.' '.$rounded.' relative overflow-hidden bg-cream-deep')]) }}>

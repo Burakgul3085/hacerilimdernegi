@@ -197,6 +197,67 @@ class PostPageTest extends TestCase
             ->assertDontSee('aspect-[16/9]', false);
     }
 
+    public function test_home_and_list_show_every_published_post(): void
+    {
+        $this->makePost([
+            'title' => 'Web sitemiz yayında',
+            'slug' => 'web-sitemiz-yayinda',
+            'published_at' => now()->subDay(),
+        ]);
+        $this->makePost([
+            'title' => 'Yolraki Mühandis Kitap Tahlili',
+            'slug' => 'kitap-tahlili',
+            'published_at' => now(),
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Web sitemiz yayında')
+            ->assertSee('Yolraki Mühandis Kitap Tahlili');
+
+        $this->get(route('posts.index'))
+            ->assertOk()
+            ->assertSee('Web sitemiz yayında')
+            ->assertSee('Yolraki Mühandis Kitap Tahlili');
+    }
+
+    public function test_a_post_dated_later_today_still_appears_on_the_site(): void
+    {
+        $this->freezeTime();
+
+        $post = $this->makePost([
+            'title' => 'Aynı gün duyuru',
+            'slug' => 'ayni-gun-duyuru',
+            'published_at' => now()->addHours(3),
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Aynı gün duyuru');
+
+        $this->get(route('posts.index'))
+            ->assertOk()
+            ->assertSee('Aynı gün duyuru');
+
+        $this->get(route('posts.show', $post))
+            ->assertOk()
+            ->assertSee('Aynı gün duyuru');
+    }
+
+    public function test_publishing_without_a_date_uses_now(): void
+    {
+        $this->freezeTime();
+
+        $data = PostForm::persistableData([
+            'type' => 'Duyuru',
+            'is_published' => true,
+            'published_at' => null,
+        ]);
+
+        $this->assertNotNull($data['published_at']);
+        $this->assertTrue(now()->equalTo($data['published_at']));
+    }
+
     public function test_typed_admin_fields_create_a_category_and_render_on_the_page(): void
     {
         $data = PostForm::persistableData([

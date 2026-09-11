@@ -14,7 +14,9 @@ class PostController extends Controller
         $posts = Post::query()
             ->with('category')
             ->published()
-            ->when($request->filled('tur'), fn (Builder $query) => $query->where('type', $request->string('tur')))
+            ->when($request->filled('tur'), function (Builder $query) use ($request): void {
+                $query->where('type', Post::normalizeType($request->string('tur')->toString()));
+            })
             ->latest('published_at')
             ->latest()
             ->paginate(9)

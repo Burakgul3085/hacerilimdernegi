@@ -18,7 +18,7 @@ class HomeController extends Controller
             'events' => Event::query()->published()->where(function ($query): void {
                 $query->whereNull('starts_at')->orWhere('starts_at', '>=', now()->subDay());
             })->orderBy('starts_at')->limit(4)->get(),
-            'posts' => Post::query()->published()->latest('published_at')->latest()->limit(3)->get(),
+            'posts' => Post::query()->with('category')->published()->latest('published_at')->latest()->limit(3)->get(),
             'albums' => MediaAlbum::query()->published()->withCount('items')->latest()->limit(3)->get(),
             'settings' => SiteSettings::all(),
         ]);

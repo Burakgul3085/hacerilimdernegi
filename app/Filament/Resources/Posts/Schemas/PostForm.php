@@ -105,7 +105,11 @@ class PostForm
                 Section::make('Yayın')
                     ->columns(2)
                     ->schema([
-                        DateTimePicker::make('published_at')->label('Yayın tarihi'),
+                        DateTimePicker::make('published_at')
+                            ->label('Yayın tarihi')
+                            ->default(now())
+                            ->timezone('Europe/Istanbul')
+                            ->helperText('Boş bırakılırsa hemen yayınlanır. Yarın veya sonrası seçilirse o güne kadar sitede görünmez.'),
                         Toggle::make('is_published')->label('Yayında')->default(true),
                     ]),
             ]);
@@ -125,6 +129,11 @@ class PostForm
 
         $authorName = trim((string) ($data['author_name'] ?? ''));
         $data['author_name'] = $authorName === '' ? null : $authorName;
+
+        $isPublished = (bool) ($data['is_published'] ?? false);
+        if ($isPublished && blank($data['published_at'] ?? null)) {
+            $data['published_at'] = now();
+        }
 
         return $data;
     }

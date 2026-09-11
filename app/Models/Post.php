@@ -68,7 +68,7 @@ class Post extends Model
     {
         return $query->where('is_published', true)
             ->where(function (Builder $builder): void {
-                $builder->whereNull('published_at')->orWhere('published_at', '<=', now());
+                $builder->whereNull('published_at')->orWhere('published_at', '<=', now()->endOfDay());
             });
     }
 
@@ -78,7 +78,7 @@ class Post extends Model
             return false;
         }
 
-        return $this->published_at === null || $this->published_at->lte(now());
+        return $this->published_at === null || $this->published_at->lte(now()->endOfDay());
     }
 
     public static function normalizeType(?string $type): string
