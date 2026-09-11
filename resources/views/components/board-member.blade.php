@@ -13,13 +13,16 @@
 
 <article {{ $attributes->merge(['class' => 'board-card card card-hover overflow-hidden'.($featured ? ' board-card-featured' : '')]) }}>
     <div @class([
-        'board-photo relative overflow-hidden bg-cream-deep',
+        'board-photo relative overflow-hidden',
+        'bg-forest' => filled($photoUrl),
+        'bg-cream-deep' => blank($photoUrl),
         'aspect-[4/5]' => $featured,
         'aspect-square' => ! $featured,
     ])>
         @if ($photoUrl)
+            <img src="{{ $photoUrl }}" alt="" aria-hidden="true" class="board-photo-fill">
             <img src="{{ $photoUrl }}" alt="{{ $name }}" loading="lazy" decoding="async"
-                 class="h-full w-full object-cover">
+                 class="board-photo-fit">
         @else
             <div class="flex h-full w-full items-center justify-center">
                 <span class="font-display text-4xl tracking-wide text-gold/80 {{ $featured ? 'sm:text-5xl' : '' }}">{{ $initials }}</span>

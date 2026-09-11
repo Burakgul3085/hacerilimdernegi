@@ -144,6 +144,9 @@ class CorporatePageTest extends TestCase
                 'Ali Üye',
             ])
             ->assertSee('/storage/pages/board/ayse.jpg', false)
+            ->assertSee('board-photo-fit', false)
+            ->assertSee('board-photo-fill', false)
+            ->assertDontSee('object-cover', false)
             ->assertSee('board-directory', false)
             ->assertDontSee('Görünmemeli')
             ->assertDontSee('yönetim panelinden eklenecektir')
