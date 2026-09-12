@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\BoardTier;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasContentGallery;
 use App\Support\CorporatePages;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -13,9 +14,10 @@ use Illuminate\Support\Str;
 class Page extends Model
 {
     use Auditable;
+    use HasContentGallery;
 
     protected $fillable = [
-        'slug', 'title', 'excerpt', 'body', 'image', 'document', 'board_members', 'president_name', 'president_title', 'vision', 'mission', 'seo_title', 'seo_description', 'is_published',
+        'slug', 'title', 'excerpt', 'body', 'image', 'gallery', 'document', 'board_members', 'president_name', 'president_title', 'vision', 'mission', 'seo_title', 'seo_description', 'is_published',
     ];
 
     protected function casts(): array
@@ -23,6 +25,7 @@ class Page extends Model
         return [
             'is_published' => 'boolean',
             'board_members' => 'array',
+            'gallery' => 'array',
         ];
     }
 

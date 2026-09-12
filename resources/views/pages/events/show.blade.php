@@ -21,6 +21,9 @@
     <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-14">
         <div class="reveal">
             <x-cover :src="$event->image" :alt="$event->title" ratio="aspect-[16/10]" rounded="rounded-2xl" />
+            @if ($event->galleryMedia() !== [])
+                <x-content-gallery class="mt-4" :items="$event->galleryMedia()" :alt="$event->title" />
+            @endif
         </div>
 
         <aside class="reveal space-y-4">

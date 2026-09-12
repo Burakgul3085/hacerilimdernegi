@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Posts\Schemas;
 
+use App\Filament\Support\ContentUploads;
 use App\Models\Category;
 use App\Models\Post;
 use App\Support\UploadRules;
@@ -68,19 +69,9 @@ class PostForm
                             ->disk('public')
                             ->directory('posts')
                             ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
-                            ->maxSize(UploadRules::MAX_IMAGE_KB)
+                            ->maxSize(UploadRules::maxImageKb())
                             ->helperText('Görsel kırpılmaz. Sitede çerçeveye sığdırılır.'),
-                        FileUpload::make('gallery')
-                            ->label('Galeri')
-                            ->image()
-                            ->multiple()
-                            ->reorderable()
-                            ->disk('public')
-                            ->directory('posts/gallery')
-                            ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
-                            ->maxSize(UploadRules::MAX_IMAGE_KB)
-                            ->maxFiles(8)
-                            ->helperText('Kapak dışındaki ek görseller. Kırpılmaz, çerçeveye sığdırılır. En fazla 8 görsel.'),
+                        ContentUploads::gallery('gallery', 'posts/gallery'),
                     ]),
                 Section::make('İçerik')
                     ->columns(2)
@@ -90,9 +81,9 @@ class PostForm
                             ->rows(3)
                             ->maxLength(500)
                             ->columnSpanFull(),
-                        RichEditor::make('body')
-                            ->label('İçerik')
-                            ->columnSpanFull(),
+                        ContentUploads::withEditorUploads(
+                            RichEditor::make('body')->label('İçerik')->columnSpanFull(),
+                        ),
                         TextInput::make('source_label')
                             ->label('Kaynak adı')
                             ->maxLength(120),

@@ -14,6 +14,9 @@
     <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16">
         <div class="reveal">
             <x-cover :src="$program->image" :alt="$program->title" ratio="aspect-[16/9]" rounded="rounded-2xl" />
+            @if ($program->galleryMedia() !== [])
+                <x-content-gallery class="mt-4" :items="$program->galleryMedia()" :alt="$program->title" />
+            @endif
             <div class="prose-hacer mt-10">{!! $program->description !!}</div>
         </div>
 

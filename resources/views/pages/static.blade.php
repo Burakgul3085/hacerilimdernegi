@@ -314,6 +314,12 @@
 </section>
 @endif
 
+@if ($page->galleryMedia() !== [])
+    <section class="shell pb-16">
+        <x-content-gallery :items="$page->galleryMedia()" :alt="$page->title" />
+    </section>
+@endif
+
 @if (filled($settings['cta_title']))
     <section class="shell pb-8">
         <x-cta-band

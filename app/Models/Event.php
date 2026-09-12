@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasContentGallery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,9 +12,10 @@ use Illuminate\Support\Str;
 class Event extends Model
 {
     use Auditable;
+    use HasContentGallery;
 
     protected $fillable = [
-        'title', 'slug', 'description', 'starts_at', 'ends_at', 'location', 'image', 'capacity', 'registration_open', 'is_published',
+        'title', 'slug', 'description', 'starts_at', 'ends_at', 'location', 'image', 'gallery', 'capacity', 'registration_open', 'is_published',
     ];
 
     protected function casts(): array
@@ -21,6 +23,7 @@ class Event extends Model
         return [
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'gallery' => 'array',
             'registration_open' => 'boolean',
             'is_published' => 'boolean',
         ];

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Events\Schemas;
 
+use App\Filament\Support\ContentUploads;
 use App\Support\UploadRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -28,8 +29,11 @@ class EventForm
                     ->disk('public')
                     ->directory('events')
                     ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
-                    ->maxSize(UploadRules::MAX_IMAGE_KB),
-                RichEditor::make('description')->label('Açıklama')->columnSpanFull(),
+                    ->maxSize(UploadRules::maxImageKb()),
+                ContentUploads::gallery('gallery', 'events/gallery')->columnSpanFull(),
+                ContentUploads::withEditorUploads(
+                    RichEditor::make('description')->label('Açıklama')->columnSpanFull(),
+                ),
                 Toggle::make('registration_open')->label('Kayıt açık')->default(true),
                 Toggle::make('is_published')->label('Yayında')->default(true),
             ]);

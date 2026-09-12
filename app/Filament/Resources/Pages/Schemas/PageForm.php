@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Pages\Schemas;
 
 use App\Enums\BoardTier;
+use App\Filament\Support\ContentUploads;
 use App\Support\CorporatePages;
 use App\Support\UploadRules;
 use Filament\Forms\Components\FileUpload;
@@ -32,7 +33,7 @@ class PageForm
                     ->disk('public')
                     ->directory('pages')
                     ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
-                    ->maxSize(UploadRules::MAX_IMAGE_KB)
+                    ->maxSize(UploadRules::maxImageKb())
                     ->helperText(fn (Get $get): ?string => CorporatePages::isMessage((string) $get('slug'))
                         ? 'İsteğe bağlı. Yüklemezseniz sitede insan simgesi görünür.'
                         : null)
@@ -44,10 +45,10 @@ class PageForm
                     ->acceptedFileTypes(UploadRules::PDF_MIMES)
                     ->disk('public')
                     ->directory('pages/documents')
-                    ->maxSize(UploadRules::MAX_PDF_KB)
+                    ->maxSize(UploadRules::maxPdfKb())
                     ->openable()
                     ->downloadable()
-                    ->helperText('PDF sitede sayfada görüntülenir. En fazla 20 MB.')
+                    ->helperText('PDF sitede sayfada görüntülenir. En fazla '.UploadRules::formatKb(UploadRules::maxPdfKb()).'.')
                     ->visible(fn (Get $get): bool => CorporatePages::isBylaws((string) $get('slug')))
                     ->columnSpanFull(),
                 Repeater::make('board_members')
@@ -81,7 +82,7 @@ class PageForm
                             ->disk('public')
                             ->directory('pages/board')
                             ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
-                            ->maxSize(UploadRules::MAX_IMAGE_KB),
+                            ->maxSize(UploadRules::maxImageKb()),
                         Textarea::make('bio')
                             ->label('Kısa not')
                             ->rows(2)
@@ -98,22 +99,29 @@ class PageForm
                     ->placeholder(CorporatePages::DEFAULT_PRESIDENT_TITLE)
                     ->helperText('Boş bırakılırsa sitede «'.CorporatePages::DEFAULT_PRESIDENT_TITLE.'» yazılır.')
                     ->visible(fn (Get $get): bool => CorporatePages::isMessage((string) $get('slug'))),
-                RichEditor::make('vision')
-                    ->label('Vizyon')
-                    ->helperText('Derneğin yönü ve gelecek ufku. Sitede soldaki kartta görünür.')
-                    ->visible(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
-                    ->columnSpanFull(),
-                RichEditor::make('mission')
-                    ->label('Misyon')
-                    ->helperText('Derneğin gayesi ve çalışma ilkeleri. Sitede sağdaki kartta görünür.')
-                    ->visible(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
-                    ->columnSpanFull(),
-                RichEditor::make('body')
-                    ->label(fn (Get $get): string => CorporatePages::isMessage((string) $get('slug'))
-                        ? 'Mesaj'
-                        : 'İçerik')
-                    ->hidden(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
-                    ->columnSpanFull(),
+                ContentUploads::withEditorUploads(
+                    RichEditor::make('vision')
+                        ->label('Vizyon')
+                        ->helperText('Derneğin yönü ve gelecek ufku. Sitede soldaki kartta görünür.')
+                        ->visible(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
+                        ->columnSpanFull(),
+                ),
+                ContentUploads::withEditorUploads(
+                    RichEditor::make('mission')
+                        ->label('Misyon')
+                        ->helperText('Derneğin gayesi ve çalışma ilkeleri. Sitede sağdaki kartta görünür.')
+                        ->visible(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
+                        ->columnSpanFull(),
+                ),
+                ContentUploads::withEditorUploads(
+                    RichEditor::make('body')
+                        ->label(fn (Get $get): string => CorporatePages::isMessage((string) $get('slug'))
+                            ? 'Mesaj'
+                            : 'İçerik')
+                        ->hidden(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
+                        ->columnSpanFull(),
+                ),
+                ContentUploads::gallery('gallery', 'pages/gallery')->columnSpanFull(),
                 TextInput::make('seo_title')->label('SEO başlık')->maxLength(255),
                 Textarea::make('seo_description')->label('SEO açıklama')->rows(2),
                 Toggle::make('is_published')->label('Yayında')->default(true),

@@ -1658,6 +1658,32 @@ html.js .reveal.is-visible .media-zoom {
     object-position: center;
 }
 
+.post-gallery-item video,
+.album-video {
+    display: block;
+    width: 100%;
+    background: #161513;
+}
+
+.post-gallery-item video {
+    max-height: 14rem;
+    border-radius: 0.9rem;
+}
+
+.album-video {
+    max-height: 22rem;
+}
+
+.post-gallery-item-audio {
+    cursor: default;
+    padding: 0.75rem;
+    background: var(--color-paper);
+}
+
+.post-gallery-item-audio audio {
+    width: 100%;
+}
+
 .post-pullquote {
     border-radius: 1.25rem;
     border: 1px solid var(--color-line);

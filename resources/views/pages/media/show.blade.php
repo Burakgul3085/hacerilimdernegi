@@ -4,8 +4,10 @@
 @section('description', $album->description)
 
 @php
-    $photos = $album->items->filter(fn ($item) => $item->type?->value === 'photo' && filled($item->path));
-    $links = $album->items->filter(fn ($item) => $item->type?->value !== 'photo' && filled($item->external_url));
+    $photos = $album->items->filter(fn ($item) => filled($item->path) && \App\Support\UploadRules::isImagePath($item->path));
+    $videos = $album->items->filter(fn ($item) => filled($item->path) && \App\Support\UploadRules::isVideoPath($item->path));
+    $audios = $album->items->filter(fn ($item) => filled($item->path) && \App\Support\UploadRules::isAudioPath($item->path));
+    $links = $album->items->filter(fn ($item) => filled($item->external_url));
 @endphp
 
 @section('content')
@@ -17,7 +19,7 @@
     :breadcrumbs="[['label' => 'Medya', 'url' => route('media.index')], ['label' => $album->title]]" />
 
 <section class="shell py-12 lg:py-16" x-data="{ open: false, src: '', caption: '' }">
-    @if ($photos->isEmpty() && $links->isEmpty())
+    @if ($photos->isEmpty() && $videos->isEmpty() && $audios->isEmpty() && $links->isEmpty())
         <x-empty-state icon="photo" title="Albüm boş" text="Bu albüme henüz içerik eklenmedi." />
     @endif
 
@@ -39,8 +41,36 @@
         </div>
     @endif
 
+    @if ($videos->isNotEmpty())
+        <div class="{{ $photos->isNotEmpty() ? 'mt-12' : '' }} grid gap-4 sm:grid-cols-2">
+            @foreach ($videos as $item)
+                @php $url = \Illuminate\Support\Facades\Storage::disk('public')->url($item->path); @endphp
+                <figure class="card overflow-hidden">
+                    <video src="{{ $url }}" controls playsinline preload="metadata" class="album-video"></video>
+                    @if (filled($item->caption ?: $item->title))
+                        <figcaption class="px-5 py-4 text-sm text-muted">{{ $item->caption ?: $item->title }}</figcaption>
+                    @endif
+                </figure>
+            @endforeach
+        </div>
+    @endif
+
+    @if ($audios->isNotEmpty())
+        <div class="{{ $photos->isNotEmpty() || $videos->isNotEmpty() ? 'mt-12' : '' }} grid gap-4 sm:grid-cols-2">
+            @foreach ($audios as $item)
+                @php $url = \Illuminate\Support\Facades\Storage::disk('public')->url($item->path); @endphp
+                <figure class="card p-5">
+                    <audio src="{{ $url }}" controls preload="metadata" class="w-full"></audio>
+                    @if (filled($item->caption ?: $item->title))
+                        <figcaption class="mt-3 text-sm text-muted">{{ $item->caption ?: $item->title }}</figcaption>
+                    @endif
+                </figure>
+            @endforeach
+        </div>
+    @endif
+
     @if ($links->isNotEmpty())
-        <div class="mt-12">
+        <div class="{{ $photos->isNotEmpty() || $videos->isNotEmpty() || $audios->isNotEmpty() ? 'mt-12' : '' }}">
             <p class="eyebrow">Video ve ses kayıtları</p>
             <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($links as $item)

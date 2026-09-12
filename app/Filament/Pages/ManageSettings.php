@@ -150,7 +150,7 @@ class ManageSettings extends Page
                     ->columns(2)
                     ->schema([
                         FileUpload::make('logo')->label('Logo')->image()->disk('public')->directory('brand')
-                            ->acceptedFileTypes(UploadRules::IMAGE_MIMES)->maxSize(UploadRules::MAX_IMAGE_KB),
+                            ->acceptedFileTypes(UploadRules::IMAGE_MIMES)->maxSize(UploadRules::maxImageKb()),
                         FileUpload::make('favicon')->label('Favicon')->image()->disk('public')->directory('brand')
                             ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/svg+xml', 'image/webp'])->maxSize(512),
                         ColorPicker::make('color_primary')->label('Ana renk'),
@@ -214,7 +214,7 @@ class ManageSettings extends Page
                     ->schema([
                         TextInput::make('hero_eyebrow')->label('Üst etiket')->maxLength(80),
                         FileUpload::make('hero_image')->label('Giriş görseli')->image()->disk('public')->directory('hero')
-                            ->acceptedFileTypes(UploadRules::IMAGE_MIMES)->maxSize(UploadRules::MAX_IMAGE_KB),
+                            ->acceptedFileTypes(UploadRules::IMAGE_MIMES)->maxSize(UploadRules::maxImageKb()),
                         TextInput::make('hero_title')->label('Başlık')->required()->maxLength(160)->columnSpanFull(),
                         Textarea::make('hero_text')->label('Açıklama')->rows(3)->columnSpanFull(),
                         TextInput::make('hero_primary_label')->label('Birincil buton yazısı')->maxLength(40),
@@ -297,7 +297,7 @@ class ManageSettings extends Page
                     ->columns(2)
                     ->schema([
                         FileUpload::make('about_image')->label('Kurum görseli')->image()->disk('public')->directory('about')
-                            ->acceptedFileTypes(UploadRules::IMAGE_MIMES)->maxSize(UploadRules::MAX_IMAGE_KB),
+                            ->acceptedFileTypes(UploadRules::IMAGE_MIMES)->maxSize(UploadRules::maxImageKb()),
                         Textarea::make('about_quote')->label('Öne çıkan alıntı')->rows(3),
                     ]),
 

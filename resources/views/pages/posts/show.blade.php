@@ -6,9 +6,6 @@
 
 @php
     $coverUrl = $post->coverUrl();
-    $galleryUrls = collect($post->galleryImages())
-        ->map(fn (string $path): string => \Illuminate\Support\Facades\Storage::disk('public')->url($path))
-        ->values();
     $sourceHref = $post->sourceHref();
     $sourceLabel = filled($post->source_label) ? $post->source_label : 'Kaynağı aç';
     $articleSchema = [
@@ -65,17 +62,8 @@
                 <x-cover :src="$post->image" :alt="$post->title" rounded="rounded-2xl" fit="contain" />
             @endif
 
-            @if ($galleryUrls->isNotEmpty())
-                <div class="post-gallery mt-3">
-                    @foreach ($galleryUrls as $index => $url)
-                        <button type="button"
-                                class="post-gallery-item group"
-                                data-src="{{ $url }}"
-                                x-on:click="lightbox = $el.dataset.src">
-                            <img src="{{ $url }}" alt="{{ $post->title }} görseli {{ $index + 1 }}" loading="lazy" decoding="async">
-                        </button>
-                    @endforeach
-                </div>
+            @if ($post->galleryMedia() !== [])
+                <x-content-gallery class="mt-3" :items="$post->galleryMedia()" :alt="$post->title" />
             @endif
 
             @if (filled($post->featured_quote))

@@ -15,6 +15,9 @@ ufw allow OpenSSH
 ufw allow 'Nginx Full'
 ufw --force enable
 
+install -m 644 "$(dirname "$0")/php-uploads.ini" /etc/php/8.3/fpm/conf.d/99-uploads.ini
+install -m 644 "$(dirname "$0")/php-uploads.ini" /etc/php/8.3/cli/conf.d/99-uploads.ini
+
 systemctl enable --now nginx mysql redis-server php8.3-fpm fail2ban
 
 mysql -e "CREATE DATABASE IF NOT EXISTS hacerilim CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"

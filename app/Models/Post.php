@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasContentGallery;
 use App\Support\MailTemplate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Illuminate\Support\Str;
 class Post extends Model
 {
     use Auditable;
+    use HasContentGallery;
 
     protected $fillable = [
         'category_id',
@@ -139,17 +141,6 @@ class Post extends Model
         $words = preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
         return max(1, (int) ceil(count($words) / 180));
-    }
-
-    /**
-     * @return list<string>
-     */
-    public function galleryImages(): array
-    {
-        return collect($this->gallery ?? [])
-            ->filter(fn (mixed $path): bool => is_string($path) && filled($path))
-            ->values()
-            ->all();
     }
 
     public function coverUrl(): ?string

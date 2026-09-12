@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ProgramType;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasContentGallery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -11,9 +12,10 @@ use Illuminate\Support\Str;
 class Program extends Model
 {
     use Auditable;
+    use HasContentGallery;
 
     protected $fillable = [
-        'type', 'title', 'slug', 'instructor', 'description', 'starts_at', 'ends_at', 'location', 'image', 'is_published',
+        'type', 'title', 'slug', 'instructor', 'description', 'starts_at', 'ends_at', 'location', 'image', 'gallery', 'is_published',
     ];
 
     protected function casts(): array
@@ -22,6 +24,7 @@ class Program extends Model
             'type' => ProgramType::class,
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'gallery' => 'array',
             'is_published' => 'boolean',
         ];
     }
