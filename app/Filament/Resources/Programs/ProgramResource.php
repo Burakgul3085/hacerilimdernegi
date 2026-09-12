@@ -22,13 +22,15 @@ class ProgramResource extends Resource
 
     protected static ?string $model = Program::class;
 
-    protected static ?string $navigationLabel = 'Programlar';
+    protected static ?string $navigationLabel = 'Ders ve sohbetler';
 
     protected static ?string $modelLabel = 'program';
 
-    protected static ?string $pluralModelLabel = 'programlar';
+    protected static ?string $pluralModelLabel = 'ders ve sohbetler';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Projeler';
+    protected static string|UnitEnum|null $navigationGroup = 'Programlar';
+
+    protected static ?int $navigationSort = 10;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 

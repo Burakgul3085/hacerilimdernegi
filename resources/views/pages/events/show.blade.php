@@ -6,9 +6,9 @@
 @section('content')
 
 <x-page-header
-    eyebrow="Etkinlik"
+    eyebrow="Program"
     :title="$event->title"
-    :breadcrumbs="[['label' => 'Etkinlikler', 'url' => route('events.index')], ['label' => $event->title]]">
+    :breadcrumbs="[['label' => 'Programlar', 'url' => route('programs.index')], ['label' => $event->title]]">
     <div class="flex flex-col gap-2">
         <x-meta icon="calendar">{{ $event->starts_at?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
         @if ($event->location)
@@ -28,7 +28,7 @@
 
         <aside class="reveal space-y-4">
             <div class="card p-7">
-                <p class="eyebrow">Etkinlik hakkında</p>
+                <p class="eyebrow">Program hakkında</p>
                 <div class="prose-hacer mt-4 text-[15px]">{!! $event->description !!}</div>
 
                 <div class="mt-6 space-y-3 border-t border-line pt-5">
@@ -54,7 +54,7 @@
 
             @if ($related->isNotEmpty())
                 <div class="card p-6">
-                    <p class="eyebrow">Diğer etkinlikler</p>
+                    <p class="eyebrow">Diğer programlar</p>
                     <ul class="mt-4 divide-y divide-line">
                         @foreach ($related as $item)
                             <li>

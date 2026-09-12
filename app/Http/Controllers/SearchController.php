@@ -58,7 +58,7 @@ class SearchController extends Controller
             ->limit(10)
             ->get()
             ->map(fn (Event $event) => [
-                'label' => 'Etkinlik',
+                'label' => $event->registration_open ? 'Kayıt açık' : 'Program',
                 'title' => $event->title,
                 'excerpt' => $event->starts_at?->translatedFormat('d F Y, H:i'),
                 'url' => route('events.show', $event),

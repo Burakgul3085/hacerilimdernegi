@@ -732,6 +732,22 @@
         @apply border-forest bg-forest text-cream hover:border-forest hover:text-cream;
     }
 
+    .program-scope {
+        @apply inline-flex rounded-full border border-line bg-paper p-1;
+    }
+
+    .program-scope-link {
+        @apply rounded-full px-4 py-2 text-[13px] font-medium text-forest/70 transition;
+    }
+
+    .program-scope-link:hover {
+        @apply text-forest;
+    }
+
+    .program-scope-link.is-active {
+        @apply bg-forest text-cream;
+    }
+
     .tag {
         @apply text-[10px] font-semibold uppercase tracking-[0.24em] text-gold;
     }

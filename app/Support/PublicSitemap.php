@@ -27,7 +27,6 @@ class PublicSitemap
             $this->entry(route('corporate.board'), $now, 'monthly', '0.6'),
             $this->entry(route('corporate.bylaws'), $now, 'monthly', '0.6'),
             $this->entry(route('programs.index'), $now, 'weekly', '0.8'),
-            $this->entry(route('events.index'), $now, 'weekly', '0.8'),
             $this->entry(route('posts.index'), $now, 'weekly', '0.8'),
             $this->entry(route('media.index'), $now, 'weekly', '0.7'),
             $this->entry(route('social'), $now, 'weekly', '0.6'),

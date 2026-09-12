@@ -40,7 +40,6 @@ class FrontendContentTest extends TestCase
             '/hakkimizda',
             '/programlar',
             route('programs.show', $program),
-            '/etkinlikler',
             route('events.show', $event),
             '/yazilar',
             route('posts.show', $post),
@@ -281,29 +280,9 @@ class FrontendContentTest extends TestCase
             ->assertSee('openLegal', false);
     }
 
-    public function test_program_list_filters_by_type_and_search_term(): void
+    public function test_legacy_event_index_redirects_to_programs(): void
     {
-        $this->makeProgram([
-            'title' => 'Tefsir dersi',
-            'slug' => 'tefsir-dersi',
-            'type' => ProgramType::Ders,
-            'description' => '<p>Ders açıklaması</p>',
-        ]);
-        $this->makeProgram([
-            'title' => 'Haftalık sohbet',
-            'slug' => 'haftalik-sohbet',
-            'type' => ProgramType::Sohbet,
-        ]);
-
-        $this->get('/programlar?tur='.ProgramType::Ders->value)
-            ->assertOk()
-            ->assertSee('Tefsir dersi')
-            ->assertDontSee('Haftalık sohbet');
-
-        $this->get('/programlar?ara=sohbet')
-            ->assertOk()
-            ->assertSee('Haftalık sohbet')
-            ->assertDontSee('Tefsir dersi');
+        $this->get('/etkinlikler')->assertRedirect('/programlar');
     }
 
     public function test_event_page_offers_a_calendar_link(): void
@@ -316,23 +295,23 @@ class FrontendContentTest extends TestCase
             ->assertSee('calendar.google.com', false);
     }
 
-    public function test_event_list_filters_by_month(): void
+    public function test_program_calendar_filters_by_month(): void
     {
         $thisMonth = $this->makeEvent([
-            'title' => 'Bu ayki etkinlik',
-            'slug' => 'bu-ayki-etkinlik',
+            'title' => 'Bu ayki program',
+            'slug' => 'bu-ayki-program',
             'starts_at' => now()->addDays(2),
         ]);
         $this->makeEvent([
-            'title' => 'Gelecek aydaki etkinlik',
-            'slug' => 'gelecek-aydaki-etkinlik',
+            'title' => 'Gelecek aydaki program',
+            'slug' => 'gelecek-aydaki-program',
             'starts_at' => now()->addMonths(2),
         ]);
 
-        $this->get('/etkinlikler?ay='.$thisMonth->starts_at->format('Y-m'))
+        $this->get('/programlar?ay='.$thisMonth->starts_at->format('Y-m'))
             ->assertOk()
-            ->assertSee('Bu ayki etkinlik')
-            ->assertDontSee('Gelecek aydaki etkinlik');
+            ->assertSee('Bu ayki program')
+            ->assertDontSee('Gelecek aydaki program');
     }
 
     public function test_search_finds_published_records_across_sections(): void

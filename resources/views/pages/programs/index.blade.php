@@ -10,42 +10,52 @@
     title="Programlar"
     :lead="$settings['programs_intro']"
     :breadcrumbs="[['label' => 'Programlar']]">
-    <form action="{{ route('programs.index') }}" method="GET" class="flex items-center gap-2 rounded-full border border-line bg-paper py-1.5 pl-4 pr-1.5">
-        @if ($currentType)
-            <input type="hidden" name="tur" value="{{ $currentType }}">
+    <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+        <div class="program-scope" role="group" aria-label="Takvim kapsamı">
+            <a href="{{ route('programs.index', array_filter(['ay' => $currentMonth ?: null])) }}"
+               @class(['program-scope-link', 'is-active' => $currentScope === 'yaklasan'])>Yaklaşan</a>
+            <a href="{{ route('programs.index', array_filter(['durum' => 'gecmis', 'ay' => $currentMonth ?: null])) }}"
+               @class(['program-scope-link', 'is-active' => $currentScope === 'gecmis'])>Geçmiş</a>
+        </div>
+
+        @if (filled($monthOptions))
+            <form action="{{ route('programs.index') }}" method="GET">
+                @if ($currentScope === 'gecmis')
+                    <input type="hidden" name="durum" value="gecmis">
+                @endif
+                <label for="program-month" class="sr-only">Ay seçin</label>
+                <select id="program-month" name="ay" x-on:change="$el.form.submit()"
+                        class="w-full rounded-full border border-line bg-paper py-2.5 pl-5 pr-10 text-sm font-medium text-forest focus:border-gold focus:outline-none sm:w-auto">
+                    <option value="">Tüm aylar</option>
+                    @foreach ($monthOptions as $value => $label)
+                        <option value="{{ $value }}" @selected($currentMonth === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </form>
         @endif
-        <label for="program-search" class="sr-only">Programlarda ara</label>
-        <input id="program-search" type="search" name="ara" value="{{ $currentSearch }}" placeholder="Programlarda ara…"
-               class="w-48 bg-transparent text-sm text-forest placeholder:text-muted/70 focus:outline-none sm:w-56">
-        <button type="submit" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest text-cream transition hover:bg-gold">
-            <span class="sr-only">Ara</span>
-            <x-ui.icon name="search" class="h-4 w-4" />
-        </button>
-    </form>
+    </div>
 </x-page-header>
 
 <section class="shell py-12 lg:py-16">
-    <div class="flex flex-wrap gap-2">
-        <a href="{{ route('programs.index', ['ara' => $currentSearch ?: null]) }}"
-           class="chip {{ $currentType === '' ? 'chip-active' : '' }}">Tümü</a>
-        @foreach ($types as $type)
-            <a href="{{ route('programs.index', ['tur' => $type->value, 'ara' => $currentSearch ?: null]) }}"
-               class="chip {{ $currentType === $type->value ? 'chip-active' : '' }}">{{ $type->label() }}</a>
-        @endforeach
-    </div>
+    @forelse ($grouped as $month => $items)
+        <div class="reveal mb-10">
+            <div class="mb-7 flex items-center gap-5">
+                <h2 class="font-display text-2xl text-gold">{{ $month }}</h2>
+                <span class="rule flex-1"></span>
+            </div>
 
-    @if ($programs->isEmpty())
-        <x-empty-state class="mt-10" icon="cap" title="Yayında program yok"
-                       text="Yeni ders, sohbet ve kitap tahlilleri yönetim panelinden eklendiğinde burada listelenir." />
-    @else
-        <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            @foreach ($programs as $program)
-                <div class="reveal"><x-program-card :program="$program" /></div>
+            @foreach ($items as $item)
+                <div class="reveal" style="--reveal-delay: {{ $loop->index * 70 }}ms">
+                    <x-work-row :item="$item" />
+                </div>
             @endforeach
         </div>
-
-        <div class="mt-12">{{ $programs->links() }}</div>
-    @endif
+    @empty
+        <x-empty-state
+            icon="calendar"
+            :title="$currentScope === 'gecmis' ? 'Bu aralıkta geçmiş program yok' : 'Yaklaşan program yok'"
+            text="Yeni ders, sohbet ve kayıtlı programlar yönetim panelinden yayınlandığında burada görünür." />
+    @endforelse
 </section>
 
 @endsection

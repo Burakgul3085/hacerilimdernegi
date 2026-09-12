@@ -8,7 +8,6 @@
     $aboutImage = \App\Support\SiteSettings::aboutImageUrl();
     $pillars = \App\Support\SiteSettings::list('value_pillars');
     $stats = \App\Support\SiteSettings::list('stats');
-    $nextProgram = $programs->first();
 @endphp
 
 @section('content')
@@ -20,14 +19,14 @@
              class="hero-parallax h-full w-full max-w-full object-cover object-top">
         <div class="absolute inset-0 bg-gradient-to-r from-cream via-cream/45 to-transparent"></div>
 
-        @if ($nextProgram)
+        @if ($nextHighlight)
             <div class="hero-enter absolute bottom-10 left-8 max-w-xs rounded-2xl border border-line bg-paper/95 p-5 shadow-float backdrop-blur xl:left-10" style="--enter-delay: 0.72s">
-                <p class="tag">Yaklaşan program</p>
-                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $nextProgram->title }}</p>
+                <p class="tag">{{ $nextHighlight->badge }}</p>
+                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $nextHighlight->title }}</p>
                 <div class="mt-3 flex flex-col gap-1.5">
-                    <x-meta icon="calendar">{{ $nextProgram->starts_at?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
-                    @if ($nextProgram->location)
-                        <x-meta icon="pin">{{ $nextProgram->location }}</x-meta>
+                    <x-meta icon="calendar">{{ $nextHighlight->startsAt?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
+                    @if (filled($nextHighlight->location))
+                        <x-meta icon="pin">{{ $nextHighlight->location }}</x-meta>
                     @endif
                 </div>
             </div>
@@ -76,14 +75,14 @@
         <img src="{{ $heroImage }}" alt="" aria-hidden="true" class="hero-parallax" data-parallax="0.1">
         <div class="hero-visual-mobile-fade" aria-hidden="true"></div>
 
-        @if ($nextProgram)
+        @if ($nextHighlight)
             <div class="hero-enter hero-visual-mobile-card" style="--enter-delay: 0.72s">
-                <p class="tag">Yaklaşan program</p>
-                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $nextProgram->title }}</p>
+                <p class="tag">{{ $nextHighlight->badge }}</p>
+                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $nextHighlight->title }}</p>
                 <div class="mt-3 flex flex-col gap-1.5">
-                    <x-meta icon="calendar">{{ $nextProgram->starts_at?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
-                    @if ($nextProgram->location)
-                        <x-meta icon="pin">{{ $nextProgram->location }}</x-meta>
+                    <x-meta icon="calendar">{{ $nextHighlight->startsAt?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
+                    @if (filled($nextHighlight->location))
+                        <x-meta icon="pin">{{ $nextHighlight->location }}</x-meta>
                     @endif
                 </div>
             </div>
@@ -160,8 +159,8 @@
 </section>
 
 {{-- Programlar --}}
-@if ($programs->isNotEmpty())
-    <section class="border-y border-line bg-paper py-20 lg:py-24">
+@if ($upcoming->isNotEmpty())
+    <section class="border-y border-line bg-paper py-16 sm:py-20 lg:py-24">
         <div class="shell">
             <x-section-heading
                 class="reveal"
@@ -171,9 +170,11 @@
                 link-label="Tüm programlar"
                 :link-url="route('programs.index')" />
 
-            <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                @foreach ($programs as $program)
-                    <div class="reveal" style="--reveal-delay: {{ $loop->index * 90 }}ms"><x-program-card :program="$program" /></div>
+            <div class="mt-12">
+                @foreach ($upcoming as $item)
+                    <div class="reveal" style="--reveal-delay: {{ $loop->index * 80 }}ms">
+                        <x-work-row :item="$item" />
+                    </div>
                 @endforeach
             </div>
         </div>
@@ -190,33 +191,6 @@
             :text="$settings['cta_text'] ?: null"
             :button-label="$settings['cta_button_label'] ?: null"
             :button-url="$settings['cta_button_url'] ?: null" />
-    </section>
-@endif
-
-{{-- Etkinlikler --}}
-@if ($events->isNotEmpty())
-    <section class="shell py-16 lg:py-20">
-        <div class="grid gap-12 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-16">
-            <div class="reveal reveal-left lg:sticky lg:top-32 lg:self-start">
-                <p class="eyebrow">Etkinlikler</p>
-                <h2 class="display-2 mt-3">{{ $settings['home_events_title'] ?: 'Etkinlik takvimi' }}</h2>
-                @if (filled($settings['home_events_text']))
-                    <p class="lead mt-4">{{ $settings['home_events_text'] }}</p>
-                @endif
-                <a href="{{ route('events.index') }}" class="btn btn-outline mt-8">
-                    Takvimin tamamı
-                    <x-ui.icon name="arrow-right" class="h-4 w-4" />
-                </a>
-            </div>
-
-            <div>
-                @foreach ($events as $event)
-                    <div class="reveal" style="--reveal-delay: {{ $loop->index * 80 }}ms">
-                        <x-event-row :event="$event" />
-                    </div>
-                @endforeach
-            </div>
-        </div>
     </section>
 @endif
 

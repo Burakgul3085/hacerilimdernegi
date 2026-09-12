@@ -109,7 +109,7 @@ class SiteSettings
             'about_image' => '',
             'about_quote' => 'İlim, hayatı güzelleştirir; insanı, toplumu ve yarınları inşa eder.',
 
-            'programs_intro' => 'Dersler, sohbetler ve kitap tahlilleri.',
+            'programs_intro' => 'Ders, sohbet, kitap tahlili ve kayıtlı programlar tek takvimde.',
             'events_intro' => 'Aylara göre yaklaşan programlar. Katılım başvurusu etkinlik detayındadır.',
             'posts_intro' => 'Dernek gündemine dair yazılar ve resmî duyurular.',
             'media_intro' => 'Program ve etkinliklerimizden fotoğraf, video ve ses kayıtları.',
@@ -202,14 +202,7 @@ class SiteSettings
                     ['label' => 'Dernek tüzüğü', 'url' => '/dernek-tuzugu'],
                 ],
             ],
-            [
-                'label' => 'Projeler',
-                'url' => '/programlar',
-                'children' => [
-                    ['label' => 'Programlar', 'url' => '/programlar'],
-                    ['label' => 'Etkinlikler', 'url' => '/etkinlikler'],
-                ],
-            ],
+            ['label' => 'Programlar', 'url' => '/programlar'],
             ['label' => 'Yazılar', 'url' => '/yazilar'],
             ['label' => 'Medya', 'url' => '/medya'],
             ['label' => 'Vitrin', 'url' => '/vitrin'],
@@ -261,7 +254,7 @@ class SiteSettings
     }
 
     /**
-     * Eski düz menüyü veya Medya’yı Projeler altına koyan yanlış ağacı güncel menüyle değiştirir.
+     * Eski düz menüyü, Projeler grubunu veya Medya’yı Projeler altına koyan yanlış ağacı güncel menüyle değiştirir.
      *
      * @param  list<array<string, mixed>>  $items
      */
@@ -278,21 +271,7 @@ class SiteSettings
         }
 
         foreach ($items as $item) {
-            if (($item['label'] ?? '') !== 'Projeler') {
-                continue;
-            }
-
-            $childUrls = [];
-
-            foreach ($item['children'] ?? [] as $child) {
-                if (! is_array($child)) {
-                    continue;
-                }
-
-                $childUrls[] = rtrim((string) ($child['url'] ?? ''), '/') ?: '/';
-            }
-
-            if (in_array('/medya', $childUrls, true) && ! in_array('/etkinlikler', $childUrls, true)) {
+            if (($item['label'] ?? '') === 'Projeler') {
                 return true;
             }
         }

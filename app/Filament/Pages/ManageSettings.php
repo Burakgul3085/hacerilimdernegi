@@ -13,6 +13,7 @@ use App\Support\UploadRules;
 use Closure;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -273,10 +274,8 @@ class ManageSettings extends Page
                     ->columns(2)
                     ->collapsed()
                     ->schema([
-                        TextInput::make('home_programs_title')->label('Programlar başlığı')->maxLength(120),
-                        TextInput::make('home_programs_text')->label('Programlar açıklaması')->maxLength(200),
-                        TextInput::make('home_events_title')->label('Etkinlikler başlığı')->maxLength(120),
-                        TextInput::make('home_events_text')->label('Etkinlikler açıklaması')->maxLength(200),
+                        TextInput::make('home_programs_title')->label('Yaklaşan programlar başlığı')->maxLength(120),
+                        TextInput::make('home_programs_text')->label('Yaklaşan programlar açıklaması')->maxLength(200),
                         TextInput::make('home_posts_title')->label('Yazılar başlığı')->maxLength(120),
                         TextInput::make('home_posts_text')->label('Yazılar açıklaması')->maxLength(200),
                         TextInput::make('home_media_title')->label('Medya başlığı')->maxLength(120),
@@ -284,6 +283,8 @@ class ManageSettings extends Page
                         TextInput::make('home_location_eyebrow')->label('Konum üst etiketi')->maxLength(80),
                         TextInput::make('home_location_title')->label('Konum başlığı')->maxLength(120),
                         TextInput::make('home_location_button')->label('Harita butonu yazısı')->maxLength(40)->columnSpanFull(),
+                        Hidden::make('home_events_title'),
+                        Hidden::make('home_events_text'),
                     ]),
             ]);
     }
@@ -306,12 +307,12 @@ class ManageSettings extends Page
                     ->columns(2)
                     ->schema([
                         Textarea::make('programs_intro')->label('Programlar')->rows(2),
-                        Textarea::make('events_intro')->label('Etkinlikler')->rows(2),
                         Textarea::make('posts_intro')->label('Yazılar')->rows(2),
                         Textarea::make('media_intro')->label('Medya')->rows(2),
                         Textarea::make('membership_intro')->label('Üyelik')->rows(2),
                         Textarea::make('contact_intro')->label('İletişim')->rows(2),
                         Textarea::make('live_intro')->label('Vitrin')->rows(2),
+                        Hidden::make('events_intro'),
                     ]),
 
                 Section::make('Üyelik kartı')

@@ -79,7 +79,7 @@ class EventRegistrationReceivedForAdmin extends Notification implements SendsVia
             'highlight' => $details,
             'body' => '<p style="margin:0 0 8px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8a7a62;">Not</p>'
                 .'<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:15px;line-height:1.75;color:#3a3733;">'.$body.'</div>',
-            'closing' => 'Yanıtlamak için yönetim panelindeki <strong>Etkinlik kayıtları</strong> bölümünü kullanın.',
+            'closing' => 'Yanıtlamak için yönetim panelindeki <strong>Program kayıtları</strong> bölümünü kullanın.',
             'cta_label' => 'Panele git',
             'cta_url' => $panelUrl,
         ]);

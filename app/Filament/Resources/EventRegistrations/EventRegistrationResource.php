@@ -22,7 +22,7 @@ class EventRegistrationResource extends Resource
 
     protected static ?string $model = EventRegistration::class;
 
-    protected static ?string $navigationLabel = 'Etkinlik kayıtları';
+    protected static ?string $navigationLabel = 'Program kayıtları';
 
     protected static ?string $modelLabel = 'kayıt';
 

@@ -54,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->navigationGroups([
                 'İçerik',
-                'Projeler',
+                'Programlar',
                 'Medya',
                 'Başvurular',
                 'Yönetim',

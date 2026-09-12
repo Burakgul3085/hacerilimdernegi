@@ -10,6 +10,11 @@ class ListEvents extends ListRecords
 {
     protected static string $resource = EventResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return 'Özel günler. Kayıt açıkken ziyaretçi başvurabilir.';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

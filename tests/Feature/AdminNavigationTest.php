@@ -14,19 +14,19 @@ class AdminNavigationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_events_and_programs_appear_under_the_projects_group(): void
+    public function test_regular_and_registered_programs_appear_under_the_programs_group(): void
     {
         $this->actingAs($this->editor());
 
         Filament::setCurrentPanel('admin');
 
-        $projectLabels = $this->navigationLabelsInGroup('Projeler');
+        $programLabels = $this->navigationLabelsInGroup('Programlar');
         $contentLabels = $this->navigationLabelsInGroup('İçerik');
 
-        $this->assertContains('Etkinlikler', $projectLabels);
-        $this->assertContains('Programlar', $projectLabels);
-        $this->assertNotContains('Etkinlikler', $contentLabels);
-        $this->assertNotContains('Programlar', $contentLabels);
+        $this->assertContains('Ders ve sohbetler', $programLabels);
+        $this->assertContains('Kayıtlı programlar', $programLabels);
+        $this->assertNotContains('Ders ve sohbetler', $contentLabels);
+        $this->assertNotContains('Kayıtlı programlar', $contentLabels);
     }
 
     public function test_pages_appear_as_corporate_in_the_content_group(): void

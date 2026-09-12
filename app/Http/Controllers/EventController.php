@@ -15,29 +15,14 @@ use Illuminate\View\View;
 
 class EventController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): RedirectResponse
     {
         $month = $request->string('ay')->toString();
 
-        $events = Event::query()
-            ->published()
-            ->when($month !== '' && preg_match('/^\d{4}-\d{2}$/', $month) === 1, function (Builder $query) use ($month): void {
-                [$year, $monthNumber] = explode('-', $month);
-
-                $query->whereYear('starts_at', $year)->whereMonth('starts_at', $monthNumber);
-            }, function (Builder $query): void {
-                $query->where(fn (Builder $builder) => $builder
-                    ->whereNull('starts_at')
-                    ->orWhere('starts_at', '>=', now()->subDay()));
-            })
-            ->orderBy('starts_at')
-            ->get();
-
-        return view('pages.events.index', [
-            'grouped' => $events->groupBy(fn (Event $event) => $event->starts_at?->translatedFormat('F Y') ?: 'Tarihi belirlenecek'),
-            'monthOptions' => $this->monthOptions(),
-            'currentMonth' => $month,
-        ]);
+        return redirect()->route('programs.index', array_filter([
+            'ay' => preg_match('/^\d{4}-\d{2}$/', $month) === 1 ? $month : null,
+            'durum' => $request->string('durum')->toString() === 'gecmis' ? 'gecmis' : null,
+        ]), 301);
     }
 
     public function show(Event $event): View
@@ -85,23 +70,6 @@ class EventController extends Controller
         app(ProcessEventRegistration::class)->handle($registration);
 
         return FormStatus::redirect('Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.', 'event');
-    }
-
-    /**
-     * Takvim filtresi için yaklaşan etkinliklerin bulunduğu aylar.
-     *
-     * @return array<string, string>
-     */
-    private function monthOptions(): array
-    {
-        return Event::query()
-            ->published()
-            ->whereNotNull('starts_at')
-            ->where('starts_at', '>=', now()->startOfMonth())
-            ->orderBy('starts_at')
-            ->get()
-            ->mapWithKeys(fn (Event $event) => [$event->starts_at->format('Y-m') => $event->starts_at->translatedFormat('F Y')])
-            ->all();
     }
 
     /**

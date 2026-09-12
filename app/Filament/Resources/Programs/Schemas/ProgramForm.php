@@ -11,6 +11,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class ProgramForm
@@ -19,28 +20,33 @@ class ProgramForm
     {
         return $schema
             ->components([
-                Select::make('type')
-                    ->label('Tür')
-                    ->options(collect(ProgramType::cases())->mapWithKeys(fn (ProgramType $type) => [$type->value => $type->label()]))
-                    ->required(),
-                TextInput::make('title')->label('Başlık')->required()->maxLength(255),
-                TextInput::make('slug')->label('Bağlantı')->maxLength(255),
-                TextInput::make('instructor')->label('Hoca / konuşmacı')->maxLength(255),
-                TextInput::make('location')->label('Yer')->maxLength(255),
-                DateTimePicker::make('starts_at')->label('Başlangıç'),
-                DateTimePicker::make('ends_at')->label('Bitiş'),
-                FileUpload::make('image')
-                    ->label('Görsel')
-                    ->image()
-                    ->disk('public')
-                    ->directory('programs')
-                    ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
-                    ->maxSize(UploadRules::maxImageKb()),
-                ContentUploads::gallery('gallery', 'programs/gallery')->columnSpanFull(),
-                ContentUploads::withEditorUploads(
-                    RichEditor::make('description')->label('Açıklama')->columnSpanFull(),
-                ),
-                Toggle::make('is_published')->label('Yayında')->default(true),
+                Section::make('Ders ve sohbet')
+                    ->description('Haftalık ders, sohbet ve kitap tahlili. Sitede takvime düşer; başvuru formu açılmaz.')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('type')
+                            ->label('Tür')
+                            ->options(collect(ProgramType::cases())->mapWithKeys(fn (ProgramType $type) => [$type->value => $type->label()]))
+                            ->required(),
+                        TextInput::make('title')->label('Başlık')->required()->maxLength(255),
+                        TextInput::make('slug')->label('Bağlantı')->maxLength(255),
+                        TextInput::make('instructor')->label('Hoca / konuşmacı')->maxLength(255),
+                        TextInput::make('location')->label('Yer')->maxLength(255),
+                        DateTimePicker::make('starts_at')->label('Başlangıç'),
+                        DateTimePicker::make('ends_at')->label('Bitiş'),
+                        FileUpload::make('image')
+                            ->label('Görsel')
+                            ->image()
+                            ->disk('public')
+                            ->directory('programs')
+                            ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
+                            ->maxSize(UploadRules::maxImageKb()),
+                        ContentUploads::gallery('gallery', 'programs/gallery')->columnSpanFull(),
+                        ContentUploads::withEditorUploads(
+                            RichEditor::make('description')->label('Açıklama')->columnSpanFull(),
+                        ),
+                        Toggle::make('is_published')->label('Yayında')->default(true),
+                    ]),
             ]);
     }
 }

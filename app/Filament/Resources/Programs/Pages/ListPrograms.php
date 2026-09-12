@@ -10,6 +10,11 @@ class ListPrograms extends ListRecords
 {
     protected static string $resource = ProgramResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return 'Haftalık ders, sohbet ve kitap tahlili. Sitede başvuru formu çıkmaz.';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

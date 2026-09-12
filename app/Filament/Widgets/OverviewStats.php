@@ -14,8 +14,8 @@ class OverviewStats extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Programlar', Program::query()->count()),
-            Stat::make('Etkinlikler', Event::query()->count()),
+            Stat::make('Ders ve sohbetler', Program::query()->count()),
+            Stat::make('Kayıtlı programlar', Event::query()->count()),
             Stat::make('Üyelik başvuruları', MembershipApplication::query()->where('status', 'pending')->count()),
             Stat::make('Okunmamış mesaj', ContactMessage::query()->where('is_read', false)->count()),
         ];

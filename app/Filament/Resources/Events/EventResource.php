@@ -22,13 +22,15 @@ class EventResource extends Resource
 
     protected static ?string $model = Event::class;
 
-    protected static ?string $navigationLabel = 'Etkinlikler';
+    protected static ?string $navigationLabel = 'Kayıtlı programlar';
 
-    protected static ?string $modelLabel = 'etkinlik';
+    protected static ?string $modelLabel = 'kayıtlı program';
 
-    protected static ?string $pluralModelLabel = 'etkinlikler';
+    protected static ?string $pluralModelLabel = 'kayıtlı programlar';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Projeler';
+    protected static string|UnitEnum|null $navigationGroup = 'Programlar';
+
+    protected static ?int $navigationSort = 20;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
