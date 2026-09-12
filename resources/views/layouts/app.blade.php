@@ -377,11 +377,8 @@
     @endunless
 
     @if (session('status'))
-        <div class="shell pt-8">
-            <div class="flex items-start gap-3 rounded-2xl border border-gold/40 bg-gold-light/25 px-5 py-4 text-sm text-forest" role="status">
-                <x-ui.icon name="check" class="mt-0.5 h-5 w-5 shrink-0 text-gold" />
-                <p>{{ session('status') }}</p>
-            </div>
+        <div class="shell pt-6 sm:pt-8">
+            <x-flash-status :message="session('status')" />
         </div>
     @endif
 

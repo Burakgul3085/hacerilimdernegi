@@ -611,6 +611,79 @@
         @apply px-4 py-2 text-[13px];
     }
 
+    .flash-status-wrap {
+        max-width: 36rem;
+    }
+
+    .flash-status {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        overflow: hidden;
+        padding: 1.05rem 1.15rem 1.1rem 1.2rem;
+        border: 1px solid var(--color-line);
+        border-radius: 1.15rem;
+        background: var(--color-paper);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .flash-status::before {
+        content: '';
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--color-gold-light), var(--color-gold));
+    }
+
+    .flash-status-mark {
+        display: flex;
+        height: 2.35rem;
+        width: 2.35rem;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        border: 1px solid rgb(138 122 98 / 0.35);
+        color: var(--color-gold);
+        background: var(--color-cream);
+    }
+
+    .flash-status-title {
+        margin-top: 0.35rem;
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        line-height: 1.25;
+        color: var(--color-forest);
+    }
+
+    .flash-status-text {
+        margin-top: 0.3rem;
+        font-size: 0.875rem;
+        line-height: 1.55;
+        color: var(--color-muted);
+    }
+
+    .flash-status-close {
+        margin-left: auto;
+        display: flex;
+        height: 2rem;
+        width: 2rem;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--color-muted);
+        transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .flash-status-close:hover {
+        background: var(--color-cream-deep);
+        color: var(--color-forest);
+    }
+
     .card {
         @apply rounded-2xl border border-line bg-paper transition duration-300;
     }
