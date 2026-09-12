@@ -18,9 +18,14 @@ class MediaItemForm
                 Select::make('type')
                     ->label('Tür')
                     ->options(collect(MediaType::cases())->mapWithKeys(fn (MediaType $type) => [$type->value => $type->label()]))
+                    ->default(MediaType::Photo->value)
                     ->required(),
                 TextInput::make('title')->label('Başlık'),
-                ContentUploads::mediaFile('path', 'media'),
+                ContentUploads::gallery('files', 'media')
+                    ->visibleOn('create')
+                    ->helperText('Birden fazla fotoğraf ve videoyu birlikte seçin. Her dosya ayrı öğe olarak kaydedilir.'),
+                ContentUploads::mediaFile('path', 'media')
+                    ->visibleOn('edit'),
                 TextInput::make('external_url')->label('YouTube / harici bağlantı')->url(),
                 TextInput::make('caption')->label('Açıklama'),
                 TextInput::make('sort_order')->label('Sıra')->numeric()->default(0),

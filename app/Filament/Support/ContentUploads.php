@@ -22,13 +22,18 @@ class ContentUploads
     public static function gallery(string $name, string $directory): FileUpload
     {
         return FileUpload::make($name)
-            ->label('Galeri')
+            ->label('Fotoğraf ve videolar')
             ->multiple()
+            ->appendFiles()
             ->reorderable()
+            ->panelLayout('grid')
+            ->openable()
+            ->downloadable()
             ->disk('public')
             ->directory($directory)
             ->acceptedFileTypes(UploadRules::imageAndVideoMimes())
             ->maxSize(UploadRules::maxMediaKb())
+            ->placeholder('Dosyalarınızı buraya bırakın veya çoklu seçin')
             ->helperText(UploadRules::galleryHelperText());
     }
 

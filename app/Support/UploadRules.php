@@ -109,7 +109,7 @@ class UploadRules
 
     public static function galleryHelperText(): string
     {
-        return 'İstediğiniz kadar fotoğraf ve video ekleyin. Sıralamayı sürükleyerek değiştirin. Fotoğraf en fazla '
+        return 'Dosya seçerken birden fazla fotoğraf ve videoyu birlikte işaretleyin. Sıralamayı sürükleyerek değiştirin. Fotoğraf en fazla '
             .self::formatKb(self::maxImageKb())
             .', video en fazla '
             .self::formatKb(self::maxVideoKb()).'.';

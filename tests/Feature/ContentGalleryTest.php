@@ -7,9 +7,11 @@ use App\Enums\ProgramType;
 use App\Enums\UserRole;
 use App\Filament\Resources\Events\Pages\EditEvent;
 use App\Filament\Resources\MediaAlbums\Pages\CreateMediaAlbum;
+use App\Filament\Resources\MediaItems\Pages\CreateMediaItem;
 use App\Filament\Resources\Pages\Pages\EditPage;
 use App\Filament\Resources\Posts\Pages\EditPost;
 use App\Filament\Resources\Programs\Pages\EditProgram;
+use App\Filament\Support\ContentUploads;
 use App\Models\Event;
 use App\Models\MediaAlbum;
 use App\Models\MediaItem;
@@ -25,6 +27,11 @@ use Tests\TestCase;
 class ContentGalleryTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_gallery_upload_field_allows_multiple_files(): void
+    {
+        $this->assertTrue(ContentUploads::gallery('gallery', 'pages/gallery')->isMultiple());
+    }
 
     public function test_gallery_paths_ignore_empty_and_non_string_entries(): void
     {
@@ -215,5 +222,32 @@ class ContentGalleryTest extends TestCase
         Livewire::test(CreateMediaAlbum::class)
             ->assertFormFieldIsVisible('incoming_media')
             ->assertFormFieldIsVisible('items');
+        Livewire::test(CreateMediaItem::class)
+            ->assertFormFieldIsVisible('files')
+            ->assertFormFieldIsHidden('path');
+    }
+
+    public function test_creating_a_media_item_saves_each_selected_file(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::SuperAdmin]));
+
+        $album = MediaAlbum::query()->create([
+            'title' => 'Çoklu yükleme',
+            'slug' => 'coklu-yukleme',
+            'is_published' => true,
+        ]);
+
+        Livewire::test(CreateMediaItem::class)
+            ->fillForm([
+                'media_album_id' => $album->id,
+                'type' => MediaType::Photo->value,
+                'files' => ['media/sohbet.jpg', 'media/kamp.mp4'],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(2, $album->items()->count());
+        $this->assertTrue($album->items()->where('path', 'media/sohbet.jpg')->exists());
+        $this->assertTrue($album->items()->where('path', 'media/kamp.mp4')->where('type', MediaType::Video)->exists());
     }
 }

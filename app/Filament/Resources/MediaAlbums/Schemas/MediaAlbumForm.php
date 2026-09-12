@@ -22,17 +22,18 @@ class MediaAlbumForm
                 TextInput::make('title')->label('Başlık')->required(),
                 TextInput::make('slug')->label('Bağlantı'),
                 Textarea::make('description')->label('Açıklama'),
+                ContentUploads::gallery('incoming_media', 'media')
+                    ->label('Fotoğraf ve videolar')
+                    ->helperText('Kapak dışındaki tüm dosyalar. Birden fazla dosyayı birlikte seçin; kayıt sonrası albüme eklenir. '.UploadRules::galleryHelperText())
+                    ->columnSpanFull(),
                 FileUpload::make('cover')
                     ->label('Kapak')
                     ->image()
                     ->disk('public')
                     ->directory('albums')
                     ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
-                    ->maxSize(UploadRules::maxImageKb()),
-                ContentUploads::gallery('incoming_media', 'media')
-                    ->label('Toplu fotoğraf ve video')
-                    ->helperText('Birden fazla dosyayı birlikte seçin. Kayıt sonrası albüme eklenir. '.UploadRules::galleryHelperText())
-                    ->columnSpanFull(),
+                    ->maxSize(UploadRules::maxImageKb())
+                    ->helperText('Albüm kartında görünen tek görsel. İsteğe bağlı.'),
                 Repeater::make('items')
                     ->relationship()
                     ->label('Albüm içerikleri')
