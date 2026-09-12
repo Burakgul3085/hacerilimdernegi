@@ -376,12 +376,6 @@
         <div class="site-chrome-spacer" aria-hidden="true"></div>
     @endunless
 
-    @if (session('status'))
-        <div class="shell pt-6 sm:pt-8">
-            <x-flash-status :message="session('status')" />
-        </div>
-    @endif
-
     <main id="main" @class(['pb-16 lg:pb-24' => ! request()->routeIs('home')])>
         @yield('content')
     </main>
@@ -427,6 +421,7 @@
                     @if (filled($settings['newsletter_text']))
                         <p class="mt-3 text-sm leading-relaxed text-cream/55">{{ $settings['newsletter_text'] }}</p>
                     @endif
+                    <x-flash-status context="newsletter" tone="dark" class="mt-5" />
                     <form method="POST" action="{{ route('newsletter.store') }}" class="relative mt-5">
                         @csrf
                         <x-honeypot />

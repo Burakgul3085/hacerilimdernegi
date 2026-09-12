@@ -7,6 +7,7 @@ use App\Enums\ApplicationStatus;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Support\FormGuard;
+use App\Support\FormStatus;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,7 +64,7 @@ class EventController extends Controller
         abort_unless($event->is_published && $event->registration_open, 404);
 
         if (FormGuard::isBot($request)) {
-            return back()->with('status', 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.');
+            return FormStatus::redirect('Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.', 'event');
         }
 
         $data = $request->validate([
@@ -83,7 +84,7 @@ class EventController extends Controller
 
         app(ProcessEventRegistration::class)->handle($registration);
 
-        return back()->with('status', 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.');
+        return FormStatus::redirect('Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.', 'event');
     }
 
     /**

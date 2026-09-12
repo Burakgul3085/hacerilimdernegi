@@ -612,7 +612,37 @@
     }
 
     .flash-status-wrap {
-        max-width: 36rem;
+        max-width: none;
+        scroll-margin-top: 7.5rem;
+    }
+
+    .flash-status-wrap-dark .flash-status {
+        border-color: rgb(255 255 255 / 0.12);
+        background: rgb(255 252 248 / 0.08);
+        box-shadow: none;
+    }
+
+    .flash-status-wrap-dark .flash-status-title {
+        color: var(--color-cream);
+    }
+
+    .flash-status-wrap-dark .flash-status-text {
+        color: rgb(251 246 236 / 0.62);
+    }
+
+    .flash-status-wrap-dark .flash-status-mark {
+        border-color: rgb(212 203 190 / 0.35);
+        background: rgb(255 252 248 / 0.06);
+        color: var(--color-gold-light);
+    }
+
+    .flash-status-wrap-dark .flash-status-close {
+        color: rgb(251 246 236 / 0.55);
+    }
+
+    .flash-status-wrap-dark .flash-status-close:hover {
+        background: rgb(255 252 248 / 0.08);
+        color: var(--color-cream);
     }
 
     .flash-status {

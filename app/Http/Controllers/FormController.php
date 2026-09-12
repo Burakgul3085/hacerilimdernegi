@@ -9,6 +9,7 @@ use App\Models\ContactMessage;
 use App\Models\MembershipApplication;
 use App\Models\NewsletterSubscriber;
 use App\Support\FormGuard;
+use App\Support\FormStatus;
 use App\Support\InstagramMedia;
 use App\Support\SiteSettings;
 use Illuminate\Http\RedirectResponse;
@@ -25,7 +26,7 @@ class FormController extends Controller
     public function storeMembership(Request $request): RedirectResponse
     {
         if (FormGuard::isBot($request)) {
-            return back()->with('status', 'Başvurunuz iletildi. Size de bir onay e-postası gönderdik.');
+            return FormStatus::redirect('Başvurunuz iletildi. Size de bir onay e-postası gönderdik.', 'membership');
         }
 
         $data = $request->validate([
@@ -45,7 +46,7 @@ class FormController extends Controller
 
         app(ProcessMembershipApplication::class)->handle($application);
 
-        return back()->with('status', 'Başvurunuz iletildi. Size de bir onay e-postası gönderdik.');
+        return FormStatus::redirect('Başvurunuz iletildi. Size de bir onay e-postası gönderdik.', 'membership');
     }
 
     public function contact(): View
@@ -59,7 +60,7 @@ class FormController extends Controller
     public function storeContact(Request $request): RedirectResponse
     {
         if (FormGuard::isBot($request)) {
-            return back()->with('status', 'Mesajınız iletildi. Teşekkür ederiz.');
+            return FormStatus::redirect('Mesajınız iletildi. Teşekkür ederiz.', 'contact');
         }
 
         $data = $request->validate([
@@ -78,13 +79,13 @@ class FormController extends Controller
 
         app(ProcessContactMessage::class)->handle($message);
 
-        return back()->with('status', 'Mesajınız iletildi. Teşekkür ederiz.');
+        return FormStatus::redirect('Mesajınız iletildi. Teşekkür ederiz.', 'contact');
     }
 
     public function storeWhatsapp(Request $request): RedirectResponse
     {
         if (FormGuard::isBot($request)) {
-            return back()->with('status', 'Mesajınız WhatsApp’a iletildi.');
+            return FormStatus::redirect('Mesajınız WhatsApp’a iletildi.', 'whatsapp');
         }
 
         $data = $request->validate([
@@ -139,7 +140,7 @@ class FormController extends Controller
     public function newsletter(Request $request): RedirectResponse
     {
         if (FormGuard::isBot($request)) {
-            return back()->with('status', 'E-bülten kaydınız alındı.');
+            return FormStatus::redirect('E-bülten kaydınız alındı.', 'newsletter');
         }
 
         $data = $request->validate([
@@ -151,6 +152,6 @@ class FormController extends Controller
             ['confirmed_at' => now(), 'ip_address' => $request->ip()],
         );
 
-        return back()->with('status', 'E-bülten kaydınız alındı.');
+        return FormStatus::redirect('E-bülten kaydınız alındı.', 'newsletter');
     }
 }

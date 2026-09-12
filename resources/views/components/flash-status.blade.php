@@ -1,15 +1,20 @@
-@props(['message'])
+@props([
+    'context' => '',
+    'tone' => 'light',
+])
 
 @php
-    $message = trim((string) $message);
-    $parts = preg_split('/(?<=[.!?])\s+/u', $message, 2) ?: [$message];
+    $message = trim((string) session('status'));
+    $matches = $message !== '' && (string) session('status_context') === $context;
+    $parts = $matches ? (preg_split('/(?<=[.!?])\s+/u', $message, 2) ?: [$message]) : [];
     $title = rtrim((string) ($parts[0] ?? $message), '.!?…');
     $detail = isset($parts[1]) ? trim((string) $parts[1]) : '';
 @endphp
 
-@if ($message !== '')
+@if ($matches)
     <div
-        {{ $attributes->class('flash-status-wrap') }}
+        {{ $attributes->class(['flash-status-wrap', 'flash-status-wrap-dark' => $tone === 'dark']) }}
+        id="form-status-{{ $context }}"
         x-data="{ open: true }"
         x-show="open"
         x-transition.opacity.duration.280ms

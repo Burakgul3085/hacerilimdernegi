@@ -87,6 +87,7 @@
                 <form method="POST" action="{{ route('events.register', $event) }}" class="relative space-y-5 p-8 lg:p-10">
                     @csrf
                     <x-honeypot />
+                    <x-flash-status context="event" />
 
                     <div class="grid gap-5 sm:grid-cols-2">
                         <x-field name="name" label="Ad soyad" placeholder="Ad soyad" required autocomplete="name" />

@@ -75,6 +75,7 @@
             <form method="POST" action="{{ route('contact.store') }}" class="relative space-y-5 p-8 lg:p-10">
                 @csrf
                 <x-honeypot />
+                <x-flash-status context="contact" />
 
                 <div class="grid gap-5 sm:grid-cols-2">
                     <x-field name="name" label="Ad soyad" placeholder="Ad soyad" required autocomplete="name" />
@@ -107,6 +108,7 @@
                 <form method="POST" action="{{ route('contact.whatsapp') }}" target="_blank" rel="noopener noreferrer" class="relative space-y-5 p-8 lg:p-10">
                     @csrf
                     <x-honeypot id="whatsapp-website" />
+                    <x-flash-status context="whatsapp" />
 
                     <x-field name="wa_name" label="Ad soyad" placeholder="Ad soyad" required autocomplete="name" />
                     <x-field name="wa_phone" label="Telefonunuz" placeholder="Telefon" autocomplete="tel" />
