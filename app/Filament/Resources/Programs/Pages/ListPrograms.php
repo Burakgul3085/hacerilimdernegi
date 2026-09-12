@@ -12,7 +12,7 @@ class ListPrograms extends ListRecords
 
     public function getSubheading(): ?string
     {
-        return 'Haftalık ders, sohbet ve kitap tahlili. Sitede başvuru formu çıkmaz.';
+        return 'Haftalık ders, sohbet ve kitap tahlili. Katılım formu Program kayıtlarına düşer.';
     }
 
     protected function getHeaderActions(): array

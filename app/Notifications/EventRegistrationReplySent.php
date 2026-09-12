@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
 /**
- * Yönetim panelinden yazılan yanıtı etkinlik başvurana gönderir.
+ * Yönetim panelinden yazılan yanıtı program başvurana gönderir.
  */
 class EventRegistrationReplySent extends Notification implements SendsViaPhpMailer
 {
@@ -31,27 +31,25 @@ class EventRegistrationReplySent extends Notification implements SendsViaPhpMail
 
     public function toPhpMailer(object $notifiable): array
     {
-        $this->registration->loadMissing('event');
-
         $siteName = (string) SiteSettings::get('site_name', 'Hâcer İlim ve Kültür Derneği');
-        $eventTitle = $this->registration->event?->title ?: 'etkinlik';
+        $programTitle = $this->registration->subjectTitle();
         $name = e($this->registration->name);
-        $eventTitleHtml = e($eventTitle);
+        $programTitleHtml = e($programTitle);
         $body = nl2br(e($this->reply->body));
         $original = e(Str::limit($this->registration->notes ?: '—', 400));
 
         $text = "Merhaba {$this->registration->name},\n\n"
-            ."{$siteName} olarak «{$eventTitle}» etkinliği başvurunuza yanıtımız:\n\n"
+            ."{$siteName} olarak «{$programTitle}» programı başvurunuza yanıtımız:\n\n"
             ."{$this->reply->body}\n\n"
             ."—\nBaşvuru notunuz:\n".($this->registration->notes ?: '—')."\n\n"
             ."Saygılarımızla,\n{$siteName}";
 
         $html = MailTemplate::render([
-            'title' => 'Etkinlik başvurunuza yanıt',
+            'title' => 'Program başvurunuza yanıt',
             'preheader' => Str::limit(strip_tags($this->reply->body), 90),
-            'eyebrow' => 'Etkinlik yanıtı',
+            'eyebrow' => 'Program yanıtı',
             'greeting' => "Merhaba {$name},",
-            'intro' => '<p style="margin:0;"><strong style="color:#161513;">'.$siteName.'</strong> olarak <strong style="color:#161513;">'.$eventTitleHtml.'</strong> etkinliği başvurunuza yanıtımız aşağıdadır.</p>',
+            'intro' => '<p style="margin:0;"><strong style="color:#161513;">'.$siteName.'</strong> olarak <strong style="color:#161513;">'.$programTitleHtml.'</strong> programı başvurunuza yanıtımız aşağıdadır.</p>',
             'highlight' => '<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:15px;line-height:1.75;color:#161513;">'.$body.'</div>',
             'body' => '<p style="margin:0 0 8px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8a7a62;">Başvuru notunuz</p>'
                 .'<p style="margin:0;font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;line-height:1.7;color:#6b6560;white-space:pre-wrap;">'.$original.'</p>',
@@ -62,7 +60,7 @@ class EventRegistrationReplySent extends Notification implements SendsViaPhpMail
 
         return [
             'to' => [$this->registration->email],
-            'subject' => "Re: Etkinlik başvurunuz — {$eventTitle}",
+            'subject' => "Re: Program başvurunuz — {$programTitle}",
             'html' => $html,
             'text' => $text,
         ];

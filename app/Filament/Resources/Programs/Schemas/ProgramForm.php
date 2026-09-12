@@ -21,7 +21,7 @@ class ProgramForm
         return $schema
             ->components([
                 Section::make('Ders ve sohbet')
-                    ->description('Haftalık ders, sohbet ve kitap tahlili. Sitede takvime düşer; başvuru formu açılmaz.')
+                    ->description('Haftalık ders, sohbet ve kitap tahlili. Sitede katılım formu çıkar; başvurular Program kayıtlarına düşer.')
                     ->columns(2)
                     ->schema([
                         Select::make('type')

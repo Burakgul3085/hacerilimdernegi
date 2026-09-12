@@ -94,7 +94,7 @@ class AuditLogsTable
                         User::class => 'Kullanıcı',
                         Setting::class => 'Site ayarı',
                         MembershipApplication::class => 'Üyelik başvurusu',
-                        EventRegistration::class => 'Etkinlik kaydı',
+                        EventRegistration::class => 'Program kaydı',
                         ContactMessage::class => 'İletişim mesajı',
                         NewsletterSubscriber::class => 'E-bülten',
                     ]),

@@ -19,10 +19,10 @@ class ProcessEventRegistration
 
     public function handle(EventRegistration $registration): void
     {
-        $registration->loadMissing('event');
+        $registration->loadMissing(['event', 'program']);
 
         if (! $this->mailer->isConfigured()) {
-            report(new \RuntimeException('Etkinlik başvurusu kaydedildi ancak mailer ayarları eksik.'));
+            report(new \RuntimeException('Program başvurusu kaydedildi ancak mailer ayarları eksik.'));
 
             return;
         }
@@ -32,7 +32,7 @@ class ProcessEventRegistration
         );
 
         if ($adminRecipient === '') {
-            report(new \RuntimeException('Etkinlik bildirimi için alıcı e-posta tanımlı değil.'));
+            report(new \RuntimeException('Program bildirimi için alıcı e-posta tanımlı değil.'));
         } else {
             try {
                 Notification::route('mail', $adminRecipient)

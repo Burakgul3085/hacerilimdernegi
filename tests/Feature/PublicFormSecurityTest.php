@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ProgramType;
 use App\Models\ContactMessage;
+use App\Models\EventRegistration;
+use App\Models\Program;
 use App\Support\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -34,11 +37,35 @@ class PublicFormSecurityTest extends TestCase
                 'kvkk_accepted' => '1',
                 'website' => 'https://spam.example',
             ])
-            ->assertRedirect(route('contact'));
+            ->assertRedirect(route('contact').'#form-status-contact');
 
         $this->assertDatabaseMissing('contact_messages', [
             'email' => 'bot@example.com',
         ]);
+    }
+
+    public function test_program_registration_honeypot_does_not_store_a_record(): void
+    {
+        $program = Program::query()->create([
+            'type' => ProgramType::Sohbet,
+            'title' => 'Haftalık sohbet',
+            'slug' => 'haftalik-sohbet-honeypot',
+            'is_published' => true,
+        ]);
+
+        $this->from(route('programs.show', $program))
+            ->post(route('programs.register', $program), [
+                'name' => 'Bot',
+                'email' => 'bot@example.com',
+                'kvkk_accepted' => '1',
+                'website' => 'https://spam.example',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('event_registrations', [
+            'email' => 'bot@example.com',
+        ]);
+        $this->assertSame(0, EventRegistration::query()->count());
     }
 
     public function test_newsletter_honeypot_does_not_store_a_subscriber(): void

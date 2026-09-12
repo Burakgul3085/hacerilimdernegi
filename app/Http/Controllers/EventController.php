@@ -15,6 +15,8 @@ use Illuminate\View\View;
 
 class EventController extends Controller
 {
+    public function __construct(private ProcessEventRegistration $processEventRegistration) {}
+
     public function index(Request $request): RedirectResponse
     {
         $month = $request->string('ay')->toString();
@@ -67,7 +69,7 @@ class EventController extends Controller
             'status' => ApplicationStatus::Pending,
         ]);
 
-        app(ProcessEventRegistration::class)->handle($registration);
+        $this->processEventRegistration->handle($registration);
 
         return FormStatus::redirect('Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.', 'event');
     }

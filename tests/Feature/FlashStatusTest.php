@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ProgramType;
 use App\Models\Event;
+use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -116,6 +118,39 @@ class FlashStatusTest extends TestCase
             ->assertSeeInOrder([
                 'Katılım başvurusu',
                 'form-status-event',
+                'Katılım başvurunuz alındı',
+                'Ad soyad',
+            ]);
+    }
+
+    public function test_program_registration_success_renders_the_notice_inside_the_form(): void
+    {
+        Notification::fake();
+
+        $program = Program::query()->create([
+            'type' => ProgramType::Sohbet,
+            'title' => 'Haftalık sohbet bildirim',
+            'slug' => 'haftalik-sohbet-bildirim',
+            'is_published' => true,
+        ]);
+
+        $this->from(route('programs.show', $program))
+            ->post(route('programs.register', $program), [
+                'name' => 'Ayşe Yılmaz',
+                'email' => 'ayse@example.com',
+                'kvkk_accepted' => '1',
+            ])
+            ->assertRedirect(route('programs.show', $program).'#form-status-program')
+            ->assertSessionHas('status_context', 'program');
+
+        $this->withSession([
+            'status' => 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.',
+            'status_context' => 'program',
+        ])
+            ->get(route('programs.show', $program))
+            ->assertSeeInOrder([
+                'Katılım başvurusu',
+                'form-status-program',
                 'Katılım başvurunuz alındı',
                 'Ad soyad',
             ]);

@@ -14,7 +14,7 @@ class EventRegistration extends Model
     use Auditable, Notifiable;
 
     protected $fillable = [
-        'event_id', 'name', 'email', 'phone', 'notes', 'kvkk_accepted', 'status', 'replied_at',
+        'event_id', 'program_id', 'name', 'email', 'phone', 'notes', 'kvkk_accepted', 'status', 'replied_at',
     ];
 
     protected function casts(): array
@@ -26,9 +26,27 @@ class EventRegistration extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Event, $this>
+     */
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    /**
+     * @return BelongsTo<Program, $this>
+     */
+    public function program(): BelongsTo
+    {
+        return $this->belongsTo(Program::class);
+    }
+
+    public function subjectTitle(): string
+    {
+        $this->loadMissing(['event', 'program']);
+
+        return $this->program?->title ?: ($this->event?->title ?: 'Program');
     }
 
     /**

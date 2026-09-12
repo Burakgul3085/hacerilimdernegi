@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EventRegistrations\Schemas;
 
 use App\Enums\ApplicationStatus;
+use App\Models\EventRegistration;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -21,9 +22,9 @@ class EventRegistrationForm
                 Section::make('Gelen başvuru')
                     ->columns(2)
                     ->schema([
-                        Placeholder::make('event_title')
-                            ->label('Etkinlik')
-                            ->content(fn ($record): string => $record?->event?->title ?: '—'),
+                        Placeholder::make('program_title')
+                            ->label('Program')
+                            ->content(fn (?EventRegistration $record): string => $record?->subjectTitle() ?: '—'),
                         TextInput::make('name')->label('Ad soyad')->disabled(),
                         TextInput::make('email')->label('E-posta')->disabled(),
                         TextInput::make('phone')->label('Telefon')->disabled(),

@@ -23,6 +23,9 @@ foreach (CorporatePages::prettyRoutes() as $slug => $name) {
 }
 Route::get('/programlar', [ProgramController::class, 'index'])->name('programs.index');
 Route::get('/programlar/{program:slug}', [ProgramController::class, 'show'])->name('programs.show');
+Route::post('/programlar/{program:slug}/kayit', [ProgramController::class, 'register'])
+    ->middleware('throttle:forms')
+    ->name('programs.register');
 Route::get('/etkinlikler', [EventController::class, 'index'])->name('events.index');
 Route::get('/etkinlikler/{event:slug}', [EventController::class, 'show'])->name('events.show');
 Route::post('/etkinlikler/{event:slug}/kayit', [EventController::class, 'register'])

@@ -7,6 +7,7 @@ use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasContentGallery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Program extends Model
@@ -36,6 +37,14 @@ class Program extends Model
                 $program->slug = Str::slug($program->title);
             }
         });
+    }
+
+    /**
+     * @return HasMany<EventRegistration, $this>
+     */
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(EventRegistration::class);
     }
 
     public function scopePublished(Builder $query): Builder

@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Actions\ProcessEventRegistration;
 use App\Actions\ReplyToEventRegistration;
 use App\Enums\ApplicationStatus;
+use App\Enums\ProgramType;
 use App\Enums\UserRole;
 use App\Models\Event;
 use App\Models\EventRegistration;
+use App\Models\Program;
 use App\Models\User;
 use App\Notifications\EventRegistrationAcknowledged;
 use App\Notifications\EventRegistrationReceivedForAdmin;
@@ -57,6 +59,65 @@ class EventRegistrationMailFlowTest extends TestCase
 
         Notification::assertSentOnDemand(EventRegistrationReceivedForAdmin::class);
         Notification::assertSentTo($registration, EventRegistrationAcknowledged::class);
+    }
+
+    public function test_program_form_stores_registration_and_dispatches_admin_and_ack_mails(): void
+    {
+        Notification::fake();
+
+        $program = $this->makeProgram();
+
+        $this->post(route('programs.register', $program), [
+            'name' => 'Ayşe Yılmaz',
+            'email' => 'ayse@example.com',
+            'phone' => '05320000000',
+            'notes' => 'Katılmak istiyorum.',
+            'kvkk_accepted' => '1',
+        ])->assertRedirect()->assertSessionHas('status', 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.');
+
+        $registration = EventRegistration::query()->where('email', 'ayse@example.com')->firstOrFail();
+
+        $this->assertSame(ApplicationStatus::Pending, $registration->status);
+        $this->assertSame($program->id, $registration->program_id);
+        $this->assertNull($registration->event_id);
+        $this->assertDatabaseHas('event_registrations', [
+            'email' => 'ayse@example.com',
+            'name' => 'Ayşe Yılmaz',
+            'program_id' => $program->id,
+        ]);
+
+        Notification::assertSentOnDemand(EventRegistrationReceivedForAdmin::class);
+        Notification::assertSentTo($registration, EventRegistrationAcknowledged::class);
+    }
+
+    public function test_program_form_rejects_an_empty_payload(): void
+    {
+        Notification::fake();
+
+        $program = $this->makeProgram();
+
+        $this->from(route('programs.show', $program))->post(route('programs.register', $program), [])
+            ->assertRedirect(route('programs.show', $program))
+            ->assertSessionHasErrors(['name', 'email', 'kvkk_accepted']);
+
+        $this->assertDatabaseCount('event_registrations', 0);
+        Notification::assertNothingSent();
+    }
+
+    public function test_unpublished_program_registration_is_not_found(): void
+    {
+        Notification::fake();
+
+        $program = $this->makeProgram(['is_published' => false]);
+
+        $this->post(route('programs.register', $program), [
+            'name' => 'Ayşe Yılmaz',
+            'email' => 'ayse@example.com',
+            'kvkk_accepted' => '1',
+        ])->assertNotFound();
+
+        $this->assertDatabaseCount('event_registrations', 0);
+        Notification::assertNothingSent();
     }
 
     public function test_event_form_rejects_an_empty_payload(): void
@@ -139,6 +200,59 @@ class EventRegistrationMailFlowTest extends TestCase
         $this->assertStringContainsString('alınmıştır', $payload['text']);
         $this->assertStringContainsString('Dönem açılış programı', $payload['text']);
         $this->assertStringContainsString('Hâcer İlim ve Kültür Derneği', $payload['text']);
+        $this->assertStringContainsString('En kısa zamanda', $payload['text']);
+    }
+
+    public function test_program_acknowledgement_mail_uses_the_program_title(): void
+    {
+        $registration = EventRegistration::query()->create([
+            'program_id' => $this->makeProgram()->id,
+            'name' => 'Zeynep',
+            'email' => 'zeynep@example.com',
+            'kvkk_accepted' => true,
+            'status' => ApplicationStatus::Pending,
+        ]);
+
+        $payload = (new EventRegistrationAcknowledged($registration))->toPhpMailer($registration);
+
+        $this->assertSame(['zeynep@example.com'], $payload['to']);
+        $this->assertStringContainsString('Haftalık sohbet', $payload['text']);
+        $this->assertStringContainsString('alınmıştır', $payload['text']);
+        $this->assertStringContainsString('En kısa zamanda', $payload['text']);
+    }
+
+    public function test_admin_reply_is_emailed_for_a_program_registration(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        $registration = EventRegistration::query()->create([
+            'program_id' => $this->makeProgram()->id,
+            'name' => 'Ayşe',
+            'email' => 'ayse@example.com',
+            'notes' => 'Katılmak istiyorum.',
+            'kvkk_accepted' => true,
+            'status' => ApplicationStatus::Pending,
+        ]);
+
+        $reply = app(ReplyToEventRegistration::class)->handle(
+            $registration,
+            $admin,
+            'Merhaba Ayşe, yeriniz ayrıldı.',
+        );
+
+        $this->assertDatabaseHas('event_registration_replies', [
+            'id' => $reply->id,
+            'event_registration_id' => $registration->id,
+        ]);
+
+        Notification::assertSentTo($registration, EventRegistrationReplySent::class, function (EventRegistrationReplySent $notification) use ($registration): bool {
+            $payload = $notification->toPhpMailer($registration);
+
+            return $payload['to'] === ['ayse@example.com']
+                && str_contains($payload['subject'], 'Haftalık sohbet')
+                && str_contains($payload['text'], 'yeriniz ayrıldı');
+        });
     }
 
     public function test_event_registration_mails_escape_applicant_content(): void
@@ -182,6 +296,20 @@ class EventRegistrationMailFlowTest extends TestCase
             'location' => 'Karacaahmet, Şehitkamil / Gaziantep',
             'registration_open' => true,
             'is_published' => true,
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function makeProgram(array $attributes = []): Program
+    {
+        return Program::query()->create([
+            'type' => ProgramType::Sohbet,
+            'title' => 'Haftalık sohbet',
+            'slug' => 'haftalik-sohbet-'.fake()->unique()->numerify('###'),
+            'is_published' => true,
+            ...$attributes,
         ]);
     }
 }

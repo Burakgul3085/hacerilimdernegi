@@ -93,6 +93,18 @@ class ProgramCalendarTest extends TestCase
             ->assertSee('Başvuruyu gönder');
     }
 
+    public function test_program_detail_shows_the_participation_form_instead_of_the_contact_link(): void
+    {
+        $program = $this->makeProgram();
+
+        $this->get(route('programs.show', $program))
+            ->assertOk()
+            ->assertSee('Katılım için bize yazın')
+            ->assertSee('href="#kayit"', false)
+            ->assertSee('Başvuruyu gönder')
+            ->assertSee(route('programs.register', $program), false);
+    }
+
     /**
      * @param  array<string, mixed>  $attributes
      */

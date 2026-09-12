@@ -35,7 +35,7 @@
                         <li><x-meta icon="pin">{{ $program->location }}</x-meta></li>
                     @endif
                 </ul>
-                <a href="{{ route('contact') }}" class="btn btn-solid btn-sm mt-6 w-full">Katılım için bize yazın</a>
+                <a href="#kayit" class="btn btn-solid btn-sm mt-6 w-full">Katılım için bize yazın</a>
             </div>
 
             @if ($related->isNotEmpty())
@@ -58,6 +58,8 @@
             @endif
         </aside>
     </div>
+
+    <x-participation-form :action="route('programs.register', $program)" context="program" />
 </section>
 
 @endsection
