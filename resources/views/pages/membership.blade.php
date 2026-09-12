@@ -14,7 +14,7 @@
 <section class="shell py-14 lg:py-20">
     <div class="reveal overflow-hidden rounded-2xl border border-line bg-paper">
         <div class="grid lg:grid-cols-[22rem_minmax(0,1fr)]">
-            <div class="grain flex flex-col justify-center bg-cream p-8 lg:p-10">
+            <div class="grain flex flex-col justify-center bg-cream p-6 sm:p-8 lg:p-10">
                 <span class="flex h-14 w-14 items-center justify-center rounded-full border border-line bg-paper text-gold">
                     <x-ui.icon name="users" class="h-7 w-7" />
                 </span>
@@ -28,7 +28,7 @@
                 </ul>
             </div>
 
-            <form method="POST" action="{{ route('membership.store') }}" class="relative space-y-5 p-8 lg:p-10">
+            <form method="POST" action="{{ route('membership.store') }}" class="relative space-y-5 p-5 sm:p-8 lg:p-10">
                 @csrf
                 <x-honeypot />
                 <x-flash-status context="membership" />

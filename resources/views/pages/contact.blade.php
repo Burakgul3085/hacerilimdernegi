@@ -64,7 +64,7 @@
 
     <div @class(['reveal mt-14 grid gap-6', 'lg:grid-cols-2' => filled($whatsappChatUrl ?? null)])>
         <div class="overflow-hidden rounded-2xl border border-line bg-paper">
-            <div class="grain border-b border-line bg-cream px-8 py-7 lg:px-10">
+            <div class="grain border-b border-line bg-cream px-5 py-6 sm:px-8 sm:py-7 lg:px-10">
                 <span class="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-paper text-gold">
                     <x-ui.icon name="mail" class="h-6 w-6" />
                 </span>
@@ -72,7 +72,7 @@
                 <p class="mt-3 text-sm leading-relaxed text-muted">Soru, öneri ve iş birliği talepleriniz yönetim paneline düşer; size e-posta ile dönüş yapılır.</p>
             </div>
 
-            <form method="POST" action="{{ route('contact.store') }}" class="relative space-y-5 p-8 lg:p-10">
+            <form method="POST" action="{{ route('contact.store') }}" class="relative space-y-5 p-5 sm:p-8 lg:p-10">
                 @csrf
                 <x-honeypot />
                 <x-flash-status context="contact" />
@@ -97,7 +97,7 @@
 
         @if (filled($whatsappChatUrl ?? null))
             <div class="overflow-hidden rounded-2xl border border-line bg-paper">
-                <div class="grain border-b border-line bg-cream px-8 py-7 lg:px-10">
+                <div class="grain border-b border-line bg-cream px-5 py-6 sm:px-8 sm:py-7 lg:px-10">
                     <span class="flex h-12 w-12 items-center justify-center rounded-full border border-[#128C7E]/25 bg-paper text-[#128C7E]">
                         <x-ui.icon name="whatsapp" class="h-6 w-6" />
                     </span>
@@ -105,7 +105,7 @@
                     <p class="mt-3 text-sm leading-relaxed text-muted">Mesajınız derneğin kayıtlı hattında hazır bir selam metniyle açılır; göndermek sizin onayınıza kalır.</p>
                 </div>
 
-                <form method="POST" action="{{ route('contact.whatsapp') }}" target="_blank" rel="noopener noreferrer" class="relative space-y-5 p-8 lg:p-10">
+                <form method="POST" action="{{ route('contact.whatsapp') }}" target="_blank" rel="noopener noreferrer" class="relative space-y-5 p-5 sm:p-8 lg:p-10">
                     @csrf
                     <x-honeypot id="whatsapp-website" />
                     <x-flash-status context="whatsapp" />

@@ -14,14 +14,14 @@
 @section('content')
 
 {{-- Hero --}}
-<section class="hero-cinematic relative overflow-hidden border-b border-line bg-cream">
-    <div class="hero-visual absolute inset-y-0 right-0 hidden w-[46%] overflow-hidden lg:block">
+<section class="hero-cinematic relative overflow-x-clip overflow-y-hidden border-b border-line bg-cream">
+    <div class="hero-visual absolute inset-y-0 right-0 hidden w-[42%] overflow-hidden lg:block xl:w-[46%]">
         <img src="{{ $heroImage }}" alt="" aria-hidden="true" data-parallax="0.16"
-             class="hero-parallax h-full w-full object-cover object-top">
+             class="hero-parallax h-full w-full max-w-full object-cover object-top">
         <div class="absolute inset-0 bg-gradient-to-r from-cream via-cream/45 to-transparent"></div>
 
         @if ($nextProgram)
-            <div class="hero-enter absolute bottom-10 left-10 max-w-xs rounded-2xl border border-line bg-paper/95 p-5 shadow-float backdrop-blur" style="--enter-delay: 0.72s">
+            <div class="hero-enter absolute bottom-10 left-8 max-w-xs rounded-2xl border border-line bg-paper/95 p-5 shadow-float backdrop-blur xl:left-10" style="--enter-delay: 0.72s">
                 <p class="tag">Yaklaşan program</p>
                 <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $nextProgram->title }}</p>
                 <div class="mt-3 flex flex-col gap-1.5">
@@ -34,8 +34,8 @@
         @endif
     </div>
 
-    <div class="shell relative">
-        <div class="hero-copy pb-14 sm:pb-20 lg:max-w-[52%] lg:pb-32">
+    <div class="shell relative z-10">
+        <div class="hero-copy min-w-0 pb-10 sm:pb-16 lg:max-w-[58%] lg:pb-32 xl:max-w-[52%]">
             @if (filled($settings['hero_eyebrow']))
                 <p class="hero-enter eyebrow" style="--enter-delay: 0.04s">{{ $settings['hero_eyebrow'] }}</p>
             @endif
@@ -43,10 +43,10 @@
             <h1 class="hero-enter display-1 mt-5 text-balance" style="--enter-delay: 0.16s">{{ $settings['hero_title'] ?: $settings['site_name'] }}</h1>
 
             @if (filled($settings['hero_text']))
-                <p class="hero-enter lead mt-6 max-w-xl" style="--enter-delay: 0.3s">{{ $settings['hero_text'] }}</p>
+                <p class="hero-enter lead mt-5 max-w-xl sm:mt-6" style="--enter-delay: 0.3s">{{ $settings['hero_text'] }}</p>
             @endif
 
-            <div class="hero-enter mt-9 flex flex-wrap gap-3" style="--enter-delay: 0.44s">
+            <div class="hero-enter mt-8 flex flex-wrap gap-3 sm:mt-9" style="--enter-delay: 0.44s">
                 @if (filled($settings['hero_primary_label']))
                     <a href="{{ $settings['hero_primary_url'] ?: route('programs.index') }}" class="btn btn-solid">
                         {{ $settings['hero_primary_label'] }}
@@ -61,9 +61,9 @@
             </div>
 
             @if (filled($settings['hero_quote']))
-                <figure class="hero-enter mt-12 max-w-md rounded-2xl border border-line bg-paper/70 p-6" style="--enter-delay: 0.58s">
+                <figure class="hero-enter mt-10 w-full max-w-md rounded-2xl border border-line bg-paper/80 p-5 sm:mt-12 sm:p-6" style="--enter-delay: 0.58s">
                     <x-ui.icon name="quote" class="h-6 w-6 text-gold" />
-                    <blockquote class="mt-3 font-display text-xl leading-snug text-forest">“{{ $settings['hero_quote'] }}”</blockquote>
+                    <blockquote class="mt-3 font-display text-[1.2rem] leading-snug text-forest sm:text-xl">“{{ $settings['hero_quote'] }}”</blockquote>
                     @if (filled($settings['hero_quote_author']))
                         <figcaption class="mt-3 text-[13px] text-muted">{{ $settings['hero_quote_author'] }}</figcaption>
                     @endif
@@ -72,8 +72,22 @@
         </div>
     </div>
 
-    <div class="hero-visual overflow-hidden lg:hidden">
-        <img src="{{ $heroImage }}" alt="" aria-hidden="true" class="hero-parallax h-64 w-full object-cover sm:h-80" data-parallax="0.1">
+    <div class="hero-visual hero-visual-mobile lg:hidden">
+        <img src="{{ $heroImage }}" alt="" aria-hidden="true" class="hero-parallax" data-parallax="0.1">
+        <div class="hero-visual-mobile-fade" aria-hidden="true"></div>
+
+        @if ($nextProgram)
+            <div class="hero-enter hero-visual-mobile-card" style="--enter-delay: 0.72s">
+                <p class="tag">Yaklaşan program</p>
+                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $nextProgram->title }}</p>
+                <div class="mt-3 flex flex-col gap-1.5">
+                    <x-meta icon="calendar">{{ $nextProgram->starts_at?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
+                    @if ($nextProgram->location)
+                        <x-meta icon="pin">{{ $nextProgram->location }}</x-meta>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
 </section>
 
@@ -99,7 +113,7 @@
 @endif
 
 {{-- Kurum --}}
-<section class="shell py-20 lg:py-28">
+<section class="shell py-14 sm:py-20 lg:py-28">
     <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
         <div class="reveal reveal-left">
             <p class="eyebrow">Kurum</p>
@@ -107,7 +121,7 @@
             <p class="lead mt-5">{{ $settings['about_excerpt'] }}</p>
 
             @if (filled($stats))
-                <div class="mt-10 grid grid-cols-1 gap-px bg-line sm:grid-cols-3">
+                <div class="mt-10 grid grid-cols-1 gap-px bg-line md:grid-cols-3">
                     @foreach ($stats as $stat)
                         <div class="stat-cell bg-cream px-5 py-6 text-center">
                             <p class="font-display text-3xl text-forest" data-count="{{ $stat['value'] ?? '' }}">{{ $stat['value'] ?? '' }}</p>
@@ -129,7 +143,7 @@
             </div>
 
             @if (filled($settings['address']))
-                <div class="mt-4 rounded-2xl border border-line bg-paper p-5 sm:absolute sm:bottom-6 sm:left-6 sm:mt-0 sm:max-w-[19rem] sm:shadow-float">
+                <div class="mt-4 rounded-2xl border border-line bg-paper p-5 lg:absolute lg:bottom-6 lg:left-6 lg:mt-0 lg:max-w-[19rem] lg:shadow-float">
                     <div class="flex items-start gap-3">
                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest text-cream">
                             <x-ui.icon name="pin" class="h-4 w-4" />

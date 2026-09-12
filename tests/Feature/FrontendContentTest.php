@@ -163,7 +163,7 @@ class FrontendContentTest extends TestCase
             ->assertSee('is-compact', false)
             ->assertSee('site-topbar', false)
             ->assertSee('hero-copy', false)
-            ->assertSee('h-14 w-auto max-w-[220px]', false)
+            ->assertSee('sm:h-14 sm:max-w-[220px]', false)
             ->assertDontSee('site-chrome-spacer', false);
     }
 
@@ -183,6 +183,7 @@ class FrontendContentTest extends TestCase
         $this->get('/')
             ->assertSee('page-home', false)
             ->assertSee('hero-cinematic', false)
+            ->assertSee('hero-visual-mobile', false)
             ->assertSee('hero-enter', false)
             ->assertSee('hero-parallax', false)
             ->assertSee('data-parallax', false)

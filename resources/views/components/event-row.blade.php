@@ -24,6 +24,6 @@
                 @endif
             </div>
         </div>
-        <span class="arrow-btn"><x-ui.icon name="arrow-right" class="h-4 w-4" /></span>
+        <span class="arrow-btn hidden sm:inline-flex"><x-ui.icon name="arrow-right" class="h-4 w-4" /></span>
     </a>
 </div>

@@ -76,7 +76,7 @@
     @if ($event->registration_open)
         <div class="reveal mt-16 overflow-hidden rounded-2xl border border-line bg-paper">
             <div class="grid lg:grid-cols-[20rem_minmax(0,1fr)]">
-                <div class="grain flex flex-col justify-center bg-cream p-8 lg:p-10">
+                <div class="grain flex flex-col justify-center bg-cream p-6 sm:p-8 lg:p-10">
                     <span class="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-paper text-gold">
                         <x-ui.icon name="hand" class="h-6 w-6" />
                     </span>
@@ -84,7 +84,7 @@
                     <p class="mt-3 text-sm leading-relaxed text-muted">Formu doldurun, dernek yönetimi sizinle iletişime geçsin.</p>
                 </div>
 
-                <form method="POST" action="{{ route('events.register', $event) }}" class="relative space-y-5 p-8 lg:p-10">
+                <form method="POST" action="{{ route('events.register', $event) }}" class="relative space-y-5 p-5 sm:p-8 lg:p-10">
                     @csrf
                     <x-honeypot />
                     <x-flash-status context="event" />

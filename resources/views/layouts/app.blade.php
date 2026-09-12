@@ -230,15 +230,15 @@
         @if (filled($settings['topbar_text'] ?? null))
             <div class="site-topbar">
                 <div class="shell py-2.5 text-center">
-                    <p class="text-[10px] font-medium uppercase tracking-[0.34em] text-cream/60">{{ $settings['topbar_text'] }}</p>
+                    <p class="px-1 text-[10px] font-medium uppercase tracking-[0.2em] text-cream/60 sm:tracking-[0.34em]">{{ $settings['topbar_text'] }}</p>
                 </div>
             </div>
         @endif
 
         <header class="site-header">
-            <div class="shell flex h-[5.25rem] items-center justify-between gap-8 lg:h-24">
-                <a href="{{ route('home') }}" class="flex shrink-0 items-center" aria-label="{{ $settings['site_name'] }}">
-                    <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-14 w-auto max-w-[220px] object-contain lg:h-[3.75rem] lg:max-w-[240px]">
+            <div class="shell flex h-[5.25rem] items-center justify-between gap-3 sm:gap-6 lg:h-24 xl:gap-8">
+                <a href="{{ route('home') }}" class="flex min-w-0 shrink-0 items-center" aria-label="{{ $settings['site_name'] }}">
+                    <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-12 w-auto max-w-[10.5rem] object-contain sm:h-14 sm:max-w-[220px] lg:h-[3.75rem] lg:max-w-[240px]">
                 </a>
 
                 <nav class="hidden items-center gap-7 xl:flex xl:gap-8" aria-label="Ana menü">
@@ -269,7 +269,7 @@
             </div>
 
             <div id="site-search" x-show="search" x-cloak x-transition.opacity class="site-header-search border-t border-line/50">
-                <form action="{{ route('search') }}" method="GET" class="shell flex items-center gap-3 py-4">
+                <form action="{{ route('search') }}" method="GET" class="shell flex items-center gap-2 py-3 sm:gap-3 sm:py-4">
                     <x-ui.icon name="search" class="h-5 w-5 shrink-0 text-gold" />
                     <label for="site-search-input" class="sr-only">Sitede ara</label>
                     <input id="site-search-input" x-ref="searchInput" type="search" name="q" value="{{ request('q') }}"
@@ -483,7 +483,7 @@
         </div>
     </footer>
 
-    <div x-show="cookies" x-cloak x-transition.opacity class="fixed inset-x-0 bottom-0 z-50 px-4 pb-4">
+    <div x-show="cookies" x-cloak x-transition.opacity class="fixed inset-x-0 bottom-0 z-50 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div class="shell">
             <div class="flex flex-col gap-4 rounded-2xl bg-forest px-6 py-5 text-sm text-cream shadow-float sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-cream/80">
@@ -498,7 +498,7 @@
 
     <x-legal-modal />
 
-    <div class="site-float" :class="cookies ? 'bottom-28' : 'bottom-6'">
+    <div class="site-float" :class="cookies && 'is-cookies'">
         <button type="button"
                 class="site-float-top"
                 x-show="chromeScrolled"
