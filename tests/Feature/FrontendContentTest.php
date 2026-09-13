@@ -84,6 +84,16 @@ class FrontendContentTest extends TestCase
             ->assertSee('google.com/maps/search', false);
     }
 
+    public function test_default_map_embed_pins_the_official_google_listing(): void
+    {
+        $embed = SiteSettings::safeMapEmbed();
+
+        $this->assertStringContainsString('maps.google.com/maps', $embed);
+        $this->assertStringContainsString('38%2FH', $embed);
+        $this->assertStringContainsString('37.10732', $embed);
+        $this->assertStringContainsString('37.3895721', $embed);
+    }
+
     public function test_home_page_renders_hero_and_pillars_from_settings(): void
     {
         SiteSettings::put('hero_title', 'Panelden gelen başlık');
@@ -241,6 +251,18 @@ class FrontendContentTest extends TestCase
             ->assertSee('site-float', false)
             ->assertDontSee('https://wa.me/', false)
             ->assertDontSee('site-float-whatsapp', false);
+    }
+
+    public function test_footer_note_sits_above_the_legal_strip(): void
+    {
+        SiteSettings::put('footer_note', 'Gaziantep alt bilgi notu xyz');
+
+        $this->get('/')
+            ->assertSeeInOrder([
+                'Gaziantep alt bilgi notu xyz',
+                'KVKK',
+                'Tasarım ve yazılım',
+            ]);
     }
 
     public function test_footer_credits_the_developer_from_settings(): void

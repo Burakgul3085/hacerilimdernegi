@@ -440,24 +440,27 @@
         </div>
 
         <div class="border-t border-white/10">
-            <div class="shell flex flex-col gap-5 py-5 text-[12px] text-cream/45 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
-                <p class="order-1 text-cream/50">© {{ date('Y') }} {{ $settings['site_name'] }}</p>
+            <div class="shell py-5 text-[12px] text-cream/45">
+                @if (filled($settings['footer_note']))
+                    <p class="text-cream/40">{{ $settings['footer_note'] }}</p>
+                @endif
 
-                <nav class="order-2 flex flex-wrap items-center gap-x-1 gap-y-2 lg:justify-center" aria-label="Yasal metinler">
-                    <button type="button" class="rounded-full px-3 py-1 transition hover:bg-white/5 hover:text-cream" @click="openLegal('kvkk')">KVKK</button>
-                    <span class="text-cream/20" aria-hidden="true">·</span>
-                    <button type="button" class="rounded-full px-3 py-1 transition hover:bg-white/5 hover:text-cream" @click="openLegal('gizlilik')">Gizlilik</button>
-                    <span class="text-cream/20" aria-hidden="true">·</span>
-                    <button type="button" class="rounded-full px-3 py-1 transition hover:bg-white/5 hover:text-cream" @click="openLegal('cerezler')">Çerezler</button>
-                </nav>
+                <div @class([
+                    'flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8',
+                    'mt-5' => filled($settings['footer_note']),
+                ])>
+                    <p class="text-cream/50">© {{ date('Y') }} {{ $settings['site_name'] }}</p>
 
-                <div class="order-3 flex flex-wrap items-center gap-x-3 gap-y-2 lg:justify-end">
-                    @if (filled($settings['footer_note']))
-                        <p class="text-cream/40">{{ $settings['footer_note'] }}</p>
-                    @endif
+                    <nav class="flex flex-wrap items-center gap-x-1 gap-y-2 lg:justify-center" aria-label="Yasal metinler">
+                        <button type="button" class="rounded-full px-3 py-1 transition hover:bg-white/5 hover:text-cream" @click="openLegal('kvkk')">KVKK</button>
+                        <span class="text-cream/20" aria-hidden="true">·</span>
+                        <button type="button" class="rounded-full px-3 py-1 transition hover:bg-white/5 hover:text-cream" @click="openLegal('gizlilik')">Gizlilik</button>
+                        <span class="text-cream/20" aria-hidden="true">·</span>
+                        <button type="button" class="rounded-full px-3 py-1 transition hover:bg-white/5 hover:text-cream" @click="openLegal('cerezler')">Çerezler</button>
+                    </nav>
 
                     @if (filled($settings['developer_name']))
-                        <p class="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                        <p class="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1 lg:justify-end">
                             <span>{{ $settings['developer_label'] ?: 'Tasarım ve yazılım' }}</span>
                             @if (filled($settings['developer_url']))
                                 <a href="{{ $settings['developer_url'] }}" target="_blank" rel="noopener noreferrer author"
