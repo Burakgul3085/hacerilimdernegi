@@ -15,8 +15,9 @@ class NavigationMenuTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('Kurumsal')
-            ->assertSee('Vizyon ve misyon')
+            ->assertSee('Hedef ve ilkelerimiz')
             ->assertSee('/vizyon-misyon', false)
+            ->assertDontSee('>Vizyon ve misyon<', false)
             ->assertSee('Başkanın mesajı')
             ->assertSee('Yönetim kadrosu')
             ->assertSee('Dernek tüzüğü')
@@ -29,6 +30,27 @@ class NavigationMenuTest extends TestCase
             ->assertSee('Vitrin')
             ->assertSee('/vitrin', false)
             ->assertDontSee('>Seçkiler<', false);
+    }
+
+    public function test_stored_vision_menu_label_is_renamed_to_goals_and_principles(): void
+    {
+        SiteSettings::put('nav_items', json_encode([
+            [
+                'label' => 'Kurumsal',
+                'url' => '/hakkimizda',
+                'children' => [
+                    ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
+                    ['label' => 'Vizyon ve misyon', 'url' => '/vizyon-misyon'],
+                ],
+            ],
+            ['label' => 'Yazılar', 'url' => '/yazilar'],
+        ], JSON_UNESCAPED_UNICODE));
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Hedef ve ilkelerimiz')
+            ->assertSee('/vizyon-misyon', false)
+            ->assertDontSee('>Vizyon ve misyon<', false);
     }
 
     public function test_stored_flat_menu_is_replaced_with_the_grouped_tree(): void

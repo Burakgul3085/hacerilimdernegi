@@ -196,7 +196,7 @@ class SiteSettings
                 'url' => '/hakkimizda',
                 'children' => [
                     ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
-                    ['label' => 'Vizyon ve misyon', 'url' => '/vizyon-misyon'],
+                    ['label' => 'Hedef ve ilkelerimiz', 'url' => '/vizyon-misyon'],
                     ['label' => 'Başkanın mesajı', 'url' => '/baskanin-mesaji'],
                     ['label' => 'Yönetim kadrosu', 'url' => '/yonetim-kadrosu'],
                     ['label' => 'Dernek tüzüğü', 'url' => '/dernek-tuzugu'],
@@ -338,6 +338,10 @@ class SiteSettings
     {
         if ($url === '/vitrin' && in_array($label, ['Canlı', 'Sosyal', 'Seçkiler', ''], true)) {
             return 'Vitrin';
+        }
+
+        if ($url === '/vizyon-misyon' && $label === 'Vizyon ve misyon') {
+            return 'Hedef ve ilkelerimiz';
         }
 
         return $label;

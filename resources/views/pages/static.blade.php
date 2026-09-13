@@ -215,7 +215,7 @@
 
         <div class="mt-10 grid gap-5 lg:grid-cols-3">
             <x-about-path
-                title="Vizyon ve misyon"
+                title="Hedef ve ilkelerimiz"
                 text="Derneğin yönü, gayesi ve çalışma ilkeleri."
                 :href="route('corporate.vision')"
                 icon="sparkles"
