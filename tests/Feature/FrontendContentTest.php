@@ -38,7 +38,7 @@ class FrontendContentTest extends TestCase
         $urls = [
             '/',
             '/hakkimizda',
-            '/programlar',
+            '/faaliyetler',
             route('programs.show', $program),
             route('events.show', $event),
             '/yazilar',
@@ -280,9 +280,9 @@ class FrontendContentTest extends TestCase
             ->assertSee('openLegal', false);
     }
 
-    public function test_legacy_event_index_redirects_to_programs(): void
+    public function test_legacy_event_index_redirects_to_activities(): void
     {
-        $this->get('/etkinlikler')->assertRedirect('/programlar');
+        $this->get('/etkinlikler')->assertRedirect('/faaliyetler');
     }
 
     public function test_event_page_offers_a_calendar_link(): void
@@ -295,23 +295,9 @@ class FrontendContentTest extends TestCase
             ->assertSee('calendar.google.com', false);
     }
 
-    public function test_program_calendar_filters_by_month(): void
+    public function test_legacy_program_index_redirects_to_activities(): void
     {
-        $thisMonth = $this->makeEvent([
-            'title' => 'Bu ayki program',
-            'slug' => 'bu-ayki-program',
-            'starts_at' => now()->addDays(2),
-        ]);
-        $this->makeEvent([
-            'title' => 'Gelecek aydaki program',
-            'slug' => 'gelecek-aydaki-program',
-            'starts_at' => now()->addMonths(2),
-        ]);
-
-        $this->get('/programlar?ay='.$thisMonth->starts_at->format('Y-m'))
-            ->assertOk()
-            ->assertSee('Bu ayki program')
-            ->assertDontSee('Gelecek aydaki program');
+        $this->get('/programlar')->assertRedirect('/faaliyetler');
     }
 
     public function test_search_finds_published_records_across_sections(): void
@@ -336,7 +322,7 @@ class FrontendContentTest extends TestCase
     {
         $program = $this->makeProgram(['is_published' => false]);
 
-        $this->get('/programlar')->assertOk()->assertDontSee($program->title);
+        $this->get('/faaliyetler')->assertOk()->assertDontSee($program->title);
         $this->get(route('programs.show', $program))->assertNotFound();
         $this->get('/ara?q='.urlencode($program->title))->assertOk()->assertSee('Sonuç bulunamadı');
     }

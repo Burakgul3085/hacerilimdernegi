@@ -3,10 +3,12 @@
 namespace App\Filament\Resources\Events\Schemas;
 
 use App\Filament\Support\ContentUploads;
+use App\Models\Activity;
 use App\Support\UploadRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
@@ -22,6 +24,11 @@ class EventForm
                     ->description('Özel gün. Kayıt açıkken sitede başvuru formu çıkar ve başvurular panele düşer.')
                     ->columns(2)
                     ->schema([
+                        Select::make('activity_id')
+                            ->label('Faaliyet hattı')
+                            ->options(fn (): array => Activity::query()->ordered()->pluck('title', 'id')->all())
+                            ->searchable()
+                            ->helperText('Bağlanınca faaliyet detayında yaklaşan oturum olarak görünür.'),
                         TextInput::make('title')->label('Başlık')->required()->maxLength(255),
                         TextInput::make('slug')->label('Bağlantı')->maxLength(255),
                         TextInput::make('location')->label('Yer')->maxLength(255),

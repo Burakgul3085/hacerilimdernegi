@@ -68,8 +68,8 @@ class SiteSettings
             'hero_title' => 'İlim, sohbet ve kültür etrafında duran bir dernek.',
             'hero_text' => 'Hâcer İlim ve Kültür Derneği; Gaziantep’te dersler, sohbetler ve kitap tahlilleri etrafında bir ilim muhiti kurar.',
             'hero_image' => '',
-            'hero_primary_label' => 'Programlar',
-            'hero_primary_url' => '/programlar',
+            'hero_primary_label' => 'Faaliyetler',
+            'hero_primary_url' => '/faaliyetler',
             'hero_secondary_label' => 'Üyelik / gönüllü',
             'hero_secondary_url' => '/uyelik',
             'hero_quote' => 'İlim, hayatı güzelleştirir; insanı, toplumu ve yarınları inşa eder.',
@@ -89,13 +89,13 @@ class SiteSettings
             ], JSON_UNESCAPED_UNICODE),
 
             'cta_icon' => 'users',
-            'cta_title' => 'Tüm programları keşfedin',
-            'cta_text' => 'Güncel ders, sohbet ve etkinlik takvimine göz atın.',
-            'cta_button_label' => 'Tüm programlar',
-            'cta_button_url' => '/programlar',
+            'cta_title' => 'Faaliyetlerimizi keşfedin',
+            'cta_text' => 'Ders, sohbet, kamp ve seminer hatlarımız.',
+            'cta_button_label' => 'Tüm faaliyetler',
+            'cta_button_url' => '/faaliyetler',
 
-            'home_programs_title' => 'Yaklaşan programlar',
-            'home_programs_text' => 'Dersler, sohbetler ve kitap tahlilleri.',
+            'home_programs_title' => 'Faaliyetlerimiz',
+            'home_programs_text' => 'Ders, sohbet, kamp ve seminer hatlarımız.',
             'home_events_title' => 'Etkinlik takvimi',
             'home_events_text' => 'Katılıma açık yaklaşan etkinlikler.',
             'home_posts_title' => 'Yazılar ve duyurular',
@@ -109,7 +109,7 @@ class SiteSettings
             'about_image' => '',
             'about_quote' => 'İlim, hayatı güzelleştirir; insanı, toplumu ve yarınları inşa eder.',
 
-            'programs_intro' => 'Ders, sohbet, kitap tahlili ve kayıtlı programlar tek takvimde.',
+            'programs_intro' => 'Ders, sohbet, kamp ve seminer hatlarımız. Devam eden ve tamamlanan çalışmaları buradan izleyin.',
             'events_intro' => 'Aylara göre yaklaşan programlar. Katılım başvurusu etkinlik detayındadır.',
             'posts_intro' => 'Dernek gündemine dair yazılar ve resmî duyurular.',
             'media_intro' => 'Program ve etkinliklerimizden fotoğraf, video ve ses kayıtları.',
@@ -163,7 +163,7 @@ class SiteSettings
         return Cache::remember('site_settings', 60, function () {
             $stored = Setting::query()->pluck('value', 'key')->all();
 
-            return array_merge(static::defaults(), $stored);
+            return static::remapLegacyPublicCopy(array_merge(static::defaults(), $stored));
         });
     }
 
@@ -202,7 +202,7 @@ class SiteSettings
                     ['label' => 'Dernek tüzüğü', 'url' => '/dernek-tuzugu'],
                 ],
             ],
-            ['label' => 'Programlar', 'url' => '/programlar'],
+            ['label' => 'Faaliyetler', 'url' => '/faaliyetler'],
             ['label' => 'Yazılar', 'url' => '/yazilar'],
             ['label' => 'Medya', 'url' => '/medya'],
             ['label' => 'Vitrin', 'url' => '/vitrin'],
@@ -330,6 +330,7 @@ class SiteSettings
 
         return match ($url) {
             '/canli', '/sosyal', '/seckiler' => '/vitrin',
+            '/programlar' => '/faaliyetler',
             default => $url,
         };
     }
@@ -344,7 +345,44 @@ class SiteSettings
             return 'Hedef ve ilkelerimiz';
         }
 
+        if ($url === '/faaliyetler' && $label === 'Programlar') {
+            return 'Faaliyetler';
+        }
+
         return $label;
+    }
+
+    /**
+     * Panelde hâlâ eski varsayılan metin duruyorsa faaliyet vitrinine çevirir.
+     *
+     * @param  array<string, mixed>  $settings
+     * @return array<string, mixed>
+     */
+    private static function remapLegacyPublicCopy(array $settings): array
+    {
+        $replacements = [
+            'hero_primary_label' => ['Programlar' => 'Faaliyetler'],
+            'hero_primary_url' => ['/programlar' => '/faaliyetler'],
+            'cta_title' => ['Tüm programları keşfedin' => 'Faaliyetlerimizi keşfedin'],
+            'cta_text' => ['Güncel ders, sohbet ve etkinlik takvimine göz atın.' => 'Ders, sohbet, kamp ve seminer hatlarımız.'],
+            'cta_button_label' => ['Tüm programlar' => 'Tüm faaliyetler'],
+            'cta_button_url' => ['/programlar' => '/faaliyetler'],
+            'home_programs_title' => ['Yaklaşan programlar' => 'Faaliyetlerimiz'],
+            'home_programs_text' => ['Dersler, sohbetler ve kitap tahlilleri.' => 'Ders, sohbet, kamp ve seminer hatlarımız.'],
+            'programs_intro' => [
+                'Ders, sohbet, kitap tahlili ve kayıtlı programlar tek takvimde.' => 'Ders, sohbet, kamp ve seminer hatlarımız. Devam eden ve tamamlanan çalışmaları buradan izleyin.',
+            ],
+        ];
+
+        foreach ($replacements as $key => $map) {
+            $current = $settings[$key] ?? null;
+
+            if (is_string($current) && isset($map[$current])) {
+                $settings[$key] = $map[$current];
+            }
+        }
+
+        return $settings;
     }
 
     public static function put(string $key, mixed $value): void

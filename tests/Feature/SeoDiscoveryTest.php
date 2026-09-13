@@ -46,6 +46,7 @@ class SeoDiscoveryTest extends TestCase
             ->assertSee(route('about'), false)
             ->assertSee(route('corporate.vision'), false)
             ->assertSee(route('social'), false)
+            ->assertSee(route('activities.index'), false)
             ->assertSee(route('programs.show', $published), false)
             ->assertDontSee(route('programs.show', $draft), false)
             ->assertDontSee('/yonetim</loc>', false)

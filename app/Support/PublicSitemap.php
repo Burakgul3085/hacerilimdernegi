@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Activity;
 use App\Models\Event;
 use App\Models\MediaAlbum;
 use App\Models\Page;
@@ -26,7 +27,7 @@ class PublicSitemap
             $this->entry(route('corporate.message'), $now, 'monthly', '0.6'),
             $this->entry(route('corporate.board'), $now, 'monthly', '0.6'),
             $this->entry(route('corporate.bylaws'), $now, 'monthly', '0.6'),
-            $this->entry(route('programs.index'), $now, 'weekly', '0.8'),
+            $this->entry(route('activities.index'), $now, 'weekly', '0.8'),
             $this->entry(route('posts.index'), $now, 'weekly', '0.8'),
             $this->entry(route('media.index'), $now, 'weekly', '0.7'),
             $this->entry(route('social'), $now, 'weekly', '0.6'),
@@ -34,6 +35,10 @@ class PublicSitemap
             $this->entry(route('donate'), $now, 'monthly', '0.7'),
             $this->entry(route('contact'), $now, 'monthly', '0.7'),
         ];
+
+        foreach (Activity::query()->published()->orderBy('id')->get(['slug', 'updated_at']) as $activity) {
+            $entries[] = $this->entry(route('activities.show', $activity), $activity->updated_at, 'weekly', '0.8');
+        }
 
         foreach (Program::query()->published()->orderBy('id')->get(['slug', 'updated_at']) as $program) {
             $entries[] = $this->entry(route('programs.show', $program), $program->updated_at, 'weekly', '0.7');

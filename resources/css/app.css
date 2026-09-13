@@ -748,6 +748,22 @@
         @apply bg-forest text-cream;
     }
 
+    .activity-card {
+        min-height: 100%;
+    }
+
+    .activity-card .activity-status {
+        @apply inline-flex w-fit items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em];
+    }
+
+    .activity-card .activity-status.is-ongoing {
+        @apply border-gold/35 bg-gold/10 text-gold;
+    }
+
+    .activity-card .activity-status.is-done {
+        @apply border-line bg-cream-deep text-muted;
+    }
+
     .tag {
         @apply text-[10px] font-semibold uppercase tracking-[0.24em] text-gold;
     }
@@ -1137,12 +1153,15 @@ body.overflow-hidden .site-float {
     position: absolute;
     inset-inline: 1.25rem;
     bottom: 1.25rem;
+    display: block;
     max-width: 22rem;
     padding: 1.15rem 1.2rem;
     border: 1px solid var(--color-line);
     border-radius: 1rem;
     background: rgb(255 252 248 / 0.94);
     box-shadow: var(--shadow-float);
+    color: inherit;
+    text-decoration: none;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 }

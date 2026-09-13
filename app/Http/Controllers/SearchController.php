@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Event;
 use App\Models\MediaAlbum;
 use App\Models\Page;
@@ -29,13 +30,27 @@ class SearchController extends Controller
     }
 
     /**
-     * Yayında olan program, etkinlik, yazı, albüm ve sayfalarda başlık/özet araması yapar.
+     * Yayında olan faaliyet, program, etkinlik, yazı, albüm ve sayfalarda başlık/özet araması yapar.
      *
      * @return Collection<int, array{label: string, title: string, excerpt: ?string, url: string, icon: string}>
      */
     private function search(string $term): Collection
     {
         $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $term).'%';
+
+        $activities = Activity::query()
+            ->published()
+            ->where(fn ($query) => $query->where('title', 'like', $like)->orWhere('excerpt', 'like', $like)->orWhere('description', 'like', $like))
+            ->ordered()
+            ->limit(10)
+            ->get()
+            ->map(fn (Activity $activity) => [
+                'label' => $activity->status->label(),
+                'title' => $activity->title,
+                'excerpt' => $activity->excerpt,
+                'url' => route('activities.show', $activity),
+                'icon' => 'cap',
+            ]);
 
         $programs = Program::query()
             ->published()
@@ -112,6 +127,7 @@ class SearchController extends Controller
             });
 
         return collect()
+            ->concat($activities)
             ->concat($programs)
             ->concat($events)
             ->concat($posts)

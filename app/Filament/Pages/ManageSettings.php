@@ -274,8 +274,8 @@ class ManageSettings extends Page
                     ->columns(2)
                     ->collapsed()
                     ->schema([
-                        TextInput::make('home_programs_title')->label('Yaklaşan programlar başlığı')->maxLength(120),
-                        TextInput::make('home_programs_text')->label('Yaklaşan programlar açıklaması')->maxLength(200),
+                        TextInput::make('home_programs_title')->label('Faaliyetler başlığı')->maxLength(120),
+                        TextInput::make('home_programs_text')->label('Faaliyetler açıklaması')->maxLength(200),
                         TextInput::make('home_posts_title')->label('Yazılar başlığı')->maxLength(120),
                         TextInput::make('home_posts_text')->label('Yazılar açıklaması')->maxLength(200),
                         TextInput::make('home_media_title')->label('Medya başlığı')->maxLength(120),
@@ -306,7 +306,7 @@ class ManageSettings extends Page
                     ->description('Her sayfanın başlığının altında görünen kısa açıklamalar.')
                     ->columns(2)
                     ->schema([
-                        Textarea::make('programs_intro')->label('Programlar')->rows(2),
+                        Textarea::make('programs_intro')->label('Faaliyetler')->rows(2),
                         Textarea::make('posts_intro')->label('Yazılar')->rows(2),
                         Textarea::make('media_intro')->label('Medya')->rows(2),
                         Textarea::make('membership_intro')->label('Üyelik')->rows(2),

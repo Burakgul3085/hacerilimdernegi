@@ -7,6 +7,7 @@ use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasContentGallery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -16,7 +17,7 @@ class Program extends Model
     use HasContentGallery;
 
     protected $fillable = [
-        'type', 'title', 'slug', 'instructor', 'description', 'starts_at', 'ends_at', 'location', 'image', 'gallery', 'is_published',
+        'activity_id', 'type', 'title', 'slug', 'instructor', 'description', 'starts_at', 'ends_at', 'location', 'image', 'gallery', 'is_published',
     ];
 
     protected function casts(): array
@@ -37,6 +38,14 @@ class Program extends Model
                 $program->slug = Str::slug($program->title);
             }
         });
+    }
+
+    /**
+     * @return BelongsTo<Activity, $this>
+     */
+    public function activity(): BelongsTo
+    {
+        return $this->belongsTo(Activity::class);
     }
 
     /**

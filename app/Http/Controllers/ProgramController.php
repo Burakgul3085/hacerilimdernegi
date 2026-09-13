@@ -8,7 +8,6 @@ use App\Models\EventRegistration;
 use App\Models\Program;
 use App\Support\FormGuard;
 use App\Support\FormStatus;
-use App\Support\ProgramFeed;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,26 +16,16 @@ class ProgramController extends Controller
 {
     public function __construct(private ProcessEventRegistration $processEventRegistration) {}
 
-    public function index(Request $request): View
+    public function index(): RedirectResponse
     {
-        $scope = $request->string('durum')->toString() === 'gecmis' ? 'gecmis' : 'yaklasan';
-        $month = $request->string('ay')->toString();
-
-        if (preg_match('/^\d{4}-\d{2}$/', $month) !== 1) {
-            $month = '';
-        }
-
-        return view('pages.programs.index', [
-            'grouped' => ProgramFeed::grouped($scope, $month),
-            'monthOptions' => ProgramFeed::monthOptions($scope),
-            'currentMonth' => $month,
-            'currentScope' => $scope,
-        ]);
+        return redirect()->route('activities.index', [], 301);
     }
 
     public function show(Program $program): View
     {
         abort_unless($program->is_published, 404);
+
+        $program->load('activity');
 
         $related = Program::query()
             ->published()

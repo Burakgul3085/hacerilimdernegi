@@ -17,19 +17,16 @@ class EventController extends Controller
 {
     public function __construct(private ProcessEventRegistration $processEventRegistration) {}
 
-    public function index(Request $request): RedirectResponse
+    public function index(): RedirectResponse
     {
-        $month = $request->string('ay')->toString();
-
-        return redirect()->route('programs.index', array_filter([
-            'ay' => preg_match('/^\d{4}-\d{2}$/', $month) === 1 ? $month : null,
-            'durum' => $request->string('durum')->toString() === 'gecmis' ? 'gecmis' : null,
-        ]), 301);
+        return redirect()->route('activities.index', [], 301);
     }
 
     public function show(Event $event): View
     {
         abort_unless($event->is_published, 404);
+
+        $event->load('activity');
 
         $related = Event::query()
             ->published()

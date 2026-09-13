@@ -8,7 +8,11 @@
 <x-page-header
     :eyebrow="$program->type?->label()"
     :title="$program->title"
-    :breadcrumbs="[['label' => 'Programlar', 'url' => route('programs.index')], ['label' => $program->title]]" />
+    :breadcrumbs="array_values(array_filter([
+        ['label' => 'Faaliyetler', 'url' => route('activities.index')],
+        $program->activity ? ['label' => $program->activity->title, 'url' => route('activities.show', $program->activity)] : null,
+        ['label' => $program->title],
+    ]))" />
 
 <section class="shell py-14 lg:py-20">
     <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16">

@@ -28,7 +28,7 @@ class ProgramResource extends Resource
 
     protected static ?string $pluralModelLabel = 'ders ve sohbetler';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Programlar';
+    protected static string|UnitEnum|null $navigationGroup = 'Faaliyetler';
 
     protected static ?int $navigationSort = 10;
 

@@ -6,6 +6,7 @@ use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasContentGallery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -15,7 +16,7 @@ class Event extends Model
     use HasContentGallery;
 
     protected $fillable = [
-        'title', 'slug', 'description', 'starts_at', 'ends_at', 'location', 'image', 'gallery', 'capacity', 'registration_open', 'is_published',
+        'activity_id', 'title', 'slug', 'description', 'starts_at', 'ends_at', 'location', 'image', 'gallery', 'capacity', 'registration_open', 'is_published',
     ];
 
     protected function casts(): array
@@ -38,6 +39,17 @@ class Event extends Model
         });
     }
 
+    /**
+     * @return BelongsTo<Activity, $this>
+     */
+    public function activity(): BelongsTo
+    {
+        return $this->belongsTo(Activity::class);
+    }
+
+    /**
+     * @return HasMany<EventRegistration, $this>
+     */
     public function registrations(): HasMany
     {
         return $this->hasMany(EventRegistration::class);

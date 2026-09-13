@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\HomeController;
@@ -21,6 +22,8 @@ foreach (CorporatePages::prettyRoutes() as $slug => $name) {
         return app(PageController::class)->show($slug);
     })->name($name);
 }
+Route::get('/faaliyetler', [ActivityController::class, 'index'])->name('activities.index');
+Route::get('/faaliyetler/{activity:slug}', [ActivityController::class, 'show'])->name('activities.show');
 Route::get('/programlar', [ProgramController::class, 'index'])->name('programs.index');
 Route::get('/programlar/{program:slug}', [ProgramController::class, 'show'])->name('programs.show');
 Route::post('/programlar/{program:slug}/kayit', [ProgramController::class, 'register'])

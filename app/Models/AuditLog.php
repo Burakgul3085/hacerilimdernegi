@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ActivityStatus;
 use App\Enums\ApplicationStatus;
 use App\Enums\UserRole;
 use Carbon\CarbonInterface;
@@ -79,6 +80,7 @@ class AuditLog extends Model
         'notes' => 'Not',
         'replied_at' => 'Yanıt tarihi',
         'event_id' => 'Etkinlik',
+        'activity_id' => 'Faaliyet hattı',
         'media_album_id' => 'Albüm',
         'seo_title' => 'Arama başlığı',
         'seo_description' => 'Arama açıklaması',
@@ -175,6 +177,7 @@ class AuditLog extends Model
             MediaItem::class => 'Medya öğesi',
             Program::class => 'Program',
             Event::class => 'Etkinlik',
+            Activity::class => 'Faaliyet',
             Page::class => 'Sayfa',
             Category::class => 'Kategori',
             User::class => 'Kullanıcı',
@@ -227,6 +230,7 @@ class AuditLog extends Model
             MediaItem::class => 'medya öğesini',
             Program::class => 'programını',
             Event::class => 'etkinliğini',
+            Activity::class => 'faaliyetini',
             Page::class => 'sayfasını',
             Category::class => 'kategorisini',
             User::class => 'kullanıcısını',
@@ -412,7 +416,9 @@ class AuditLog extends Model
         }
 
         if ($key === 'status') {
-            return ApplicationStatus::tryFrom($text)?->label() ?? $text;
+            return ApplicationStatus::tryFrom($text)?->label()
+                ?? ActivityStatus::tryFrom($text)?->label()
+                ?? $text;
         }
 
         return $text;
@@ -430,6 +436,7 @@ class AuditLog extends Model
             'category_id' => Category::query()->find($id)?->name,
             'author_id' => User::query()->find($id)?->name,
             'event_id' => Event::query()->find($id)?->title,
+            'activity_id' => Activity::query()->find($id)?->title,
             'media_album_id' => MediaAlbum::query()->find($id)?->title,
             default => null,
         };

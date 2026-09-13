@@ -19,17 +19,14 @@
              class="hero-parallax h-full w-full max-w-full object-cover object-top">
         <div class="absolute inset-0 bg-gradient-to-r from-cream via-cream/45 to-transparent"></div>
 
-        @if ($nextHighlight)
-            <div class="hero-enter absolute bottom-10 left-8 max-w-xs rounded-2xl border border-line bg-paper/95 p-5 shadow-float backdrop-blur xl:left-10" style="--enter-delay: 0.72s">
-                <p class="tag">{{ $nextHighlight->badge }}</p>
-                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $nextHighlight->title }}</p>
-                <div class="mt-3 flex flex-col gap-1.5">
-                    <x-meta icon="calendar">{{ $nextHighlight->startsAt?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
-                    @if (filled($nextHighlight->location))
-                        <x-meta icon="pin">{{ $nextHighlight->location }}</x-meta>
-                    @endif
-                </div>
-            </div>
+        @if ($featuredActivity)
+            <a href="{{ route('activities.show', $featuredActivity) }}" class="hero-enter absolute bottom-10 left-8 block max-w-xs rounded-2xl border border-line bg-paper/95 p-5 no-underline shadow-float backdrop-blur xl:left-10" style="--enter-delay: 0.72s">
+                <p class="tag">{{ $featuredActivity->status->label() }}</p>
+                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $featuredActivity->title }}</p>
+                @if (filled($featuredActivity->excerpt))
+                    <p class="mt-3 line-clamp-2 text-[13px] leading-relaxed text-muted">{{ $featuredActivity->excerpt }}</p>
+                @endif
+            </a>
         @endif
     </div>
 
@@ -47,7 +44,7 @@
 
             <div class="hero-enter mt-8 flex flex-wrap gap-3 sm:mt-9" style="--enter-delay: 0.44s">
                 @if (filled($settings['hero_primary_label']))
-                    <a href="{{ $settings['hero_primary_url'] ?: route('programs.index') }}" class="btn btn-solid">
+                    <a href="{{ $settings['hero_primary_url'] ?: route('activities.index') }}" class="btn btn-solid">
                         {{ $settings['hero_primary_label'] }}
                         <x-ui.icon name="arrow-right" class="h-4 w-4" />
                     </a>
@@ -75,17 +72,14 @@
         <img src="{{ $heroImage }}" alt="" aria-hidden="true" class="hero-parallax" data-parallax="0.1">
         <div class="hero-visual-mobile-fade" aria-hidden="true"></div>
 
-        @if ($nextHighlight)
-            <div class="hero-enter hero-visual-mobile-card" style="--enter-delay: 0.72s">
-                <p class="tag">{{ $nextHighlight->badge }}</p>
-                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $nextHighlight->title }}</p>
-                <div class="mt-3 flex flex-col gap-1.5">
-                    <x-meta icon="calendar">{{ $nextHighlight->startsAt?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
-                    @if (filled($nextHighlight->location))
-                        <x-meta icon="pin">{{ $nextHighlight->location }}</x-meta>
-                    @endif
-                </div>
-            </div>
+        @if ($featuredActivity)
+            <a href="{{ route('activities.show', $featuredActivity) }}" class="hero-enter hero-visual-mobile-card" style="--enter-delay: 0.72s">
+                <p class="tag">{{ $featuredActivity->status->label() }}</p>
+                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $featuredActivity->title }}</p>
+                @if (filled($featuredActivity->excerpt))
+                    <p class="mt-3 line-clamp-2 text-[13px] leading-relaxed text-muted">{{ $featuredActivity->excerpt }}</p>
+                @endif
+            </a>
         @endif
     </div>
 </section>
@@ -158,22 +152,22 @@
     </div>
 </section>
 
-{{-- Programlar --}}
-@if ($upcoming->isNotEmpty())
+{{-- Faaliyetler --}}
+@if ($homeActivities->isNotEmpty())
     <section class="border-y border-line bg-paper py-16 sm:py-20 lg:py-24">
         <div class="shell">
             <x-section-heading
                 class="reveal"
-                eyebrow="Programlar"
-                :title="$settings['home_programs_title'] ?: 'Yaklaşan programlar'"
+                eyebrow="Faaliyetler"
+                :title="$settings['home_programs_title'] ?: 'Faaliyetlerimiz'"
                 :text="$settings['home_programs_text'] ?: null"
-                link-label="Tüm programlar"
-                :link-url="route('programs.index')" />
+                link-label="Tüm faaliyetler"
+                :link-url="route('activities.index')" />
 
-            <div class="mt-12">
-                @foreach ($upcoming as $item)
+            <div class="mt-12 grid gap-6 md:grid-cols-2">
+                @foreach ($homeActivities as $activity)
                     <div class="reveal" style="--reveal-delay: {{ $loop->index * 80 }}ms">
-                        <x-work-row :item="$item" />
+                        <x-activity-card :activity="$activity" />
                     </div>
                 @endforeach
             </div>

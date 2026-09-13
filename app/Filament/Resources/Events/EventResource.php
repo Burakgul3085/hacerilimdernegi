@@ -28,7 +28,7 @@ class EventResource extends Resource
 
     protected static ?string $pluralModelLabel = 'kayıtlı programlar';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Programlar';
+    protected static string|UnitEnum|null $navigationGroup = 'Faaliyetler';
 
     protected static ?int $navigationSort = 20;
 

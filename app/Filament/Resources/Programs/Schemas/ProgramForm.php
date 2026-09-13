@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Programs\Schemas;
 
 use App\Enums\ProgramType;
 use App\Filament\Support\ContentUploads;
+use App\Models\Activity;
 use App\Support\UploadRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -24,6 +25,11 @@ class ProgramForm
                     ->description('Haftalık ders, sohbet ve kitap tahlili. Sitede katılım formu çıkar; başvurular Program kayıtlarına düşer.')
                     ->columns(2)
                     ->schema([
+                        Select::make('activity_id')
+                            ->label('Faaliyet hattı')
+                            ->options(fn (): array => Activity::query()->ordered()->pluck('title', 'id')->all())
+                            ->searchable()
+                            ->helperText('Bağlanınca faaliyet detayında yaklaşan oturum olarak görünür.'),
                         Select::make('type')
                             ->label('Tür')
                             ->options(collect(ProgramType::cases())->mapWithKeys(fn (ProgramType $type) => [$type->value => $type->label()]))

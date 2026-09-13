@@ -8,7 +8,11 @@
 <x-page-header
     eyebrow="Program"
     :title="$event->title"
-    :breadcrumbs="[['label' => 'Programlar', 'url' => route('programs.index')], ['label' => $event->title]]">
+    :breadcrumbs="array_values(array_filter([
+        ['label' => 'Faaliyetler', 'url' => route('activities.index')],
+        $event->activity ? ['label' => $event->activity->title, 'url' => route('activities.show', $event->activity)] : null,
+        ['label' => $event->title],
+    ]))">
     <div class="flex flex-col gap-2">
         <x-meta icon="calendar">{{ $event->starts_at?->translatedFormat('d F Y, H:i') ?? 'Tarih duyurulacak' }}</x-meta>
         @if ($event->location)

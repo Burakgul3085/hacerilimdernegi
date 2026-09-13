@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Activity;
 use App\Models\ContactMessage;
 use App\Models\Event;
 use App\Models\MembershipApplication;
@@ -14,6 +15,7 @@ class OverviewStats extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
+            Stat::make('Faaliyetler', Activity::query()->count()),
             Stat::make('Ders ve sohbetler', Program::query()->count()),
             Stat::make('Kayıtlı programlar', Event::query()->count()),
             Stat::make('Üyelik başvuruları', MembershipApplication::query()->where('status', 'pending')->count()),

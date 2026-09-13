@@ -21,8 +21,9 @@ class NavigationMenuTest extends TestCase
             ->assertSee('Başkanın mesajı')
             ->assertSee('Yönetim kadrosu')
             ->assertSee('Dernek tüzüğü')
-            ->assertSee('Programlar')
-            ->assertSee('/programlar', false)
+            ->assertSee('Faaliyetler')
+            ->assertSee('/faaliyetler', false)
+            ->assertDontSee('>Programlar<', false)
             ->assertDontSee('>Projeler<', false)
             ->assertDontSee('>Etkinlikler<', false)
             ->assertSee('Medya')
@@ -68,8 +69,8 @@ class NavigationMenuTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('Kurumsal')
-            ->assertSee('Programlar')
-            ->assertSee('/programlar', false)
+            ->assertSee('Faaliyetler')
+            ->assertSee('/faaliyetler', false)
             ->assertDontSee('>Etkinlikler<', false)
             ->assertSee('Medya')
             ->assertSee('Vitrin')
@@ -102,8 +103,8 @@ class NavigationMenuTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('Programlar')
-            ->assertSee('/programlar', false)
+            ->assertSee('Faaliyetler')
+            ->assertSee('/faaliyetler', false)
             ->assertDontSee('>Etkinlikler<', false)
             ->assertSeeInOrder(['Yazılar', 'Medya', 'Vitrin']);
     }
