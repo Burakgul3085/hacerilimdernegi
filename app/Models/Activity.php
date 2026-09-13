@@ -22,7 +22,7 @@ class Activity extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'slug', 'excerpt', 'cadence', 'description', 'highlights', 'image', 'gallery', 'status', 'sort_order', 'is_published',
+        'title', 'slug', 'excerpt', 'cadence', 'description', 'highlights', 'image', 'gallery', 'status', 'sort_order', 'is_published', 'registration_open',
     ];
 
     protected function casts(): array
@@ -33,6 +33,7 @@ class Activity extends Model
             'highlights' => 'array',
             'sort_order' => 'integer',
             'is_published' => 'boolean',
+            'registration_open' => 'boolean',
         ];
     }
 
@@ -51,6 +52,21 @@ class Activity extends Model
     public function sessions(): HasMany
     {
         return $this->hasMany(ActivitySession::class)->orderBy('starts_at');
+    }
+
+    /**
+     * @return HasMany<EventRegistration, $this>
+     */
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(EventRegistration::class);
+    }
+
+    public function acceptsRegistrations(): bool
+    {
+        return $this->is_published
+            && $this->registration_open
+            && $this->status === ActivityStatus::Ongoing;
     }
 
     /**

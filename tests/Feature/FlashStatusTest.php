@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\ProgramType;
+use App\Models\Activity;
 use App\Models\Event;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -118,6 +119,37 @@ class FlashStatusTest extends TestCase
             ->assertSeeInOrder([
                 'Katılım başvurusu',
                 'form-status-event',
+                'Katılım başvurunuz alındı',
+                'Ad soyad',
+            ]);
+    }
+
+    public function test_activity_registration_success_renders_the_notice_inside_the_form(): void
+    {
+        Notification::fake();
+
+        $activity = Activity::factory()->create([
+            'title' => 'Kur’an dersi bildirimi',
+            'slug' => 'kuran-dersi-bildirim',
+        ]);
+
+        $this->from(route('activities.show', $activity))
+            ->post(route('activities.register', $activity), [
+                'name' => 'Ayşe Yılmaz',
+                'email' => 'ayse@example.com',
+                'kvkk_accepted' => '1',
+            ])
+            ->assertRedirect(route('activities.show', $activity).'#form-status-activity')
+            ->assertSessionHas('status_context', 'activity');
+
+        $this->withSession([
+            'status' => 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.',
+            'status_context' => 'activity',
+        ])
+            ->get(route('activities.show', $activity))
+            ->assertSeeInOrder([
+                'Katılım başvurusu',
+                'form-status-activity',
                 'Katılım başvurunuz alındı',
                 'Ad soyad',
             ]);

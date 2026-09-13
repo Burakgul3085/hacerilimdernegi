@@ -27,6 +27,7 @@ class ActivityFactory extends Factory
             'status' => ActivityStatus::Ongoing,
             'sort_order' => 0,
             'is_published' => true,
+            'registration_open' => true,
         ];
     }
 

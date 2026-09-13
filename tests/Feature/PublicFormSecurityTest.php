@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\ProgramType;
+use App\Models\Activity;
 use App\Models\ContactMessage;
 use App\Models\EventRegistration;
 use App\Models\Program;
@@ -55,6 +56,28 @@ class PublicFormSecurityTest extends TestCase
 
         $this->from(route('programs.show', $program))
             ->post(route('programs.register', $program), [
+                'name' => 'Bot',
+                'email' => 'bot@example.com',
+                'kvkk_accepted' => '1',
+                'website' => 'https://spam.example',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('event_registrations', [
+            'email' => 'bot@example.com',
+        ]);
+        $this->assertSame(0, EventRegistration::query()->count());
+    }
+
+    public function test_activity_registration_honeypot_does_not_store_a_record(): void
+    {
+        $activity = Activity::factory()->create([
+            'title' => 'Honeypot faaliyet',
+            'slug' => 'honeypot-faaliyet',
+        ]);
+
+        $this->from(route('activities.show', $activity))
+            ->post(route('activities.register', $activity), [
                 'name' => 'Bot',
                 'email' => 'bot@example.com',
                 'kvkk_accepted' => '1',

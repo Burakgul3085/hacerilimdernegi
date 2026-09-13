@@ -7,6 +7,7 @@ use App\Actions\ReplyToEventRegistration;
 use App\Enums\ApplicationStatus;
 use App\Enums\ProgramType;
 use App\Enums\UserRole;
+use App\Models\Activity;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\Program;
@@ -88,6 +89,157 @@ class EventRegistrationMailFlowTest extends TestCase
 
         Notification::assertSentOnDemand(EventRegistrationReceivedForAdmin::class);
         Notification::assertSentTo($registration, EventRegistrationAcknowledged::class);
+    }
+
+    public function test_activity_form_stores_registration_and_dispatches_admin_and_ack_mails(): void
+    {
+        Notification::fake();
+
+        $activity = Activity::factory()->create([
+            'title' => 'Riyâzü’s-Sâlihîn başvuru',
+            'slug' => 'riyaz-basvuru-mail',
+        ]);
+
+        $this->post(route('activities.register', $activity), [
+            'name' => 'Ayşe Yılmaz',
+            'email' => 'ayse@example.com',
+            'phone' => '05320000000',
+            'notes' => 'Katılmak istiyorum.',
+            'kvkk_accepted' => '1',
+        ])->assertRedirect()->assertSessionHas('status', 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.');
+
+        $registration = EventRegistration::query()->where('email', 'ayse@example.com')->firstOrFail();
+
+        $this->assertSame(ApplicationStatus::Pending, $registration->status);
+        $this->assertSame($activity->id, $registration->activity_id);
+        $this->assertNull($registration->event_id);
+        $this->assertNull($registration->program_id);
+        $this->assertDatabaseHas('event_registrations', [
+            'email' => 'ayse@example.com',
+            'name' => 'Ayşe Yılmaz',
+            'activity_id' => $activity->id,
+        ]);
+
+        Notification::assertSentOnDemand(EventRegistrationReceivedForAdmin::class);
+        Notification::assertSentTo($registration, EventRegistrationAcknowledged::class);
+
+        $payload = (new EventRegistrationAcknowledged($registration))->toPhpMailer($registration);
+        $this->assertStringContainsString('Riyâzü’s-Sâlihîn başvuru', $payload['text']);
+        $this->assertStringContainsString('alınmıştır', $payload['text']);
+        $this->assertStringContainsString('En kısa zamanda', $payload['text']);
+    }
+
+    public function test_activity_form_rejects_an_empty_payload(): void
+    {
+        Notification::fake();
+
+        $activity = Activity::factory()->create([
+            'title' => 'Boş form hattı',
+            'slug' => 'bos-form-hatti',
+        ]);
+
+        $this->from(route('activities.show', $activity))->post(route('activities.register', $activity), [])
+            ->assertRedirect(route('activities.show', $activity))
+            ->assertSessionHasErrors(['name', 'email', 'kvkk_accepted']);
+
+        $this->assertDatabaseCount('event_registrations', 0);
+        Notification::assertNothingSent();
+    }
+
+    public function test_unpublished_activity_registration_is_not_found(): void
+    {
+        Notification::fake();
+
+        $activity = Activity::factory()->unpublished()->create([
+            'title' => 'Gizli hat başvurusu',
+            'slug' => 'gizli-hat-basvurusu',
+        ]);
+
+        $this->post(route('activities.register', $activity), [
+            'name' => 'Ayşe Yılmaz',
+            'email' => 'ayse@example.com',
+            'kvkk_accepted' => '1',
+        ])->assertNotFound();
+
+        $this->assertDatabaseCount('event_registrations', 0);
+        Notification::assertNothingSent();
+    }
+
+    public function test_completed_activity_registration_is_not_found(): void
+    {
+        Notification::fake();
+
+        $activity = Activity::factory()->completed()->create([
+            'title' => 'Bitmiş hat başvurusu',
+            'slug' => 'bitmis-hat-basvurusu',
+        ]);
+
+        $this->post(route('activities.register', $activity), [
+            'name' => 'Ayşe Yılmaz',
+            'email' => 'ayse@example.com',
+            'kvkk_accepted' => '1',
+        ])->assertNotFound();
+
+        $this->assertDatabaseCount('event_registrations', 0);
+        Notification::assertNothingSent();
+    }
+
+    public function test_closed_activity_registration_is_not_found(): void
+    {
+        Notification::fake();
+
+        $activity = Activity::factory()->create([
+            'title' => 'Kapalı kayıt hattı',
+            'slug' => 'kapali-kayit-hatti',
+            'registration_open' => false,
+        ]);
+
+        $this->post(route('activities.register', $activity), [
+            'name' => 'Ayşe Yılmaz',
+            'email' => 'ayse@example.com',
+            'kvkk_accepted' => '1',
+        ])->assertNotFound();
+
+        $this->assertDatabaseCount('event_registrations', 0);
+        Notification::assertNothingSent();
+    }
+
+    public function test_admin_reply_is_emailed_for_an_activity_registration(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        $activity = Activity::factory()->create([
+            'title' => 'Gençlik çalışmaları başvuru',
+            'slug' => 'genclik-basvuru-yanit',
+        ]);
+        $registration = EventRegistration::query()->create([
+            'activity_id' => $activity->id,
+            'name' => 'Ayşe',
+            'email' => 'ayse@example.com',
+            'notes' => 'Katılmak istiyorum.',
+            'kvkk_accepted' => true,
+            'status' => ApplicationStatus::Pending,
+        ]);
+
+        $reply = app(ReplyToEventRegistration::class)->handle(
+            $registration,
+            $admin,
+            'Merhaba Ayşe, yeriniz ayrıldı.',
+        );
+
+        $this->assertDatabaseHas('event_registration_replies', [
+            'id' => $reply->id,
+            'event_registration_id' => $registration->id,
+        ]);
+
+        Notification::assertSentTo($registration, EventRegistrationReplySent::class, function (EventRegistrationReplySent $notification) use ($registration): bool {
+            $payload = $notification->toPhpMailer($registration);
+
+            return $payload['to'] === ['ayse@example.com']
+                && str_contains($payload['subject'], 'Gençlik çalışmaları başvuru')
+                && str_contains($payload['text'], 'yeriniz ayrıldı');
+        });
     }
 
     public function test_program_form_rejects_an_empty_payload(): void

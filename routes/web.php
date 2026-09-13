@@ -24,6 +24,9 @@ foreach (CorporatePages::prettyRoutes() as $slug => $name) {
 }
 Route::get('/faaliyetler', [ActivityController::class, 'index'])->name('activities.index');
 Route::get('/faaliyetler/{activity:slug}', [ActivityController::class, 'show'])->name('activities.show');
+Route::post('/faaliyetler/{activity:slug}/kayit', [ActivityController::class, 'register'])
+    ->middleware('throttle:forms')
+    ->name('activities.register');
 Route::get('/programlar', [ProgramController::class, 'index'])->name('programs.index');
 Route::get('/programlar/{program:slug}', [ProgramController::class, 'show'])->name('programs.show');
 Route::post('/programlar/{program:slug}/kayit', [ProgramController::class, 'register'])

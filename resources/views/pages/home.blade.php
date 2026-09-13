@@ -168,7 +168,7 @@
                 link-label="Tüm faaliyetler"
                 :link-url="route('activities.index')" />
 
-            <div class="mt-12 grid gap-6 md:grid-cols-2">
+            <div class="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach ($homeActivities as $activity)
                     <div class="reveal" style="--reveal-delay: {{ $loop->index * 80 }}ms">
                         <x-activity-card :activity="$activity" />

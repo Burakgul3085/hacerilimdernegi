@@ -21,7 +21,7 @@ class ReplyToEventRegistration
             throw new RuntimeException('Yanıt metni boş olamaz.');
         }
 
-        $registration->loadMissing(['event', 'program']);
+        $registration->loadMissing(['event', 'program', 'activity']);
 
         $reply = new EventRegistrationReply([
             'event_registration_id' => $registration->id,

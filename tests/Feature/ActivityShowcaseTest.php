@@ -103,8 +103,9 @@ class ActivityShowcaseTest extends TestCase
             ->assertSee('Kimler için')
             ->assertSee('Sonraki oturum')
             ->assertSee('Bu ayki tahlil')
-            ->assertSee('Destek olun')
-            ->assertSee(route('donate', absolute: false), false)
+            ->assertSee('Katılmak için tıkla')
+            ->assertSee('Katılım başvurusu')
+            ->assertDontSee('Destek olun')
             ->assertDontSee('IBAN');
     }
 
@@ -142,6 +143,35 @@ class ActivityShowcaseTest extends TestCase
         $this->get('/faaliyetler')
             ->assertOk()
             ->assertSee('Bugün yapıldı');
+    }
+
+    public function test_completed_activity_hides_the_registration_form(): void
+    {
+        $activity = Activity::factory()->completed()->create([
+            'title' => 'Tamamlanan kamp hattı',
+            'slug' => 'tamamlanan-kamp-hatti',
+        ]);
+
+        $this->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertSee('Bu hat tamamlandı.')
+            ->assertDontSee('Katılmak için tıkla')
+            ->assertDontSee('Katılım başvurusu');
+    }
+
+    public function test_closed_registration_hides_the_form(): void
+    {
+        $activity = Activity::factory()->create([
+            'title' => 'Kayıt kapalı hat',
+            'slug' => 'kayit-kapali-hat',
+            'registration_open' => false,
+        ]);
+
+        $this->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertSee('Bu hat için kayıt şu an kapalı.')
+            ->assertDontSee('Katılmak için tıkla')
+            ->assertDontSee('Katılım başvurusu');
     }
 
     public function test_unpublished_activity_is_not_found(): void

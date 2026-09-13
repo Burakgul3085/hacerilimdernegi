@@ -19,7 +19,7 @@ class ProcessEventRegistration
 
     public function handle(EventRegistration $registration): void
     {
-        $registration->loadMissing(['event', 'program']);
+        $registration->loadMissing(['event', 'program', 'activity']);
 
         if (! $this->mailer->isConfigured()) {
             report(new \RuntimeException('Program başvurusu kaydedildi ancak mailer ayarları eksik.'));

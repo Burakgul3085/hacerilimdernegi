@@ -42,6 +42,10 @@ class ActivityForm
                             ->helperText('Kartta iki satır görünür.')
                             ->columnSpanFull(),
                         Toggle::make('is_published')->label('Yayında')->default(true),
+                        Toggle::make('registration_open')
+                            ->label('Kayıt açık')
+                            ->helperText('Kapalıysa sitede başvuru formu görünmez.')
+                            ->default(true),
                     ]),
 
                 Section::make('Metin')

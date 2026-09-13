@@ -54,14 +54,17 @@
             <div class="card p-6">
                 <p class="eyebrow">Katılım</p>
                 <p class="mt-3 text-[15px] leading-relaxed text-muted">
-                    @if ($nextSession)
-                        Bir sonraki buluşma yan panelde. Dernek çalışmalarına düzenli katılmak için üyelik formunu kullanabilirsiniz.
+                    @if ($activity->acceptsRegistrations())
+                        Bu hatta katılmak için formu doldurun. Yönetim size e-posta ile döner.
+                    @elseif ($activity->status === \App\Enums\ActivityStatus::Completed)
+                        Bu hat tamamlandı.
                     @else
-                        Bu hattın bir sonraki tarihi duyurulunca burada görünür.
+                        Bu hat için kayıt şu an kapalı.
                     @endif
                 </p>
-                <a href="{{ route('membership') }}" class="btn btn-solid btn-sm mt-6 w-full">Üyelik / gönüllü</a>
-                <a href="{{ route('donate') }}" class="btn btn-outline btn-sm mt-3 w-full">Destek olun</a>
+                @if ($activity->acceptsRegistrations())
+                    <a href="#kayit" class="btn btn-solid btn-sm mt-6 w-full">Katılmak için tıkla</a>
+                @endif
             </div>
         </aside>
     </div>
@@ -100,6 +103,10 @@
         </div>
     @endif
 
+    @if ($activity->acceptsRegistrations())
+        <x-participation-form :action="route('activities.register', $activity)" context="activity" />
+    @endif
+
     @if ($related->isNotEmpty())
         <div class="mt-16 border-t border-line pt-14 lg:mt-20">
             <div class="mb-8 flex items-center gap-5">
@@ -107,7 +114,7 @@
                 <span class="rule flex-1"></span>
             </div>
 
-            <div class="grid gap-6 md:grid-cols-3">
+            <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach ($related as $item)
                     <div class="reveal" style="--reveal-delay: {{ $loop->index * 80 }}ms">
                         <x-activity-card :activity="$item" />

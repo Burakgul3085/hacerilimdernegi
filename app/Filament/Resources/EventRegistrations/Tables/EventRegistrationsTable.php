@@ -23,7 +23,8 @@ class EventRegistrationsTable
                     ->searchable(query: function (Builder $query, string $search): void {
                         $query->where(function (Builder $builder) use ($search): void {
                             $builder->whereHas('event', fn (Builder $event) => $event->where('title', 'like', "%{$search}%"))
-                                ->orWhereHas('program', fn (Builder $program) => $program->where('title', 'like', "%{$search}%"));
+                                ->orWhereHas('program', fn (Builder $program) => $program->where('title', 'like', "%{$search}%"))
+                                ->orWhereHas('activity', fn (Builder $activity) => $activity->where('title', 'like', "%{$search}%"));
                         });
                     }),
                 TextColumn::make('name')->label('Ad')->searchable(),
