@@ -20,6 +20,7 @@ class ActivityController extends Controller
 
         $activities = Activity::query()
             ->published()
+            ->with('sessions')
             ->when($scope === 'devam', fn (Builder $query) => $query->where('status', ActivityStatus::Ongoing))
             ->when($scope === 'tamamlandi', fn (Builder $query) => $query->where('status', ActivityStatus::Completed))
             ->ordered()
@@ -35,15 +36,11 @@ class ActivityController extends Controller
     {
         abort_unless($activity->is_published, 404);
 
-        $activity->load([
-            'programs' => fn (Builder $query) => $query->published()->upcoming(),
-            'events' => fn (Builder $query) => $query->published()
-                ->where(fn (Builder $builder) => $builder->whereNull('starts_at')->orWhere('starts_at', '>=', now()->subDay()))
-                ->orderBy('starts_at'),
-        ]);
+        $activity->load('sessions');
 
         $related = Activity::query()
             ->published()
+            ->with('sessions')
             ->whereKeyNot($activity->getKey())
             ->ordered()
             ->limit(3)
@@ -51,7 +48,9 @@ class ActivityController extends Controller
 
         return view('pages.activities.show', [
             'activity' => $activity,
-            'sessions' => $activity->sessionItems(),
+            'nextSession' => $activity->nextSession(),
+            'upcomingSessions' => $activity->upcomingSessions(),
+            'pastSessions' => $activity->pastSessions(),
             'related' => $related,
         ]);
     }

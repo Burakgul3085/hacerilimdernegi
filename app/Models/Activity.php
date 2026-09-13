@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\ActivityStatus;
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasContentGallery;
-use App\Support\WorkItem;
 use Database\Factories\ActivityFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,7 +22,7 @@ class Activity extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'slug', 'excerpt', 'description', 'image', 'gallery', 'status', 'sort_order', 'is_published',
+        'title', 'slug', 'excerpt', 'cadence', 'description', 'highlights', 'image', 'gallery', 'status', 'sort_order', 'is_published',
     ];
 
     protected function casts(): array
@@ -31,6 +30,7 @@ class Activity extends Model
         return [
             'status' => ActivityStatus::class,
             'gallery' => 'array',
+            'highlights' => 'array',
             'sort_order' => 'integer',
             'is_published' => 'boolean',
         ];
@@ -43,6 +43,14 @@ class Activity extends Model
                 $activity->slug = Str::slug($activity->title);
             }
         });
+    }
+
+    /**
+     * @return HasMany<ActivitySession, $this>
+     */
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(ActivitySession::class)->orderBy('starts_at');
     }
 
     /**
@@ -61,16 +69,89 @@ class Activity extends Model
         return $this->hasMany(Event::class);
     }
 
-    /**
-     * @return Collection<int, WorkItem>
-     */
-    public function sessionItems(): Collection
+    public function nextSession(): ?ActivitySession
     {
-        return collect()
-            ->concat($this->programs->map(fn (Program $program): WorkItem => WorkItem::fromProgram($program)))
-            ->concat($this->events->map(fn (Event $event): WorkItem => WorkItem::fromEvent($event)))
-            ->sortBy(fn (WorkItem $item): int => $item->startsAt?->timestamp ?? PHP_INT_MAX)
+        return $this->sessions->first(
+            fn (ActivitySession $session): bool => $session->starts_at->gte(now()),
+        );
+    }
+
+    public function lastSession(): ?ActivitySession
+    {
+        return $this->sessions
+            ->filter(fn (ActivitySession $session): bool => $session->starts_at->lt(now()))
+            ->last();
+    }
+
+    /**
+     * @return Collection<int, ActivitySession>
+     */
+    public function upcomingSessions(): Collection
+    {
+        return $this->sessions
+            ->filter(fn (ActivitySession $session): bool => $session->starts_at->gte(now()))
             ->values();
+    }
+
+    /**
+     * @return Collection<int, ActivitySession>
+     */
+    public function pastSessions(): Collection
+    {
+        return $this->sessions
+            ->filter(fn (ActivitySession $session): bool => $session->starts_at->lt(now()))
+            ->reverse()
+            ->take(4)
+            ->values();
+    }
+
+    /**
+     * @return list<array{title: string, text: string}>
+     */
+    public function highlightItems(): array
+    {
+        $items = [];
+
+        foreach ($this->highlights ?? [] as $highlight) {
+            if (! is_array($highlight)) {
+                continue;
+            }
+
+            $title = trim((string) ($highlight['title'] ?? ''));
+            $text = trim((string) ($highlight['text'] ?? ''));
+
+            if ($title === '' || $text === '') {
+                continue;
+            }
+
+            $items[] = ['title' => $title, 'text' => $text];
+        }
+
+        return array_slice($items, 0, 3);
+    }
+
+    public function sessionHeadline(): ?string
+    {
+        $next = $this->nextSession();
+        $last = $this->lastSession();
+
+        if ($last?->isToday() && $next !== null) {
+            return 'Bugün yapıldı · sonraki '.$next->shortDate();
+        }
+
+        if ($next?->isToday()) {
+            return 'Bugün · '.$next->timeLabel();
+        }
+
+        if ($next !== null) {
+            return 'Sonraki oturum · '.$next->longDate();
+        }
+
+        if ($last?->isToday()) {
+            return 'Bugün yapıldı';
+        }
+
+        return null;
     }
 
     public function scopePublished(Builder $query): Builder

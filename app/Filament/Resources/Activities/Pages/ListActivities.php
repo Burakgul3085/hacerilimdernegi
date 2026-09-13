@@ -12,7 +12,7 @@ class ListActivities extends ListRecords
 
     public function getSubheading(): ?string
     {
-        return 'Sitedeki faaliyet kartları. Ders ve kayıtlı programı buraya bağlayınca detayda oturum görünür.';
+        return 'Sitedeki faaliyet kartları. Ritim ve oturum tarihleri aynı kaydın içindedir.';
     }
 
     protected function getHeaderActions(): array

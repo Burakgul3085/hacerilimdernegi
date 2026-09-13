@@ -12,7 +12,7 @@ class HomeController extends Controller
 {
     public function __invoke(): View
     {
-        $homeActivities = Activity::query()->published()->ordered()->limit(4)->get();
+        $homeActivities = Activity::query()->published()->with('sessions')->ordered()->limit(4)->get();
 
         return view('pages.home', [
             'homeActivities' => $homeActivities,

@@ -235,6 +235,8 @@ class FrontendContentTest extends TestCase
 
     public function test_home_hides_the_whatsapp_button_when_no_phone_number_is_set(): void
     {
+        SiteSettings::put('phone', '');
+
         $this->get('/')
             ->assertSee('site-float', false)
             ->assertDontSee('https://wa.me/', false)

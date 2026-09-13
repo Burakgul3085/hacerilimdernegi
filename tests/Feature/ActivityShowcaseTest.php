@@ -2,10 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Enums\ProgramType;
 use App\Models\Activity;
+use App\Models\ActivitySession;
 use App\Models\Event;
-use App\Models\Program;
 use App\Support\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -56,21 +55,21 @@ class ActivityShowcaseTest extends TestCase
             ->assertDontSee('Süregelen hadis halkası');
     }
 
-    public function test_activity_detail_shows_copy_and_linked_sessions(): void
+    public function test_activity_detail_shows_copy_cadence_and_the_next_session(): void
     {
         $activity = Activity::factory()->create([
             'title' => 'Kitap tahlil hattı',
             'slug' => 'kitap-tahlil-hatti',
             'excerpt' => 'Seçilen eserler üzerine düzenli tahlil.',
             'description' => '<p>Tahlil açıklaması</p>',
+            'cadence' => 'Her perşembe 20.00',
+            'highlights' => [
+                ['title' => 'Kimler için', 'text' => 'Kitap okumak isteyenler.'],
+            ],
         ]);
-        Program::query()->create([
-            'activity_id' => $activity->id,
-            'type' => ProgramType::KitapTahlili,
-            'title' => 'Bu ayki tahlil',
-            'slug' => 'bu-ayki-tahlil',
-            'starts_at' => now()->addDays(4),
-            'is_published' => true,
+        ActivitySession::factory()->for($activity)->create([
+            'starts_at' => now()->addDays(4)->setTime(20, 0),
+            'note' => 'Bu ayki tahlil',
         ]);
 
         $this->get(route('activities.show', $activity))
@@ -78,11 +77,49 @@ class ActivityShowcaseTest extends TestCase
             ->assertSee('Kitap tahlil hattı')
             ->assertSee('Seçilen eserler üzerine düzenli tahlil.')
             ->assertSee('Tahlil açıklaması')
-            ->assertSee('Yaklaşan oturumlar')
+            ->assertSee('Her perşembe 20.00')
+            ->assertSee('Kimler için')
+            ->assertSee('Sonraki oturum')
             ->assertSee('Bu ayki tahlil')
             ->assertSee('Destek olun')
             ->assertSee(route('donate', absolute: false), false)
             ->assertDontSee('IBAN');
+    }
+
+    public function test_activity_index_shows_the_next_session_headline(): void
+    {
+        $activity = Activity::factory()->create([
+            'title' => 'Hadis halkası kartı',
+            'slug' => 'hadis-halkasi-karti',
+        ]);
+        ActivitySession::factory()->for($activity)->create([
+            'starts_at' => now()->addDays(5)->setTime(14, 0),
+        ]);
+
+        $this->get('/faaliyetler')
+            ->assertOk()
+            ->assertSee('Hadis halkası kartı')
+            ->assertSee('Sonraki oturum');
+    }
+
+    public function test_activity_index_says_today_happened_when_the_next_date_is_known(): void
+    {
+        $this->travelTo(now()->setTime(18, 0));
+
+        $activity = Activity::factory()->create([
+            'title' => 'Bugünkü merkez dersi',
+            'slug' => 'bugunku-merkez-dersi',
+        ]);
+        ActivitySession::factory()->for($activity)->create([
+            'starts_at' => now()->setTime(14, 0),
+        ]);
+        ActivitySession::factory()->for($activity)->create([
+            'starts_at' => now()->addWeek()->setTime(14, 0),
+        ]);
+
+        $this->get('/faaliyetler')
+            ->assertOk()
+            ->assertSee('Bugün yapıldı');
     }
 
     public function test_unpublished_activity_is_not_found(): void

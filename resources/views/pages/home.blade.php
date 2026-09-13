@@ -23,7 +23,9 @@
             <a href="{{ route('activities.show', $featuredActivity) }}" class="hero-enter absolute bottom-10 left-8 block max-w-xs rounded-2xl border border-line bg-paper/95 p-5 no-underline shadow-float backdrop-blur xl:left-10" style="--enter-delay: 0.72s">
                 <p class="tag">{{ $featuredActivity->status->label() }}</p>
                 <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $featuredActivity->title }}</p>
-                @if (filled($featuredActivity->excerpt))
+                @if (filled($featuredActivity->sessionHeadline()))
+                    <p class="activity-session-line mt-3">{{ $featuredActivity->sessionHeadline() }}</p>
+                @elseif (filled($featuredActivity->excerpt))
                     <p class="mt-3 line-clamp-2 text-[13px] leading-relaxed text-muted">{{ $featuredActivity->excerpt }}</p>
                 @endif
             </a>
@@ -76,7 +78,9 @@
             <a href="{{ route('activities.show', $featuredActivity) }}" class="hero-enter hero-visual-mobile-card" style="--enter-delay: 0.72s">
                 <p class="tag">{{ $featuredActivity->status->label() }}</p>
                 <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $featuredActivity->title }}</p>
-                @if (filled($featuredActivity->excerpt))
+                @if (filled($featuredActivity->sessionHeadline()))
+                    <p class="activity-session-line mt-3">{{ $featuredActivity->sessionHeadline() }}</p>
+                @elseif (filled($featuredActivity->excerpt))
                     <p class="mt-3 line-clamp-2 text-[13px] leading-relaxed text-muted">{{ $featuredActivity->excerpt }}</p>
                 @endif
             </a>

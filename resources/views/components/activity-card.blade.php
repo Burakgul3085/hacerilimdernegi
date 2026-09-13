@@ -16,9 +16,15 @@
             <p class="mt-3 line-clamp-2 text-[15px] leading-relaxed text-muted">{{ $activity->excerpt }}</p>
         @endif
 
-        <div class="mt-auto flex items-center justify-between border-t border-line pt-5">
-            <span class="text-[13px] font-medium tracking-wide text-forest/70">İncele</span>
-            <span class="arrow-btn"><x-ui.icon name="arrow-right" class="h-4 w-4" /></span>
+        <div class="mt-auto border-t border-line pt-5">
+            @if (filled($activity->sessionHeadline()))
+                <p class="activity-session-line">{{ $activity->sessionHeadline() }}</p>
+            @endif
+
+            <div class="mt-3 flex items-center justify-between">
+                <span class="text-[13px] font-medium tracking-wide text-forest/70">İncele</span>
+                <span class="arrow-btn"><x-ui.icon name="arrow-right" class="h-4 w-4" /></span>
+            </div>
         </div>
     </div>
 </a>

@@ -5,7 +5,9 @@ namespace App\Filament\Resources\Activities\Schemas;
 use App\Enums\ActivityStatus;
 use App\Filament\Support\ContentUploads;
 use App\Support\UploadRules;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -20,8 +22,7 @@ class ActivityForm
     {
         return $schema
             ->components([
-                Section::make('Faaliyet hattı')
-                    ->description('Sitede kart olarak durur. Tarihli ders veya kayıtlı programı buraya bağlayınca detayda oturum görünür.')
+                Section::make('Kimlik')
                     ->columns(2)
                     ->schema([
                         TextInput::make('title')->label('Başlık')->required()->maxLength(255),
@@ -38,7 +39,20 @@ class ActivityForm
                             ->label('Kısa özet')
                             ->rows(3)
                             ->maxLength(280)
+                            ->helperText('Kartta iki satır görünür.')
                             ->columnSpanFull(),
+                        Toggle::make('is_published')->label('Yayında')->default(true),
+                    ]),
+
+                Section::make('Metin')
+                    ->schema([
+                        ContentUploads::withEditorUploads(
+                            RichEditor::make('description')->label('Açıklama')->columnSpanFull(),
+                        ),
+                    ]),
+
+                Section::make('Görsel')
+                    ->schema([
                         FileUpload::make('image')
                             ->label('Kapak')
                             ->image()
@@ -47,10 +61,44 @@ class ActivityForm
                             ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
                             ->maxSize(UploadRules::maxImageKb()),
                         ContentUploads::gallery('gallery', 'activities/gallery')->columnSpanFull(),
-                        ContentUploads::withEditorUploads(
-                            RichEditor::make('description')->label('Açıklama')->columnSpanFull(),
-                        ),
-                        Toggle::make('is_published')->label('Yayında')->default(true),
+                    ]),
+
+                Section::make('Kenar kutuları')
+                    ->description('Detay sayfasında metnin yanında durur. En fazla üç kutu. Bağış bilgisi buraya yazılmaz.')
+                    ->collapsed()
+                    ->schema([
+                        Repeater::make('highlights')
+                            ->label('Kutular')
+                            ->maxItems(3)
+                            ->defaultItems(0)
+                            ->addActionLabel('Kutu ekle')
+                            ->columns(2)
+                            ->schema([
+                                TextInput::make('title')->label('Başlık')->maxLength(80)->required(),
+                                Textarea::make('text')->label('Metin')->rows(2)->maxLength(280)->required(),
+                            ]),
+                    ]),
+
+                Section::make('Oturumlar')
+                    ->description('Düzenli hattın ritim cümlesi ve tarihleri. Geçmiş tarih sitede “yapıldı”, gelecek tarih “sonraki oturum” olur.')
+                    ->schema([
+                        TextInput::make('cadence')
+                            ->label('Ritim')
+                            ->maxLength(120)
+                            ->placeholder('Her cumartesi 14.00'),
+                        Repeater::make('sessions')
+                            ->relationship()
+                            ->label('Tarihler')
+                            ->addActionLabel('Oturum ekle')
+                            ->defaultItems(0)
+                            ->collapsed()
+                            ->reorderable(false)
+                            ->columnSpanFull()
+                            ->schema([
+                                DateTimePicker::make('starts_at')->label('Tarih ve saat')->required(),
+                                TextInput::make('location')->label('Yer')->maxLength(255),
+                                TextInput::make('note')->label('Kısa not')->maxLength(180),
+                            ]),
                     ]),
             ]);
     }

@@ -14,20 +14,20 @@ class AdminNavigationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_activities_and_sessions_appear_under_the_activities_group(): void
+    public function test_only_activities_appear_under_the_activities_group(): void
     {
         $this->actingAs($this->editor());
 
         Filament::setCurrentPanel('admin');
 
-        $programLabels = $this->navigationLabelsInGroup('Faaliyetler');
-        $contentLabels = $this->navigationLabelsInGroup('İçerik');
+        $activityLabels = $this->navigationLabelsInGroup('Faaliyetler');
+        $allLabels = $this->allNavigationLabels();
 
-        $this->assertContains('Faaliyetler', $programLabels);
-        $this->assertContains('Ders ve sohbetler', $programLabels);
-        $this->assertContains('Kayıtlı programlar', $programLabels);
-        $this->assertNotContains('Ders ve sohbetler', $contentLabels);
-        $this->assertNotContains('Kayıtlı programlar', $contentLabels);
+        $this->assertContains('Faaliyetler', $activityLabels);
+        $this->assertNotContains('Ders ve sohbetler', $activityLabels);
+        $this->assertNotContains('Kayıtlı programlar', $activityLabels);
+        $this->assertNotContains('Ders ve sohbetler', $allLabels);
+        $this->assertNotContains('Kayıtlı programlar', $allLabels);
     }
 
     public function test_pages_appear_as_corporate_in_the_content_group(): void
@@ -53,6 +53,18 @@ class AdminNavigationTest extends TestCase
         $this->assertNotNull($group, "Missing navigation group [{$groupLabel}].");
 
         return collect($group->getItems())
+            ->map(fn (NavigationItem $item): string => $item->getLabel())
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function allNavigationLabels(): array
+    {
+        return collect(Filament::getCurrentOrDefaultPanel()->getNavigation())
+            ->flatMap(fn (NavigationGroup $group) => $group->getItems())
             ->map(fn (NavigationItem $item): string => $item->getLabel())
             ->values()
             ->all();
