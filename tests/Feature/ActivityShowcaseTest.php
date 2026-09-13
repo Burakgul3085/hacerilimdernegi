@@ -13,6 +13,28 @@ class ActivityShowcaseTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_activity_index_shows_lines_from_the_association_catalog(): void
+    {
+        $this->get('/faaliyetler')
+            ->assertOk()
+            ->assertSee('Riyâzü’s-Sâlihîn')
+            ->assertSee('Satır arası seferleri')
+            ->assertSee('14–18 yaşındaki kızlar')
+            ->assertSee('Lafzı ve manası şifa olan kitabı');
+    }
+
+    public function test_quran_activity_detail_shows_document_cadence_and_copy(): void
+    {
+        $activity = Activity::query()->where('slug', 'kuran-i-kerim')->firstOrFail();
+
+        $this->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertSee('Kur’an-ı Kerim dersleri')
+            ->assertSee('Her cuma 14.30–16.30')
+            ->assertSee('Kontenjan sınırlıdır')
+            ->assertSee('Yüzüne ve tecvid');
+    }
+
     public function test_activity_index_lists_published_lines_and_hides_drafts(): void
     {
         $published = Activity::factory()->create([
