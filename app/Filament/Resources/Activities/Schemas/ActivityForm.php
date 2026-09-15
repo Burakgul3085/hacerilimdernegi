@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Activities\Schemas;
 
 use App\Enums\ActivityStatus;
 use App\Filament\Support\ContentUploads;
+use App\Support\RegistrationForm;
 use App\Support\UploadRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -49,7 +50,7 @@ class ActivityForm
                     ]),
 
                 Section::make('Kayıt formu alanları')
-                    ->description('Ad soyad, e-posta, telefon ve KVKK her formda sabittir. Alttaki soruları faaliyete özel ekleyin. Boş bırakılırsa yalnızca “Not” alanı kalır.')
+                    ->description('Ad soyad, e-posta, telefon ve KVKK her formda sabittir. Aşağıya faaliyete özel sorular ekleyin; yardımcı metin ve yer tutucu ile formu netleştirin. Boş bırakılırsa yalnızca “Not” alanı kalır.')
                     ->schema([
                         Repeater::make('registration_fields')
                             ->label('Ek sorular')
@@ -58,6 +59,8 @@ class ActivityForm
                                     'label' => 'Not',
                                     'type' => 'textarea',
                                     'required' => false,
+                                    'help' => '',
+                                    'placeholder' => 'Eklemek istedikleriniz',
                                     'options' => '',
                                 ],
                             ])
@@ -72,18 +75,24 @@ class ActivityForm
                                     ->columnSpanFull(),
                                 Select::make('type')
                                     ->label('Tür')
-                                    ->options([
-                                        'text' => 'Kısa metin',
-                                        'textarea' => 'Uzun metin',
-                                        'select' => 'Seçim listesi',
-                                        'checkbox' => 'Evet / hayır',
-                                    ])
+                                    ->options(RegistrationForm::typeOptions())
                                     ->default('text')
                                     ->required()
                                     ->live(),
                                 Toggle::make('required')
                                     ->label('Zorunlu')
                                     ->default(false),
+                                TextInput::make('placeholder')
+                                    ->label('Yer tutucu')
+                                    ->maxLength(120)
+                                    ->visible(fn ($get): bool => ! in_array($get('type'), ['checkbox', 'select', 'date'], true))
+                                    ->columnSpanFull(),
+                                Textarea::make('help')
+                                    ->label('Yardımcı metin')
+                                    ->rows(2)
+                                    ->maxLength(280)
+                                    ->helperText('Soru altında gri açıklama olarak görünür.')
+                                    ->columnSpanFull(),
                                 Textarea::make('options')
                                     ->label('Seçenekler')
                                     ->rows(4)
@@ -99,7 +108,17 @@ class ActivityForm
                                     ->required(fn ($get): bool => $get('type') === 'select')
                                     ->columnSpanFull(),
                             ])
-                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                            ->itemLabel(function (array $state): ?string {
+                                $label = trim((string) ($state['label'] ?? ''));
+
+                                if ($label === '') {
+                                    return null;
+                                }
+
+                                $required = ! empty($state['required']) ? ' · Zorunlu' : '';
+
+                                return $label.$required;
+                            }),
                     ]),
 
                 Section::make('Metin')

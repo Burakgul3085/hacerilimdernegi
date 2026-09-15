@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\EventRegistrations\Tables;
 
+use App\Enums\ApplicationStatus;
 use App\Models\EventRegistration;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -26,10 +29,18 @@ class EventRegistrationsTable
                                 ->orWhereHas('program', fn (Builder $program) => $program->where('title', 'like', "%{$search}%"))
                                 ->orWhereHas('activity', fn (Builder $activity) => $activity->where('title', 'like', "%{$search}%"));
                         });
-                    }),
+                    })
+                    ->wrap()
+                    ->limit(40),
                 TextColumn::make('name')->label('Ad')->searchable(),
-                TextColumn::make('email')->label('E-posta')->searchable(),
-                TextColumn::make('phone')->label('Telefon'),
+                TextColumn::make('email')->label('E-posta')->searchable()->toggleable(),
+                TextColumn::make('answers_preview')
+                    ->label('Özet')
+                    ->state(fn (EventRegistration $record): string => $record->answersPreview())
+                    ->placeholder('—')
+                    ->wrap()
+                    ->limit(70)
+                    ->toggleable(),
                 TextColumn::make('status')->label('Durum')->badge(),
                 TextColumn::make('replied_at')
                     ->label('Yanıt')
@@ -37,6 +48,22 @@ class EventRegistrationsTable
                     ->badge()
                     ->color(fn ($state) => $state ? 'success' : 'warning'),
                 TextColumn::make('created_at')->label('Tarih')->since(),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('Durum')
+                    ->options(collect(ApplicationStatus::cases())->mapWithKeys(
+                        fn (ApplicationStatus $status): array => [$status->value => $status->label()],
+                    )),
+                TernaryFilter::make('replied')
+                    ->label('Yanıt')
+                    ->placeholder('Tümü')
+                    ->trueLabel('Yanıtlandı')
+                    ->falseLabel('Bekliyor')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereNotNull('replied_at'),
+                        false: fn (Builder $query) => $query->whereNull('replied_at'),
+                    ),
             ])
             ->recordActions([
                 EditAction::make()->label('Görüntüle'),

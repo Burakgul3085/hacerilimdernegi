@@ -3,6 +3,7 @@
     'label' => null,
     'type' => 'text',
     'placeholder' => null,
+    'help' => null,
     'required' => false,
     'value' => null,
     'rows' => 5,
@@ -25,13 +26,17 @@
         </label>
     @endif
 
+    @if (filled($help))
+        <p class="text-[12px] leading-relaxed text-muted">{{ $help }}</p>
+    @endif
+
     @if ($type === 'textarea')
         <textarea id="{{ $id }}" name="{{ $name }}" rows="{{ $rows }}" placeholder="{{ $placeholder }}"
                   @if ($required) required @endif
                   class="field {{ $ring }}">{{ $current }}</textarea>
     @elseif ($type === 'select')
         <select id="{{ $id }}" name="{{ $name }}" @if ($required) required @endif class="field {{ $ring }}">
-            <option value="">{{ $placeholder ?? 'Seçiniz' }}</option>
+            <option value="">{{ $placeholder ?: 'Seçiniz' }}</option>
             @foreach ($options ?? [] as $optionValue => $optionLabel)
                 <option value="{{ $optionValue }}" @selected((string) $current === (string) $optionValue)>{{ $optionLabel }}</option>
             @endforeach

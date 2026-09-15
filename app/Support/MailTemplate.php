@@ -127,6 +127,81 @@ final class MailTemplate
         return rtrim((string) config('app.url'), '/');
     }
 
+    /**
+     * Yönetici maillerinde kullanılan etiket-değer tablosu.
+     *
+     * @param  list<array{label: string, value: string, href?: string|null}>  $rows
+     */
+    public static function detailRows(array $rows): string
+    {
+        $html = '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:14px;color:#3a3733;">';
+        $lastIndex = count($rows) - 1;
+
+        foreach ($rows as $index => $row) {
+            $padding = $index === $lastIndex ? '0' : '0 0 10px';
+            $label = e($row['label']);
+            $value = e($row['value']);
+            $href = $row['href'] ?? null;
+
+            $valueHtml = filled($href)
+                ? '<a href="'.e((string) $href).'" style="color:#161513;text-decoration:underline;">'.$value.'</a>'
+                : $value;
+
+            $html .= <<<HTML
+                <tr>
+                    <td style="padding:{$padding};width:96px;vertical-align:top;color:#8a7a62;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;">{$label}</td>
+                    <td style="padding:{$padding};vertical-align:top;color:#161513;">{$valueHtml}</td>
+                </tr>
+                HTML;
+        }
+
+        return $html.'</table>';
+    }
+
+    /**
+     * Dinamik form cevaplarını kurumsal kart satırları olarak basar.
+     *
+     * @param  list<array{label: string, value: string}>  $answers
+     */
+    public static function answerBlocks(array $answers, string $heading = 'Form cevapları'): string
+    {
+        if ($answers === []) {
+            return '';
+        }
+
+        $headingHtml = e($heading);
+        $html = '<p style="margin:0 0 12px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8a7a62;">'.$headingHtml.'</p>';
+
+        foreach ($answers as $index => $answer) {
+            $label = e($answer['label']);
+            $value = nl2br(e($answer['value']));
+            $margin = $index === array_key_last($answers) ? '0' : '0 0 12px';
+
+            $html .= <<<HTML
+                <div style="margin:{$margin};padding:12px 14px;border:1px solid #e4d9c8;border-radius:12px;background-color:#f7f1e8;">
+                    <p style="margin:0 0 6px;font-family:'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#8a7a62;">{$label}</p>
+                    <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:14px;line-height:1.7;color:#3a3733;">{$value}</div>
+                </div>
+                HTML;
+        }
+
+        return $html;
+    }
+
+    /**
+     * @param  list<array{label: string, value: string}>  $answers
+     */
+    public static function answersPlainText(array $answers): string
+    {
+        if ($answers === []) {
+            return '';
+        }
+
+        return collect($answers)
+            ->map(fn (array $answer): string => $answer['label'].': '.$answer['value'])
+            ->implode("\n");
+    }
+
     public static function logoPath(): string
     {
         $configured = trim((string) SiteSettings::get('logo', ''));

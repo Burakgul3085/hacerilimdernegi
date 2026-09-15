@@ -54,7 +54,7 @@ class EventRegistrationResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['event', 'program']);
+        return parent::getEloquentQuery()->with(['event', 'program', 'activity']);
     }
 
     public static function getPages(): array

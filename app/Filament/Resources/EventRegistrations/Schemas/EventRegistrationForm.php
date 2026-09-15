@@ -19,19 +19,33 @@ class EventRegistrationForm
     {
         return $schema
             ->components([
-                Section::make('Gelen başvuru')
+                Section::make('Başvuru dosyası')
+                    ->description('Gelen katılım kaydı. Form cevaplarını buradan inceleyip durum güncelleyin veya yanıtlayın.')
                     ->columns(2)
                     ->schema([
                         Placeholder::make('program_title')
-                            ->label('Program')
+                            ->label('Program / faaliyet')
                             ->content(fn (?EventRegistration $record): string => $record?->subjectTitle() ?: '—'),
+                        Placeholder::make('received_at')
+                            ->label('Başvuru tarihi')
+                            ->content(fn (?EventRegistration $record): string => $record?->created_at?->translatedFormat('d F Y, H:i') ?: '—'),
                         TextInput::make('name')->label('Ad soyad')->disabled(),
                         TextInput::make('email')->label('E-posta')->disabled(),
                         TextInput::make('phone')->label('Telefon')->disabled(),
-                        Textarea::make('notes')->label('Not / özet')->disabled()->rows(6)->columnSpanFull(),
+                        Toggle::make('kvkk_accepted')->label('KVKK onayı')->disabled(),
+                        Select::make('status')
+                            ->label('Durum')
+                            ->options(collect(ApplicationStatus::cases())->mapWithKeys(
+                                fn (ApplicationStatus $status) => [$status->value => $status->label()],
+                            )),
+                    ]),
+
+                Section::make('Form cevapları')
+                    ->description('Başvuranın faaliyete özel sorulara verdiği yanıtlar.')
+                    ->visible(fn (?EventRegistration $record): bool => (bool) $record?->hasStructuredAnswers())
+                    ->schema([
                         Placeholder::make('form_answers')
-                            ->label('Form cevapları')
-                            ->columnSpanFull()
+                            ->label('')
                             ->content(function (?EventRegistration $record): HtmlString {
                                 $items = $record?->answerItems() ?? [];
 
@@ -39,29 +53,32 @@ class EventRegistrationForm
                                     return new HtmlString('<p class="text-sm text-gray-500">Ek form cevabı yok.</p>');
                                 }
 
-                                $html = '<dl class="space-y-3">';
+                                $html = '<div class="space-y-3">';
 
-                                foreach ($items as $item) {
+                                foreach ($items as $index => $item) {
+                                    $number = $index + 1;
                                     $label = e($item['label']);
                                     $value = nl2br(e($item['value']));
                                     $html .= <<<HTML
-                                        <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
-                                            <dt class="text-xs font-semibold uppercase tracking-wide text-gray-500">{$label}</dt>
-                                            <dd class="mt-1 text-sm leading-relaxed">{$value}</dd>
+                                        <div class="rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">Soru {$number}</p>
+                                            <p class="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{$label}</p>
+                                            <div class="mt-3 border-t border-gray-200 pt-3 text-sm leading-relaxed text-gray-700 dark:border-gray-700 dark:text-gray-200">{$value}</div>
                                         </div>
                                         HTML;
                                 }
 
-                                $html .= '</dl>';
+                                $html .= '</div>';
 
                                 return new HtmlString($html);
                             }),
-                        Toggle::make('kvkk_accepted')->label('KVKK')->disabled(),
-                        Select::make('status')
-                            ->label('Durum')
-                            ->options(collect(ApplicationStatus::cases())->mapWithKeys(
-                                fn (ApplicationStatus $status) => [$status->value => $status->label()],
-                            )),
+                    ]),
+
+                Section::make('Not')
+                    ->description('Eski kayıtlarda veya sabit formlardan gelen serbest not.')
+                    ->visible(fn (?EventRegistration $record): bool => filled($record?->notes) && ! $record?->hasStructuredAnswers())
+                    ->schema([
+                        Textarea::make('notes')->label('Not')->disabled()->rows(6)->columnSpanFull(),
                     ]),
 
                 Section::make('Gönderilen yanıtlar')

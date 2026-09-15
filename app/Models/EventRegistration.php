@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Enums\ApplicationStatus;
 use App\Models\Concerns\Auditable;
+use App\Support\MailTemplate;
+use App\Support\RegistrationForm;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class EventRegistration extends Model
 {
@@ -54,6 +57,38 @@ class EventRegistration extends Model
         }
 
         return $answers;
+    }
+
+    public function hasStructuredAnswers(): bool
+    {
+        return $this->answerItems() !== [];
+    }
+
+    public function answersPreview(int $limit = 90): string
+    {
+        $items = $this->answerItems();
+
+        if ($items !== []) {
+            return RegistrationForm::previewSummary($items, $limit);
+        }
+
+        return Str::limit(trim((string) $this->notes), $limit);
+    }
+
+    public function originalSubmissionSummary(int $limit = 400): string
+    {
+        $items = $this->answerItems();
+
+        if ($items !== []) {
+            return Str::limit(RegistrationForm::notesSummary($items) ?? '', $limit);
+        }
+
+        return Str::limit(trim((string) ($this->notes ?: '—')), $limit);
+    }
+
+    public function panelEditUrl(): string
+    {
+        return rtrim(MailTemplate::publicBaseUrl(), '/').'/yonetim/event-registrations/'.$this->getKey().'/edit';
     }
 
     /**

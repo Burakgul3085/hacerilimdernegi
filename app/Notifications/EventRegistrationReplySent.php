@@ -36,12 +36,12 @@ class EventRegistrationReplySent extends Notification implements SendsViaPhpMail
         $name = e($this->registration->name);
         $programTitleHtml = e($programTitle);
         $body = nl2br(e($this->reply->body));
-        $original = e(Str::limit($this->registration->notes ?: '—', 400));
+        $original = e($this->registration->originalSubmissionSummary());
 
         $text = "Merhaba {$this->registration->name},\n\n"
             ."{$siteName} olarak «{$programTitle}» programı başvurunuza yanıtımız:\n\n"
             ."{$this->reply->body}\n\n"
-            ."—\nBaşvuru notunuz:\n".($this->registration->notes ?: '—')."\n\n"
+            ."—\nBaşvurunuzdan:\n".$this->registration->originalSubmissionSummary()."\n\n"
             ."Saygılarımızla,\n{$siteName}";
 
         $html = MailTemplate::render([
@@ -51,7 +51,7 @@ class EventRegistrationReplySent extends Notification implements SendsViaPhpMail
             'greeting' => "Merhaba {$name},",
             'intro' => '<p style="margin:0;"><strong style="color:#161513;">'.$siteName.'</strong> olarak <strong style="color:#161513;">'.$programTitleHtml.'</strong> programı başvurunuza yanıtımız aşağıdadır.</p>',
             'highlight' => '<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:15px;line-height:1.75;color:#161513;">'.$body.'</div>',
-            'body' => '<p style="margin:0 0 8px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8a7a62;">Başvuru notunuz</p>'
+            'body' => '<p style="margin:0 0 8px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8a7a62;">Başvurunuzdan</p>'
                 .'<p style="margin:0;font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;line-height:1.7;color:#6b6560;white-space:pre-wrap;">'.$original.'</p>',
             'closing' => 'Saygılarımızla,<br><strong>'.$siteName.'</strong>',
             'cta_label' => 'Web sitemizi ziyaret edin',

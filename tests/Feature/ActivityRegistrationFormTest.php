@@ -8,6 +8,7 @@ use App\Filament\Resources\EventRegistrations\Pages\EditEventRegistration;
 use App\Models\Activity;
 use App\Models\EventRegistration;
 use App\Models\User;
+use App\Notifications\EventRegistrationReceivedForAdmin;
 use App\Support\RegistrationForm;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -147,11 +148,93 @@ class ActivityRegistrationFormTest extends TestCase
 
         Livewire::test(EditEventRegistration::class, ['record' => $registration->getKey()])
             ->assertOk()
+            ->assertSee('Başvuru dosyası')
             ->assertSee('Form cevapları')
             ->assertSee('Yaş')
             ->assertSee('28')
             ->assertSee('Şehir')
-            ->assertSee('Gaziantep');
+            ->assertSee('Gaziantep')
+            ->assertDontSee('Not / özet');
+    }
+
+    public function test_number_date_and_help_text_are_supported_on_the_public_form(): void
+    {
+        $activity = Activity::factory()->create([
+            'slug' => 'genisletilmis-form',
+            'registration_fields' => [
+                [
+                    'key' => 'yas',
+                    'label' => 'Yaş',
+                    'type' => 'number',
+                    'required' => true,
+                    'help' => 'Tam sayı yazın',
+                    'placeholder' => 'Örn. 28',
+                    'options' => [],
+                ],
+                [
+                    'key' => 'baslangic',
+                    'label' => 'Başlangıç tarihi',
+                    'type' => 'date',
+                    'required' => true,
+                    'help' => '',
+                    'placeholder' => '',
+                    'options' => [],
+                ],
+            ],
+        ]);
+
+        $this->get(route('activities.register.form', $activity))
+            ->assertOk()
+            ->assertSee('Yaş')
+            ->assertSee('Tam sayı yazın')
+            ->assertSee('Örn. 28')
+            ->assertSee('Başlangıç tarihi')
+            ->assertSee('type="number"', false)
+            ->assertSee('type="date"', false);
+
+        $this->post(route('activities.register', $activity), [
+            'name' => 'Ayşe Yılmaz',
+            'email' => 'ayse@example.com',
+            'custom' => [
+                'yas' => '28',
+                'baslangic' => '2026-10-01',
+            ],
+            'kvkk_accepted' => '1',
+        ])->assertRedirect();
+
+        $registration = EventRegistration::query()->where('email', 'ayse@example.com')->firstOrFail();
+
+        $this->assertSame('28', $registration->answers[0]['value']);
+        $this->assertStringContainsString('2026', $registration->answers[1]['value']);
+    }
+
+    public function test_admin_mail_includes_structured_answers_and_deep_link(): void
+    {
+        $activity = $this->makeActivityWithFields();
+        $registration = EventRegistration::query()->create([
+            'activity_id' => $activity->id,
+            'name' => 'Ayşe Yılmaz',
+            'email' => 'ayse@example.com',
+            'phone' => '05320000000',
+            'notes' => "Yaş: 28\nŞehir: Gaziantep",
+            'answers' => [
+                ['key' => 'yas', 'label' => 'Yaş', 'value' => '28'],
+                ['key' => 'sehir', 'label' => 'Şehir', 'value' => 'Gaziantep'],
+            ],
+            'kvkk_accepted' => true,
+            'status' => ApplicationStatus::Pending,
+        ]);
+
+        $payload = (new EventRegistrationReceivedForAdmin($registration))
+            ->toPhpMailer($registration);
+
+        $this->assertStringContainsString('Form cevapları', $payload['html']);
+        $this->assertStringContainsString('Yaş', $payload['html']);
+        $this->assertStringContainsString('Gaziantep', $payload['html']);
+        $this->assertStringContainsString('Başvuruyu aç', $payload['html']);
+        $this->assertStringContainsString($registration->panelEditUrl(), $payload['html']);
+        $this->assertStringContainsString('Yaş: 28', $payload['text']);
+        $this->assertStringNotContainsString('>Not<', $payload['html']);
     }
 
     public function test_registration_form_normalizes_select_options_from_multiline_text(): void
@@ -167,6 +250,8 @@ class ActivityRegistrationFormTest extends TestCase
 
         $this->assertSame('sehir', $fields[0]['key']);
         $this->assertSame(['Gaziantep', 'İstanbul'], $fields[0]['options']);
+        $this->assertArrayHasKey('help', $fields[0]);
+        $this->assertArrayHasKey('placeholder', $fields[0]);
     }
 
     private function makeActivityWithFields(): Activity
@@ -180,6 +265,8 @@ class ActivityRegistrationFormTest extends TestCase
                     'label' => 'Yaş',
                     'type' => 'text',
                     'required' => true,
+                    'help' => '',
+                    'placeholder' => '',
                     'options' => [],
                 ],
                 [
@@ -187,6 +274,8 @@ class ActivityRegistrationFormTest extends TestCase
                     'label' => 'Şehir',
                     'type' => 'select',
                     'required' => true,
+                    'help' => '',
+                    'placeholder' => '',
                     'options' => ['Gaziantep', 'Diğer'],
                 ],
                 [
@@ -194,6 +283,8 @@ class ActivityRegistrationFormTest extends TestCase
                     'label' => 'Ulaşım istiyorum',
                     'type' => 'checkbox',
                     'required' => false,
+                    'help' => '',
+                    'placeholder' => '',
                     'options' => [],
                 ],
             ],

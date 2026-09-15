@@ -8,7 +8,7 @@
 
 @php
     $isDynamic = $fields !== null;
-    /** @var list<array{key: string, label: string, type: string, required: bool, options: list<string>}> $definitions */
+    /** @var list<array{key: string, label: string, type: string, required: bool, help: string, placeholder: string, options: list<string>}> $definitions */
     $definitions = $isDynamic
         ? \App\Support\RegistrationForm::normalize($fields)
         : [];
@@ -43,6 +43,10 @@
                             $selectOptions = collect($field['options'])
                                 ->mapWithKeys(fn (string $option): array => [$option => $option])
                                 ->all();
+                            $placeholder = filled($field['placeholder'])
+                                ? $field['placeholder']
+                                : ($field['key'] === 'notes' ? 'Eklemek istedikleriniz' : null);
+                            $help = filled($field['help']) ? $field['help'] : null;
                         @endphp
 
                         @if ($field['type'] === 'checkbox')
@@ -66,6 +70,9 @@
                                         @if ($field['required'])
                                             <span class="text-gold"> *</span>
                                         @endif
+                                        @if ($help)
+                                            <span class="mt-1 block text-[12px] font-normal leading-relaxed text-muted">{{ $help }}</span>
+                                        @endif
                                     </span>
                                 </label>
                                 @error('custom.'.$field['key'])
@@ -79,6 +86,7 @@
                                 :label="$field['label']"
                                 :required="$field['required']"
                                 :options="$selectOptions"
+                                :help="$help"
                                 placeholder="Seçiniz"
                             />
                         @elseif ($field['type'] === 'textarea')
@@ -88,14 +96,18 @@
                                 :label="$field['label']"
                                 :required="$field['required']"
                                 :rows="4"
-                                :placeholder="$field['key'] === 'notes' ? 'Eklemek istedikleriniz' : null"
+                                :placeholder="$placeholder"
+                                :help="$help"
                             />
                         @else
                             <x-field
                                 :name="$inputName"
-                                type="text"
+                                :type="\App\Support\RegistrationForm::inputType($field['type'])"
                                 :label="$field['label']"
                                 :required="$field['required']"
+                                :placeholder="$placeholder"
+                                :help="$help"
+                                :autocomplete="$field['type'] === 'email' ? 'email' : ($field['type'] === 'phone' ? 'tel' : null)"
                             />
                         @endif
                     @endforeach
