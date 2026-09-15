@@ -11,9 +11,10 @@
 ])
 
 @php
-    $id = 'field-'.$name;
-    $current = old($name, $value);
-    $hasError = $errors->has($name);
+    $id = 'field-'.preg_replace('/[^A-Za-z0-9_-]+/', '-', $name);
+    $errorKey = preg_replace('/\[(.*?)\]/', '.$1', $name) ?? $name;
+    $current = old($errorKey, old($name, $value));
+    $hasError = $errors->has($errorKey);
     $ring = $hasError ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : '';
 @endphp
 
@@ -42,7 +43,7 @@
                class="field {{ $ring }}">
     @endif
 
-    @error($name)
+    @error($errorKey)
         <p class="text-[13px] text-red-600">{{ $message }}</p>
     @enderror
 </div>

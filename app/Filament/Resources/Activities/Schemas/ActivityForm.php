@@ -48,6 +48,60 @@ class ActivityForm
                             ->default(true),
                     ]),
 
+                Section::make('Kayıt formu alanları')
+                    ->description('Ad soyad, e-posta, telefon ve KVKK her formda sabittir. Alttaki soruları faaliyete özel ekleyin. Boş bırakılırsa yalnızca “Not” alanı kalır.')
+                    ->schema([
+                        Repeater::make('registration_fields')
+                            ->label('Ek sorular')
+                            ->default([
+                                [
+                                    'label' => 'Not',
+                                    'type' => 'textarea',
+                                    'required' => false,
+                                    'options' => '',
+                                ],
+                            ])
+                            ->addActionLabel('Soru ekle')
+                            ->reorderable()
+                            ->columns(2)
+                            ->schema([
+                                TextInput::make('label')
+                                    ->label('Soru')
+                                    ->required()
+                                    ->maxLength(120)
+                                    ->columnSpanFull(),
+                                Select::make('type')
+                                    ->label('Tür')
+                                    ->options([
+                                        'text' => 'Kısa metin',
+                                        'textarea' => 'Uzun metin',
+                                        'select' => 'Seçim listesi',
+                                        'checkbox' => 'Evet / hayır',
+                                    ])
+                                    ->default('text')
+                                    ->required()
+                                    ->live(),
+                                Toggle::make('required')
+                                    ->label('Zorunlu')
+                                    ->default(false),
+                                Textarea::make('options')
+                                    ->label('Seçenekler')
+                                    ->rows(4)
+                                    ->helperText('Her satıra bir seçenek yazın.')
+                                    ->formatStateUsing(function (mixed $state): string {
+                                        if (is_array($state)) {
+                                            return implode("\n", $state);
+                                        }
+
+                                        return (string) ($state ?? '');
+                                    })
+                                    ->visible(fn ($get): bool => $get('type') === 'select')
+                                    ->required(fn ($get): bool => $get('type') === 'select')
+                                    ->columnSpanFull(),
+                            ])
+                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                    ]),
+
                 Section::make('Metin')
                     ->schema([
                         ContentUploads::withEditorUploads(

@@ -104,7 +104,11 @@
     @endif
 
     @if ($activity->acceptsRegistrations())
-        <x-participation-form :action="route('activities.register', $activity)" context="activity" />
+        <x-participation-form
+            :action="route('activities.register', $activity)"
+            context="activity"
+            :fields="$activity->registrationFieldDefinitions()"
+        />
     @endif
 
     @if ($related->isNotEmpty())

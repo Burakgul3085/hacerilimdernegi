@@ -104,7 +104,9 @@ class EventRegistrationMailFlowTest extends TestCase
             'name' => 'Ayşe Yılmaz',
             'email' => 'ayse@example.com',
             'phone' => '05320000000',
-            'notes' => 'Katılmak istiyorum.',
+            'custom' => [
+                'notes' => 'Katılmak istiyorum.',
+            ],
             'kvkk_accepted' => '1',
         ])->assertRedirect()->assertSessionHas('status', 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.');
 
@@ -114,6 +116,7 @@ class EventRegistrationMailFlowTest extends TestCase
         $this->assertSame($activity->id, $registration->activity_id);
         $this->assertNull($registration->event_id);
         $this->assertNull($registration->program_id);
+        $this->assertSame('Katılmak istiyorum.', $registration->notes);
         $this->assertDatabaseHas('event_registrations', [
             'email' => 'ayse@example.com',
             'name' => 'Ayşe Yılmaz',

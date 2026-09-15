@@ -9,6 +9,7 @@ use App\Models\Activity;
 use App\Models\EventRegistration;
 use App\Support\FormGuard;
 use App\Support\FormStatus;
+use App\Support\RegistrationForm;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,6 +64,15 @@ class ActivityController extends Controller
         ]);
     }
 
+    public function registerForm(Activity $activity): View
+    {
+        abort_unless($activity->acceptsRegistrations(), 404);
+
+        return view('pages.activities.register', [
+            'activity' => $activity,
+        ]);
+    }
+
     public function register(Request $request, Activity $activity): RedirectResponse
     {
         abort_unless($activity->acceptsRegistrations(), 404);
@@ -71,17 +81,17 @@ class ActivityController extends Controller
             return FormStatus::redirect('Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.', 'activity');
         }
 
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:180'],
-            'phone' => ['nullable', 'string', 'max:40'],
-            'notes' => ['nullable', 'string', 'max:1000'],
-            'kvkk_accepted' => ['accepted'],
-        ]);
+        $fields = $activity->registrationFieldDefinitions();
+        $data = $request->validate(RegistrationForm::validationRules($fields));
+        $answers = RegistrationForm::collectAnswers($fields, $data);
 
         $registration = EventRegistration::query()->create([
-            ...$data,
             'activity_id' => $activity->id,
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'notes' => RegistrationForm::notesSummary($answers),
+            'answers' => $answers === [] ? null : $answers,
             'kvkk_accepted' => true,
             'status' => ApplicationStatus::Pending,
         ]);

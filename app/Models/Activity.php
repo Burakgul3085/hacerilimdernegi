@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ActivityStatus;
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasContentGallery;
+use App\Support\RegistrationForm;
 use Database\Factories\ActivityFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,7 +23,7 @@ class Activity extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'slug', 'excerpt', 'cadence', 'description', 'highlights', 'image', 'gallery', 'status', 'sort_order', 'is_published', 'registration_open',
+        'title', 'slug', 'excerpt', 'cadence', 'description', 'highlights', 'image', 'gallery', 'status', 'sort_order', 'is_published', 'registration_open', 'registration_fields',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class Activity extends Model
             'status' => ActivityStatus::class,
             'gallery' => 'array',
             'highlights' => 'array',
+            'registration_fields' => 'array',
             'sort_order' => 'integer',
             'is_published' => 'boolean',
             'registration_open' => 'boolean',
@@ -43,7 +45,24 @@ class Activity extends Model
             if (blank($activity->slug) && filled($activity->title)) {
                 $activity->slug = Str::slug($activity->title);
             }
+
+            if ($activity->isDirty('registration_fields')) {
+                $activity->registration_fields = RegistrationForm::normalize($activity->registration_fields);
+            }
         });
+    }
+
+    /**
+     * @return list<array{key: string, label: string, type: string, required: bool, options: list<string>}>
+     */
+    public function registrationFieldDefinitions(): array
+    {
+        return RegistrationForm::normalize($this->registration_fields);
+    }
+
+    public function registrationFormUrl(): string
+    {
+        return route('activities.register.form', $this);
     }
 
     /**
