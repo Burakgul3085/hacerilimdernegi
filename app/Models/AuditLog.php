@@ -176,6 +176,7 @@ class AuditLog extends Model
     {
         return match ($this->model_type) {
             Post::class => 'Yazı / şiir',
+            Announcement::class => 'Duyuru',
             MediaAlbum::class => 'Albüm',
             MediaItem::class => 'Medya öğesi',
             Program::class => 'Program',
@@ -230,6 +231,7 @@ class AuditLog extends Model
 
         $noun = match ($this->model_type) {
             Post::class => 'yazısını',
+            Announcement::class => 'duyurusunu',
             MediaAlbum::class => 'albümünü',
             MediaItem::class => 'medya öğesini',
             Program::class => 'programını',

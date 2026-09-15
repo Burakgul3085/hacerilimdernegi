@@ -28,6 +28,8 @@ class NavigationMenuTest extends TestCase
             ->assertDontSee('>Etkinlikler<', false)
             ->assertSee('Yazılar ve şiirler')
             ->assertSee('/yazilar', false)
+            ->assertSee('Duyurular')
+            ->assertSee('/duyurular', false)
             ->assertSee('Medya')
             ->assertSee('/medya', false)
             ->assertSee('Vitrin')
@@ -55,6 +57,26 @@ class NavigationMenuTest extends TestCase
             ->assertSee('/vizyon-misyon', false)
             ->assertDontSee('>Vizyon ve misyon<', false)
             ->assertSee('Yazılar ve şiirler');
+    }
+
+    public function test_announcements_menu_item_is_inserted_next_to_posts_when_missing(): void
+    {
+        SiteSettings::put('nav_items', json_encode([
+            [
+                'label' => 'Kurumsal',
+                'url' => '/hakkimizda',
+                'children' => [
+                    ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
+                ],
+            ],
+            ['label' => 'Yazılar', 'url' => '/yazilar'],
+            ['label' => 'Medya', 'url' => '/medya'],
+        ], JSON_UNESCAPED_UNICODE));
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSeeInOrder(['Yazılar ve şiirler', 'Duyurular', 'Medya'])
+            ->assertSee('/duyurular', false);
     }
 
     public function test_stored_flat_menu_is_replaced_with_the_grouped_tree(): void

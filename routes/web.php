@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\HomeController;
@@ -40,6 +41,8 @@ Route::post('/etkinlikler/{event:slug}/kayit', [EventController::class, 'registe
 Route::get('/yazilar', [PostController::class, 'index'])->name('posts.index');
 Route::post('/yazilar', [PostController::class, 'store'])->middleware('throttle:forms')->name('posts.store');
 Route::get('/yazilar/{post:slug}', [PostController::class, 'show'])->name('posts.show');
+Route::get('/duyurular', [AnnouncementController::class, 'index'])->name('announcements.index');
+Route::get('/duyurular/{announcement:slug}', [AnnouncementController::class, 'show'])->name('announcements.show');
 Route::get('/medya', [MediaController::class, 'index'])->name('media.index');
 Route::get('/medya/{album:slug}', [MediaController::class, 'show'])->name('media.show');
 Route::get('/vitrin', [FormController::class, 'social'])->name('social');

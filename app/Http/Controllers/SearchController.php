@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
+use App\Models\Announcement;
 use App\Models\Event;
 use App\Models\MediaAlbum;
 use App\Models\Page;
@@ -30,7 +31,7 @@ class SearchController extends Controller
     }
 
     /**
-     * Yayında olan faaliyet, program, etkinlik, yazı, albüm ve sayfalarda başlık/özet araması yapar.
+     * Yayında olan faaliyet, program, etkinlik, yazı, duyuru, albüm ve sayfalarda başlık/özet araması yapar.
      *
      * @return Collection<int, array{label: string, title: string, excerpt: ?string, url: string, icon: string}>
      */
@@ -94,6 +95,20 @@ class SearchController extends Controller
                 'icon' => 'document',
             ]);
 
+        $announcements = Announcement::query()
+            ->published()
+            ->where(fn ($query) => $query->where('title', 'like', $like)->orWhere('excerpt', 'like', $like)->orWhere('body', 'like', $like))
+            ->latest('published_at')
+            ->limit(10)
+            ->get()
+            ->map(fn (Announcement $announcement) => [
+                'label' => 'Duyuru',
+                'title' => $announcement->title,
+                'excerpt' => $announcement->excerpt,
+                'url' => route('announcements.show', $announcement),
+                'icon' => 'document',
+            ]);
+
         $albums = MediaAlbum::query()
             ->published()
             ->where(fn ($query) => $query->where('title', 'like', $like)->orWhere('description', 'like', $like))
@@ -131,6 +146,7 @@ class SearchController extends Controller
             ->concat($programs)
             ->concat($events)
             ->concat($posts)
+            ->concat($announcements)
             ->concat($albums)
             ->concat($pages);
     }

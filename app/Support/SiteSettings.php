@@ -112,6 +112,7 @@ class SiteSettings
             'programs_intro' => 'Ders, sohbet, kamp ve seminer hatlarımız. Devam eden ve tamamlanan çalışmaları buradan izleyin.',
             'events_intro' => 'Aylara göre yaklaşan programlar. Katılım başvurusu etkinlik detayındadır.',
             'posts_intro' => 'Dernek gündeminden yazılar ve şiirler. Siz de yazınızı veya şiirinizi gönderebilirsiniz.',
+            'announcements_intro' => 'Dernek yönetiminden resmi duyurular ve bilgilendirmeler.',
             'media_intro' => 'Program ve etkinliklerimizden fotoğraf, video ve ses kayıtları.',
             'membership_intro' => 'Dernek çalışmalarına katılmak için formu doldurun.',
             'donate_intro' => 'İlim, sohbet ve kültür çalışmalarımız bağışlarınızla sürer. Katkınız derneğin resmî hesabına banka havalesi veya EFT ile iletilir.',
@@ -204,6 +205,7 @@ class SiteSettings
             ],
             ['label' => 'Faaliyetler', 'url' => '/faaliyetler'],
             ['label' => 'Yazılar ve şiirler', 'url' => '/yazilar'],
+            ['label' => 'Duyurular', 'url' => '/duyurular'],
             ['label' => 'Medya', 'url' => '/medya'],
             ['label' => 'Vitrin', 'url' => '/vitrin'],
             ['label' => 'Üyelik', 'url' => '/uyelik'],
@@ -224,6 +226,8 @@ class SiteSettings
             : array_values(array_filter(
                 array_map(fn (array $item): ?array => static::normalizeNavItem($item), $stored),
             ));
+
+        $items = static::ensureAnnouncementsNavItem($items);
 
         array_unshift($items, [
             'label' => 'Ana sayfa',
@@ -354,6 +358,42 @@ class SiteSettings
         }
 
         return $label;
+    }
+
+    /**
+     * Kayıtlı menüde Duyurular yoksa Yazılar ve şiirler’in hemen yanına ekler.
+     *
+     * @param  list<array{label: string, url: string, children?: list<array{label: string, url: string}>}>  $items
+     * @return list<array{label: string, url: string, children?: list<array{label: string, url: string}>}>
+     */
+    private static function ensureAnnouncementsNavItem(array $items): array
+    {
+        foreach ($items as $item) {
+            if (rtrim((string) ($item['url'] ?? ''), '/') === '/duyurular') {
+                return $items;
+            }
+        }
+
+        $insertAt = null;
+
+        foreach ($items as $index => $item) {
+            if (rtrim((string) ($item['url'] ?? ''), '/') === '/yazilar') {
+                $insertAt = $index + 1;
+                break;
+            }
+        }
+
+        $announcementItem = ['label' => 'Duyurular', 'url' => '/duyurular'];
+
+        if ($insertAt === null) {
+            $items[] = $announcementItem;
+
+            return $items;
+        }
+
+        array_splice($items, $insertAt, 0, [$announcementItem]);
+
+        return $items;
     }
 
     /**

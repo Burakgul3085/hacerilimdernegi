@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Activity;
+use App\Models\Announcement;
 use App\Models\Event;
 use App\Models\MediaAlbum;
 use App\Models\Page;
@@ -29,6 +30,7 @@ class PublicSitemap
             $this->entry(route('corporate.bylaws'), $now, 'monthly', '0.6'),
             $this->entry(route('activities.index'), $now, 'weekly', '0.8'),
             $this->entry(route('posts.index'), $now, 'weekly', '0.8'),
+            $this->entry(route('announcements.index'), $now, 'weekly', '0.8'),
             $this->entry(route('media.index'), $now, 'weekly', '0.7'),
             $this->entry(route('social'), $now, 'weekly', '0.6'),
             $this->entry(route('membership'), $now, 'monthly', '0.7'),
@@ -51,6 +53,11 @@ class PublicSitemap
         foreach (Post::query()->published()->orderBy('id')->get(['slug', 'updated_at', 'published_at']) as $post) {
             $lastmod = $post->updated_at ?? $post->published_at ?? $now;
             $entries[] = $this->entry(route('posts.show', $post), $lastmod, 'weekly', '0.6');
+        }
+
+        foreach (Announcement::query()->published()->orderBy('id')->get(['slug', 'updated_at', 'published_at']) as $announcement) {
+            $lastmod = $announcement->updated_at ?? $announcement->published_at ?? $now;
+            $entries[] = $this->entry(route('announcements.show', $announcement), $lastmod, 'weekly', '0.6');
         }
 
         foreach (MediaAlbum::query()->published()->orderBy('id')->get(['slug', 'updated_at']) as $album) {

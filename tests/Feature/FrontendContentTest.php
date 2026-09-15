@@ -43,6 +43,7 @@ class FrontendContentTest extends TestCase
             route('events.show', $event),
             '/yazilar',
             route('posts.show', $post),
+            '/duyurular',
             '/medya',
             route('media.show', $album),
             '/vitrin',

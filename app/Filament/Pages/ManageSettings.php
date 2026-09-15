@@ -308,6 +308,7 @@ class ManageSettings extends Page
                     ->schema([
                         Textarea::make('programs_intro')->label('Faaliyetler')->rows(2),
                         Textarea::make('posts_intro')->label('Yazılar ve şiirler')->rows(2),
+                        Textarea::make('announcements_intro')->label('Duyurular')->rows(2),
                         Textarea::make('media_intro')->label('Medya')->rows(2),
                         Textarea::make('membership_intro')->label('Üyelik')->rows(2),
                         Textarea::make('contact_intro')->label('İletişim')->rows(2),

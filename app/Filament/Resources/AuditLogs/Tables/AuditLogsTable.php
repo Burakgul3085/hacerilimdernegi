@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AuditLogs\Tables;
 
+use App\Models\Announcement;
 use App\Models\AuditLog;
 use App\Models\Category;
 use App\Models\ContactMessage;
@@ -85,6 +86,7 @@ class AuditLogsTable
                     ->label('Bölüm')
                     ->options([
                         Post::class => 'Yazı / şiir',
+                        Announcement::class => 'Duyuru',
                         MediaAlbum::class => 'Albüm',
                         MediaItem::class => 'Medya öğesi',
                         Program::class => 'Program',
