@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\UserRole;
 use App\Filament\Resources\Posts\Pages\EditPost;
 use App\Filament\Resources\Posts\Pages\ListPosts;
+use App\Filament\Resources\Posts\Pages\ViewPost;
 use App\Models\Post;
 use App\Models\User;
 use App\Notifications\VisitorPostAcknowledged;
@@ -12,7 +13,9 @@ use App\Notifications\VisitorPostReceivedForAdmin;
 use App\Support\SiteSettings;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -178,7 +181,48 @@ class PostSubmissionTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    public function test_admin_list_shows_view_action_for_published_posts(): void
+    public function test_posts_index_shows_optional_image_fields(): void
+    {
+        $this->get(route('posts.index'))
+            ->assertOk()
+            ->assertSee('Kapak resmi')
+            ->assertSee('Fotoğraf')
+            ->assertSee('(isteğe bağlı)')
+            ->assertSee('Zorunlu değil')
+            ->assertSee('enctype="multipart/form-data"', false);
+    }
+
+    public function test_visitor_can_submit_optional_cover_and_photo(): void
+    {
+        Storage::fake('public');
+        Notification::fake();
+
+        $cover = UploadedFile::fake()->image('kapak.jpg', 800, 600);
+        $photo = UploadedFile::fake()->image('foto.png', 640, 480);
+
+        $this->from(route('posts.index'))
+            ->post(route('posts.store'), [
+                'type' => 'poem',
+                'name' => 'Ayşe Yılmaz',
+                'email' => 'ayse@example.com',
+                'title' => 'Sabah duası',
+                'body' => 'Bir dize.',
+                'cover' => $cover,
+                'photo' => $photo,
+                'kvkk_accepted' => '1',
+            ])
+            ->assertRedirect();
+
+        $post = Post::query()->where('submitter_email', 'ayse@example.com')->firstOrFail();
+
+        $this->assertSame('poem', $post->type);
+        $this->assertNotNull($post->image);
+        $this->assertNotEmpty($post->gallery);
+        Storage::disk('public')->assertExists($post->image);
+        Storage::disk('public')->assertExists($post->gallery[0]);
+    }
+
+    public function test_admin_list_opens_panel_view_for_published_and_pending_posts(): void
     {
         $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
 
@@ -190,17 +234,25 @@ class PostSubmissionTest extends TestCase
             'type' => 'article',
             'title' => 'Bekleyen yazı',
             'slug' => 'bekleyen-yazi',
-            'body' => '<p>Taslak</p>',
+            'body' => '<p>Taslak gövde</p>',
+            'author_name' => 'Ziyaretçi',
+            'submitter_email' => 'ziyaretci@example.com',
             'submitted_from_public' => true,
             'is_published' => false,
         ]);
 
         Livewire::test(ListPosts::class)
             ->assertOk()
-            ->assertSee('Yayındaki yazı')
-            ->assertSee('Bekleyen yazı')
             ->assertActionVisible(TestAction::make('view')->table($published))
-            ->assertActionHidden(TestAction::make('view')->table($pending));
+            ->assertActionVisible(TestAction::make('view')->table($pending));
+
+        Livewire::test(ViewPost::class, ['record' => $pending->getRouteKey()])
+            ->assertOk()
+            ->assertSee('Bekleyen yazı')
+            ->assertSee('Taslak gövde')
+            ->assertSee('ziyaretci@example.com')
+            ->assertSee('Onay bekliyor')
+            ->assertDontSee(route('posts.show', $pending, absolute: false), false);
 
         Livewire::test(EditPost::class, ['record' => $published->getRouteKey()])
             ->assertOk()

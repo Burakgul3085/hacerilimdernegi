@@ -138,7 +138,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('posts.store') }}" class="relative flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7 sm:py-6">
+            <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data" class="relative flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7 sm:py-6">
                 @csrf
                 <x-honeypot />
 
@@ -153,6 +153,34 @@
 
                 <x-field name="body" type="textarea" label="Metin" rows="7"
                          placeholder="Yazınızı veya şiirinizi buraya yazın" required />
+
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <div class="flex flex-col gap-2">
+                        <label for="field-cover" class="text-[13px] font-semibold text-forest">
+                            Kapak resmi
+                            <span class="font-medium text-muted"> (isteğe bağlı)</span>
+                        </label>
+                        <input id="field-cover" type="file" name="cover" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                               class="field file:mr-3 file:rounded-lg file:border-0 file:bg-cream file:px-3 file:py-2 file:text-[12px] file:font-semibold file:text-forest">
+                        <p class="text-[12px] leading-relaxed text-muted">JPG, PNG veya WebP. En fazla 5 MB. Zorunlu değil.</p>
+                        @error('cover')
+                            <p class="text-[13px] text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="field-photo" class="text-[13px] font-semibold text-forest">
+                            Fotoğraf
+                            <span class="font-medium text-muted"> (isteğe bağlı)</span>
+                        </label>
+                        <input id="field-photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                               class="field file:mr-3 file:rounded-lg file:border-0 file:bg-cream file:px-3 file:py-2 file:text-[12px] file:font-semibold file:text-forest">
+                        <p class="text-[12px] leading-relaxed text-muted">Metne ek görsel. JPG, PNG veya WebP. En fazla 5 MB. Zorunlu değil.</p>
+                        @error('photo')
+                            <p class="text-[13px] text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
 
                 <x-consent />
 

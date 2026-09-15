@@ -51,11 +51,23 @@ class PostController extends Controller
             'email' => ['required', 'email', 'max:180'],
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:8000'],
+            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'kvkk_accepted' => ['accepted'],
         ]);
 
         $body = Post::bodyFromPlainText($data['body']);
         $excerpt = Str::limit(trim(preg_replace('/\s+/u', ' ', $data['body']) ?? $data['body']), 180);
+
+        $coverPath = null;
+        if ($request->hasFile('cover')) {
+            $coverPath = $request->file('cover')->store('posts', 'public');
+        }
+
+        $gallery = [];
+        if ($request->hasFile('photo')) {
+            $gallery[] = $request->file('photo')->store('posts/gallery', 'public');
+        }
 
         $post = Post::query()->create([
             'type' => $data['type'],
@@ -63,6 +75,8 @@ class PostController extends Controller
             'slug' => Post::uniqueSlug($data['title']),
             'excerpt' => $excerpt,
             'body' => $body,
+            'image' => $coverPath,
+            'gallery' => $gallery === [] ? null : $gallery,
             'author_name' => $data['name'],
             'submitter_email' => $data['email'],
             'submitted_from_public' => true,

@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -67,12 +68,7 @@ class PostsTable
                     }),
             ])
             ->recordActions([
-                Action::make('view')
-                    ->label('Görüntüle')
-                    ->icon('heroicon-o-eye')
-                    ->url(fn (Post $record): string => route('posts.show', $record))
-                    ->openUrlInNewTab()
-                    ->visible(fn (Post $record): bool => $record->isVisibleOnSite()),
+                ViewAction::make()->label('Görüntüle'),
                 Action::make('approve')
                     ->label('Onayla')
                     ->icon('heroicon-o-check')
