@@ -1,7 +1,9 @@
 @props(['post'])
 
-<a href="{{ route('posts.show', $post) }}" class="group card card-hover flex flex-col overflow-hidden">
-    <x-cover :src="$post->image" :alt="$post->title" fit="contain" />
+<a href="{{ route('posts.show', $post) }}" class="group post-card card card-hover flex flex-col overflow-hidden">
+    <div class="post-card-media overflow-hidden">
+        <x-cover :src="$post->image" :alt="$post->title" fit="contain" class="media-zoom" />
+    </div>
 
     <div class="flex flex-1 flex-col p-6">
         <div class="flex flex-wrap items-center gap-2">
@@ -10,7 +12,11 @@
                 <p class="text-[12px] text-muted">{{ $post->category->name }}</p>
             @endif
         </div>
-        <h3 class="mt-2 font-display text-2xl leading-snug text-forest">{{ $post->title }}</h3>
+        <h3 class="mt-2 font-display text-2xl leading-snug text-forest transition duration-300 group-hover:text-gold">{{ $post->title }}</h3>
+
+        @if ($post->byline())
+            <p class="mt-2 text-[13px] text-muted">{{ $post->byline() }}</p>
+        @endif
 
         @if ($post->excerpt)
             <p class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">{{ $post->excerpt }}</p>

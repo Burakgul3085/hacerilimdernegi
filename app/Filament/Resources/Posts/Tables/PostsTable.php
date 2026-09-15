@@ -67,6 +67,12 @@ class PostsTable
                     }),
             ])
             ->recordActions([
+                Action::make('view')
+                    ->label('Görüntüle')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn (Post $record): string => route('posts.show', $record))
+                    ->openUrlInNewTab()
+                    ->visible(fn (Post $record): bool => $record->isVisibleOnSite()),
                 Action::make('approve')
                     ->label('Onayla')
                     ->icon('heroicon-o-check')

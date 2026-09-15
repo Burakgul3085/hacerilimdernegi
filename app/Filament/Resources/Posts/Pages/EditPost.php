@@ -19,6 +19,12 @@ class EditPost extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('view')
+                ->label('Görüntüle')
+                ->icon('heroicon-o-eye')
+                ->url(fn (): string => route('posts.show', $this->getRecord()))
+                ->openUrlInNewTab()
+                ->visible(fn (): bool => $this->getRecord()->isVisibleOnSite()),
             Action::make('approve')
                 ->label('Onayla ve yayınla')
                 ->icon('heroicon-o-check')

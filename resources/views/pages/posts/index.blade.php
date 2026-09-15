@@ -5,55 +5,142 @@
 
 @section('content')
 
-<x-page-header
-    eyebrow="Gündem"
-    title="Yazılar ve şiirler"
-    :lead="$settings['posts_intro']"
-    :breadcrumbs="[['label' => 'Yazılar ve şiirler']]" />
+@php
+    $openSubmitForm = $errors->any();
+@endphp
 
-<section class="shell py-12 lg:py-16">
-    <div class="flex flex-wrap items-center gap-2">
-        <a href="{{ route('posts.index') }}" class="chip {{ $currentType === '' ? 'chip-active' : '' }}">Tümü</a>
-        <a href="{{ route('posts.index', ['tur' => 'article']) }}" class="chip {{ $currentType === 'article' ? 'chip-active' : '' }}">Yazılar</a>
-        <a href="{{ route('posts.index', ['tur' => 'poem']) }}" class="chip {{ $currentType === 'poem' ? 'chip-active' : '' }}">Şiirler</a>
-        <a href="#gonder" class="chip">Yazı veya şiir gönder</a>
-    </div>
+<div
+    x-data="{
+        formOpen: {{ $openSubmitForm ? 'true' : 'false' }},
+        openForm() {
+            this.formOpen = true;
+            history.replaceState(null, '', '#gonder');
+        },
+        closeForm() {
+            this.formOpen = false;
+            if (window.location.hash === '#gonder') {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+        },
+        init() {
+            if (window.location.hash === '#gonder') {
+                this.formOpen = true;
+            }
+            this.$watch('formOpen', (open) => {
+                document.documentElement.classList.toggle('overflow-hidden', open);
+            });
+        },
+    }"
+    @keydown.escape.window="if (formOpen) closeForm()"
+>
 
-    @if ($posts->isEmpty())
-        <x-empty-state class="mt-10" icon="document" title="Henüz yazı yok"
-                       text="Yayınlanan yazı ve şiirler bu sayfada listelenir." />
-    @else
-        <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            @foreach ($posts as $post)
-                <div class="reveal"><x-post-card :post="$post" /></div>
-            @endforeach
-        </div>
+    <x-page-header
+        eyebrow="Gündem"
+        title="Yazılar ve şiirler"
+        :lead="$settings['posts_intro']"
+        :breadcrumbs="[['label' => 'Yazılar ve şiirler']]">
+        <button type="button" class="btn btn-solid posts-submit-cta" @click="openForm()">
+            <x-ui.icon name="document" class="h-4 w-4" />
+            Yazı veya şiir gönder
+        </button>
+    </x-page-header>
 
-        <div class="mt-12">{{ $posts->links() }}</div>
-    @endif
-</section>
+    <section class="posts-stage">
+        <div class="shell py-12 lg:py-16">
+            <x-flash-status context="posts" class="mb-8" />
 
-<section id="gonder" class="shell pb-16 lg:pb-24">
-    <div class="reveal overflow-hidden rounded-2xl border border-line bg-paper">
-        <div class="grid lg:grid-cols-[22rem_minmax(0,1fr)]">
-            <div class="grain flex flex-col justify-center bg-cream p-6 sm:p-8 lg:p-10">
-                <span class="flex h-14 w-14 items-center justify-center rounded-full border border-line bg-paper text-gold">
-                    <x-ui.icon name="document" class="h-7 w-7" />
-                </span>
-                <p class="mt-6 font-display text-4xl leading-[1.15] text-forest">Siz de yazın</p>
-                <p class="mt-4 text-sm leading-relaxed text-muted">Yazınızı veya şiirinizi gönderin. Yönetim onayından sonra bu sayfada yayımlanır.</p>
+            <div class="reveal flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="posts-filters" role="navigation" aria-label="Yazı türü">
+                    <a href="{{ route('posts.index') }}" class="chip {{ $currentType === '' ? 'chip-active' : '' }}">Tümü</a>
+                    <a href="{{ route('posts.index', ['tur' => 'article']) }}" class="chip {{ $currentType === 'article' ? 'chip-active' : '' }}">Yazılar</a>
+                    <a href="{{ route('posts.index', ['tur' => 'poem']) }}" class="chip {{ $currentType === 'poem' ? 'chip-active' : '' }}">Şiirler</a>
+                </div>
 
-                <ul class="mt-8 space-y-3 border-t border-line pt-6">
-                    <li><x-meta icon="check">Yazı veya şiir olarak gönderin</x-meta></li>
-                    <li><x-meta icon="check">Gönderince size e-posta gider</x-meta></li>
-                    <li><x-meta icon="check">Onaylanınca sayfada yayınlanır</x-meta></li>
-                </ul>
+                <button type="button" class="btn btn-outline posts-submit-cta-secondary sm:hidden" @click="openForm()">
+                    <x-ui.icon name="document" class="h-4 w-4" />
+                    Gönder
+                </button>
             </div>
 
-            <form method="POST" action="{{ route('posts.store') }}" class="relative space-y-5 p-5 sm:p-8 lg:p-10">
+            @if ($posts->isEmpty())
+                <x-empty-state class="mt-10 reveal" icon="document" title="Henüz yazı yok"
+                               text="Yayınlanan yazı ve şiirler bu sayfada listelenir." />
+            @else
+                <div class="posts-grid mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($posts as $post)
+                        <div class="reveal" style="--reveal-delay: {{ $loop->index * 70 }}ms">
+                            <x-post-card :post="$post" />
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="mt-12">{{ $posts->links() }}</div>
+            @endif
+
+            <aside class="posts-invite reveal mt-14 overflow-hidden rounded-2xl border border-line bg-paper" style="--reveal-delay: 120ms">
+                <div class="grid gap-0 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+                    <div class="grain flex flex-col justify-center bg-cream px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
+                        <p class="eyebrow">Katılın</p>
+                        <p class="mt-3 font-display text-3xl leading-[1.15] text-forest sm:text-4xl">Siz de yazın veya şiir gönderin</p>
+                        <p class="mt-4 max-w-md text-sm leading-relaxed text-muted">Metniniz yönetime ulaşır; onaylandıktan sonra bu sayfada yayımlanır. Gönderimde ve onayda e-posta ile bilgilendirilirsiniz.</p>
+                    </div>
+                    <div class="flex flex-col justify-center gap-4 border-t border-line px-6 py-8 sm:px-8 lg:border-t-0 lg:border-l lg:px-10 lg:py-10">
+                        <ul class="space-y-3">
+                            <li><x-meta icon="check">Yazı veya şiir seçerek gönderin</x-meta></li>
+                            <li><x-meta icon="check">Anında alındı e-postası</x-meta></li>
+                            <li><x-meta icon="check">Onaylanınca sitede yayın</x-meta></li>
+                        </ul>
+                        <button type="button" class="btn btn-solid mt-2 w-fit" @click="openForm()">
+                            Formu aç
+                            <x-ui.icon name="arrow-right" class="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    {{-- Gönderim formu: modal --}}
+    <div
+        x-show="formOpen"
+        x-cloak
+        x-transition.opacity.duration.200ms
+        class="fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="posts-submit-title"
+        id="gonder"
+    >
+        <div class="absolute inset-0 bg-forest-deep/55 backdrop-blur-[2px]" @click="closeForm()" aria-hidden="true"></div>
+
+        <div
+            x-show="formOpen"
+            x-transition:enter="transition ease-out duration-250"
+            x-transition:enter-start="translate-y-8 opacity-0 sm:translate-y-4 sm:scale-[0.98]"
+            x-transition:enter-end="translate-y-0 opacity-100 sm:scale-100"
+            x-transition:leave="transition ease-in duration-160"
+            x-transition:leave-start="translate-y-0 opacity-100 sm:scale-100"
+            x-transition:leave-end="translate-y-8 opacity-0 sm:translate-y-4 sm:scale-[0.98]"
+            class="posts-submit-modal relative z-10 flex max-h-[min(94vh,44rem)] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl border border-line bg-paper shadow-lift sm:max-h-[min(88vh,44rem)] sm:rounded-3xl"
+            @click.stop
+        >
+            <div class="flex items-start justify-between gap-4 border-b border-line bg-cream/70 px-5 py-4 sm:px-7 sm:py-5">
+                <div class="min-w-0 pr-2">
+                    <p class="eyebrow">Gönderi</p>
+                    <h2 id="posts-submit-title" class="mt-1 font-display text-2xl leading-snug text-forest sm:text-3xl">Yazı veya şiir gönder</h2>
+                    <p class="mt-2 text-sm leading-relaxed text-muted">Onay sonrası Yazılar ve şiirler sayfasında yayınlanır.</p>
+                </div>
+                <button type="button"
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-forest transition hover:border-gold hover:text-gold"
+                        @click="closeForm()"
+                        aria-label="Kapat">
+                    <x-ui.icon name="close" class="h-5 w-5" />
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('posts.store') }}" class="relative flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7 sm:py-6">
                 @csrf
                 <x-honeypot />
-                <x-flash-status context="posts" />
 
                 <x-field name="type" type="select" label="Tür" required :options="['article' => 'Yazı', 'poem' => 'Şiir']" placeholder="Yazı veya şiir seçin" />
 
@@ -64,18 +151,21 @@
 
                 <x-field name="title" label="Başlık" placeholder="Yazı veya şiir başlığı" required />
 
-                <x-field name="body" type="textarea" label="Metin" rows="8"
+                <x-field name="body" type="textarea" label="Metin" rows="7"
                          placeholder="Yazınızı veya şiirinizi buraya yazın" required />
 
                 <x-consent />
 
-                <button type="submit" class="btn btn-solid">
-                    Gönder
-                    <x-ui.icon name="arrow-right" class="h-4 w-4" />
-                </button>
+                <div class="flex flex-wrap items-center gap-3 border-t border-line pt-5">
+                    <button type="submit" class="btn btn-solid">
+                        Gönder
+                        <x-ui.icon name="arrow-right" class="h-4 w-4" />
+                    </button>
+                    <button type="button" class="btn btn-outline" @click="closeForm()">Vazgeç</button>
+                </div>
             </form>
         </div>
     </div>
-</section>
+</div>
 
 @endsection

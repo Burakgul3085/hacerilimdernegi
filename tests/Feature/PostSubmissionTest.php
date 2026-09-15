@@ -2,12 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
+use App\Filament\Resources\Posts\Pages\EditPost;
+use App\Filament\Resources\Posts\Pages\ListPosts;
 use App\Models\Post;
+use App\Models\User;
 use App\Notifications\VisitorPostAcknowledged;
 use App\Notifications\VisitorPostReceivedForAdmin;
 use App\Support\SiteSettings;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class PostSubmissionTest extends TestCase
@@ -30,7 +36,10 @@ class PostSubmissionTest extends TestCase
             ->assertOk()
             ->assertSee('Yazılar ve şiirler')
             ->assertSee('Yazı veya şiir gönder')
+            ->assertSee('Formu aç')
             ->assertSee('Şiirler')
+            ->assertSee('id="gonder"', false)
+            ->assertSee('role="dialog"', false)
             ->assertDontSee('>Duyurular<', false)
             ->assertDontSee('tur=announcement', false);
     }
@@ -167,6 +176,35 @@ class PostSubmissionTest extends TestCase
         $this->assertDatabaseMissing('posts', ['email' => 'bot@example.com']);
         $this->assertDatabaseMissing('posts', ['submitter_email' => 'bot@example.com']);
         Notification::assertNothingSent();
+    }
+
+    public function test_admin_list_shows_view_action_for_published_posts(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $published = $this->makePublishedPost([
+            'title' => 'Yayındaki yazı',
+            'slug' => 'yayindaki-yazi',
+        ]);
+        $pending = Post::query()->create([
+            'type' => 'article',
+            'title' => 'Bekleyen yazı',
+            'slug' => 'bekleyen-yazi',
+            'body' => '<p>Taslak</p>',
+            'submitted_from_public' => true,
+            'is_published' => false,
+        ]);
+
+        Livewire::test(ListPosts::class)
+            ->assertOk()
+            ->assertSee('Yayındaki yazı')
+            ->assertSee('Bekleyen yazı')
+            ->assertActionVisible(TestAction::make('view')->table($published))
+            ->assertActionHidden(TestAction::make('view')->table($pending));
+
+        Livewire::test(EditPost::class, ['record' => $published->getRouteKey()])
+            ->assertOk()
+            ->assertActionVisible('view');
     }
 
     /**
