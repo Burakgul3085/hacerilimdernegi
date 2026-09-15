@@ -9,6 +9,7 @@ use App\Support\UploadRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -24,12 +25,11 @@ class PostForm
                 Section::make('Yazı')
                     ->columns(2)
                     ->schema([
-                        TextInput::make('type')
+                        Select::make('type')
                             ->label('Tür')
-                            ->required()
-                            ->maxLength(80)
-                            ->placeholder('Yazı, Duyuru veya kendi türünüz')
-                            ->helperText('Listeden seçmek zorunda değilsiniz. İstediğiniz türü yazın.'),
+                            ->options(fn (?Post $record): array => Post::typeOptions($record))
+                            ->default('article')
+                            ->required(),
                         TextInput::make('category_name')
                             ->label('Kategori')
                             ->maxLength(120)
@@ -55,6 +55,12 @@ class PostForm
                             ->maxLength(120)
                             ->placeholder('Yazar adını yazın')
                             ->helperText('Kullanıcı listesine bağlı değildir. İstediğiniz adı yazın.'),
+                        TextInput::make('submitter_email')
+                            ->label('Gönderen e-posta')
+                            ->email()
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->visible(fn (?Post $record): bool => (bool) $record?->submitted_from_public),
                         Textarea::make('excerpt')
                             ->label('Özet')
                             ->rows(3)
@@ -135,7 +141,7 @@ class PostForm
      */
     public static function fillableData(array $data, Post $record): array
     {
-        $data['type'] = $record->typeLabel();
+        $data['type'] = Post::normalizeType($record->type);
         $data['category_name'] = $record->category?->name;
         $data['author_name'] = $record->author_name ?: $record->author?->name;
 

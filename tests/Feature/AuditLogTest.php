@@ -30,7 +30,7 @@ class AuditLogTest extends TestCase
         $this->actingAs($this->editor());
 
         Post::query()->create([
-            'type' => 'announcement',
+            'type' => 'article',
             'title' => 'Web sitemiz yayında',
             'slug' => 'web-sitemiz-yayinda',
             'excerpt' => 'Kısa özet',
@@ -43,7 +43,7 @@ class AuditLogTest extends TestCase
 
         $this->assertNotNull($log);
         $this->assertSame('Burak Gül «Web sitemiz yayında» yazısını ekledi.', $log->summary());
-        $this->assertSame('Yazı / duyuru', $log->typeLabel());
+        $this->assertSame('Yazı / şiir', $log->typeLabel());
         $this->assertSame('Ekledi', $log->actionLabel());
         $this->assertStringNotContainsString('App\\Models\\Post', $log->summary());
         $this->assertStringNotContainsString('created', $log->summary());
@@ -52,7 +52,7 @@ class AuditLogTest extends TestCase
     public function test_updating_a_post_names_the_changed_fields_in_turkish(): void
     {
         $post = Post::query()->create([
-            'type' => 'announcement',
+            'type' => 'article',
             'title' => 'Web sitemiz yayında',
             'slug' => 'web-sitemiz-yayinda',
             'is_published' => true,
@@ -65,7 +65,7 @@ class AuditLogTest extends TestCase
         $log = AuditLog::query()->where('model_type', Post::class)->where('action', 'updated')->first();
 
         $this->assertNotNull($log);
-        $this->assertSame('Burak Gül «Yeni başlık» yazısını güncelledi (Başlık, Yayında).', $log->summary());
+        $this->assertSame('Burak Gül «Yeni başlık» yazısını güncelledi (Yayında, Başlık).', $log->summary());
         $this->assertStringContainsString('Başlık: Yeni başlık', $log->changeSummaryText());
         $this->assertStringContainsString('Yayında: Hayır', $log->changeSummaryText());
     }
@@ -132,7 +132,7 @@ class AuditLogTest extends TestCase
     public function test_unauthenticated_changes_are_not_logged(): void
     {
         Post::query()->create([
-            'type' => 'announcement',
+            'type' => 'article',
             'title' => 'Web sitemiz yayında',
             'slug' => 'web-sitemiz-yayinda',
             'is_published' => true,
@@ -177,7 +177,7 @@ class AuditLogTest extends TestCase
         $this->actingAs($this->editor());
 
         Post::query()->create([
-            'type' => 'announcement',
+            'type' => 'article',
             'title' => 'Web sitemiz yayında',
             'slug' => 'web-sitemiz-yayinda',
             'is_published' => true,
@@ -186,7 +186,7 @@ class AuditLogTest extends TestCase
         Livewire::test(ListAuditLogs::class)
             ->assertOk()
             ->assertSee('Burak Gül «Web sitemiz yayında» yazısını ekledi.')
-            ->assertSee('Yazı / duyuru')
+            ->assertSee('Yazı / şiir')
             ->assertSee('Ekledi');
     }
 
@@ -195,7 +195,7 @@ class AuditLogTest extends TestCase
         $this->actingAs($this->editor());
 
         Post::query()->create([
-            'type' => 'announcement',
+            'type' => 'poem',
             'title' => 'Web sitemiz yayında',
             'slug' => 'web-sitemiz-yayinda',
             'is_published' => true,
@@ -207,7 +207,7 @@ class AuditLogTest extends TestCase
             ->assertOk()
             ->assertSee('Burak Gül «Web sitemiz yayında» yazısını ekledi.')
             ->assertSee('Başlık: Web sitemiz yayında')
-            ->assertSee('Tür: Duyuru');
+            ->assertSee('Tür: Şiir');
     }
 
     public function test_media_managers_can_access_audit_logs(): void

@@ -40,9 +40,9 @@ class PostPageTest extends TestCase
     {
         $author = User::factory()->create(['name' => 'Ayşe Hoca']);
         $category = Category::query()->create([
-            'name' => 'Duyurular',
-            'slug' => 'duyurular',
-            'type' => 'announcement',
+            'name' => 'Yazılar',
+            'slug' => 'yazilar',
+            'type' => 'article',
         ]);
 
         $post = $this->makePost([
@@ -56,8 +56,8 @@ class PostPageTest extends TestCase
             'image' => 'posts/cover.jpg',
             'gallery' => ['posts/gallery/one.jpg'],
             'featured_quote' => 'İlim, sohbet ve kültür.',
-            'source_label' => 'Resmî duyuru',
-            'source_url' => 'https://example.com/duyuru',
+            'source_label' => 'Kaynak yazı',
+            'source_url' => 'https://example.com/yazi',
             'body' => '<p>'.str_repeat('kelime ', 200).'</p>',
         ]);
 
@@ -68,10 +68,10 @@ class PostPageTest extends TestCase
             ->assertSee('Kısa özet metni')
             ->assertSee('Şehitkamil / Gaziantep')
             ->assertSee('Ayşe Hoca')
-            ->assertSee('Duyurular')
+            ->assertSee('Yazılar')
             ->assertSee('İlim, sohbet ve kültür.')
-            ->assertSee('Resmî duyuru')
-            ->assertSee('https://example.com/duyuru', false)
+            ->assertSee('Kaynak yazı')
+            ->assertSee('https://example.com/yazi', false)
             ->assertSee('/storage/posts/cover.jpg', false)
             ->assertSee('/storage/posts/gallery/one.jpg', false)
             ->assertSee('2 dk okuma')
@@ -101,39 +101,39 @@ class PostPageTest extends TestCase
             'published_at' => now()->subDay(),
         ]);
         $this->makePost([
-            'type' => 'announcement',
-            'title' => 'Başka duyuru',
-            'slug' => 'baska-duyuru',
+            'type' => 'poem',
+            'title' => 'Başka şiir',
+            'slug' => 'baska-siir',
             'published_at' => now(),
         ]);
 
         $this->get(route('posts.show', $current))
             ->assertOk()
-            ->assertSeeInOrder(['Kardeş yazı', 'Başka duyuru']);
+            ->assertSeeInOrder(['Kardeş yazı', 'Başka şiir']);
     }
 
     public function test_previous_and_next_links_follow_publish_order(): void
     {
         $older = $this->makePost([
-            'title' => 'Eski duyuru',
-            'slug' => 'eski-duyuru',
+            'title' => 'Eski yazı',
+            'slug' => 'eski-yazi',
             'published_at' => now()->subDays(3),
         ]);
         $current = $this->makePost([
-            'title' => 'Güncel duyuru',
-            'slug' => 'guncel-duyuru',
+            'title' => 'Güncel yazı',
+            'slug' => 'guncel-yazi',
             'published_at' => now()->subDay(),
         ]);
         $newer = $this->makePost([
-            'title' => 'Yeni duyuru',
-            'slug' => 'yeni-duyuru',
+            'title' => 'Yeni yazı',
+            'slug' => 'yeni-yazi',
             'published_at' => now(),
         ]);
 
         $this->get(route('posts.show', $current))
             ->assertOk()
-            ->assertSee('Eski duyuru')
-            ->assertSee('Yeni duyuru')
+            ->assertSee('Eski yazı')
+            ->assertSee('Yeni yazı')
             ->assertSee(route('posts.show', $older, absolute: false), false)
             ->assertSee(route('posts.show', $newer, absolute: false), false);
     }
@@ -182,20 +182,22 @@ class PostPageTest extends TestCase
     public function test_list_cards_show_the_category_name(): void
     {
         $category = Category::query()->create([
-            'name' => 'Duyurular',
-            'slug' => 'duyurular-listesi',
-            'type' => 'announcement',
+            'name' => 'Şiirler',
+            'slug' => 'siirler-listesi',
+            'type' => 'poem',
         ]);
         $this->makePost([
+            'type' => 'poem',
             'category_id' => $category->id,
             'image' => 'posts/cover.jpg',
         ]);
 
         $this->get(route('posts.index'))
             ->assertOk()
-            ->assertSee('Duyurular')
+            ->assertSee('Şiirler')
             ->assertSee('post-media-img', false)
-            ->assertDontSee('aspect-[16/9]', false);
+            ->assertDontSee('aspect-[16/9]', false)
+            ->assertDontSee('>Duyurular<', false);
     }
 
     public function test_home_and_list_show_every_published_post(): void
@@ -227,22 +229,22 @@ class PostPageTest extends TestCase
         $this->freezeTime();
 
         $post = $this->makePost([
-            'title' => 'Aynı gün duyuru',
-            'slug' => 'ayni-gun-duyuru',
+            'title' => 'Aynı gün yazı',
+            'slug' => 'ayni-gun-yazi',
             'published_at' => now()->addHours(3),
         ]);
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Aynı gün duyuru');
+            ->assertSee('Aynı gün yazı');
 
         $this->get(route('posts.index'))
             ->assertOk()
-            ->assertSee('Aynı gün duyuru');
+            ->assertSee('Aynı gün yazı');
 
         $this->get(route('posts.show', $post))
             ->assertOk()
-            ->assertSee('Aynı gün duyuru');
+            ->assertSee('Aynı gün yazı');
     }
 
     public function test_publishing_without_a_date_uses_now(): void
@@ -250,23 +252,35 @@ class PostPageTest extends TestCase
         $this->freezeTime();
 
         $data = PostForm::persistableData([
-            'type' => 'Duyuru',
+            'type' => 'Şiir',
             'is_published' => true,
             'published_at' => null,
         ]);
 
+        $this->assertSame('poem', $data['type']);
         $this->assertNotNull($data['published_at']);
         $this->assertTrue(now()->equalTo($data['published_at']));
+    }
+
+    public function test_legacy_announcement_types_normalize_to_article(): void
+    {
+        $data = PostForm::persistableData([
+            'type' => 'Duyuru',
+            'is_published' => true,
+            'published_at' => now(),
+        ]);
+
+        $this->assertSame('article', $data['type']);
     }
 
     public function test_typed_admin_fields_create_a_category_and_render_on_the_page(): void
     {
         $data = PostForm::persistableData([
-            'type' => 'Duyuru',
+            'type' => 'Şiir',
             'category_name' => 'Yeni Kategori',
             'author_name' => 'Misafir Hoca',
-            'title' => 'Özel duyuru',
-            'slug' => 'ozel-duyuru',
+            'title' => 'Özel şiir',
+            'slug' => 'ozel-siir',
             'excerpt' => 'Özet',
             'body' => '<p>Gövde</p>',
             'is_published' => true,
@@ -275,37 +289,42 @@ class PostPageTest extends TestCase
 
         $post = Post::query()->create($data);
 
-        $this->assertSame('announcement', $post->type);
+        $this->assertSame('poem', $post->type);
         $this->assertSame('Misafir Hoca', $post->author_name);
         $this->assertDatabaseHas('categories', ['name' => 'Yeni Kategori']);
         $this->assertArrayNotHasKey('category_name', $data);
 
         $this->get(route('posts.show', $post))
             ->assertOk()
-            ->assertSee('Duyuru')
+            ->assertSee('Şiir')
             ->assertSee('Yeni Kategori')
             ->assertSee('Misafir Hoca');
 
+        $this->get(route('posts.index', ['tur' => 'poem']))
+            ->assertOk()
+            ->assertSee('Özel şiir');
+
         $this->get(route('posts.index', ['tur' => 'announcement']))
             ->assertOk()
-            ->assertSee('Özel duyuru');
+            ->assertDontSee('Özel şiir')
+            ->assertDontSee('>Duyurular<', false);
     }
 
     public function test_typed_category_reuses_an_existing_record(): void
     {
         $category = Category::query()->create([
-            'name' => 'Duyurular',
-            'slug' => 'duyurular',
+            'name' => 'Şiirler',
+            'slug' => 'siirler',
             'type' => 'post',
         ]);
 
         $first = PostForm::persistableData([
             'type' => 'Yazı',
-            'category_name' => 'Duyurular',
+            'category_name' => 'Şiirler',
         ]);
         $second = PostForm::persistableData([
             'type' => 'Yazı',
-            'category_name' => 'Duyurular',
+            'category_name' => 'Şiirler',
         ]);
         $empty = PostForm::persistableData([
             'type' => 'Yazı',
@@ -349,7 +368,7 @@ class PostPageTest extends TestCase
     private function makePost(array $attributes = []): Post
     {
         return Post::query()->create([
-            'type' => 'announcement',
+            'type' => 'article',
             'title' => 'Web sitemiz yayında',
             'slug' => 'web-sitemiz-yayinda',
             'excerpt' => 'Kısa özet',

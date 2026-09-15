@@ -10,7 +10,7 @@
     $sourceLabel = filled($post->source_label) ? $post->source_label : 'Kaynağı aç';
     $articleSchema = [
         '@context' => 'https://schema.org',
-        '@type' => $post->isAnnouncement() ? 'NewsArticle' : 'Article',
+        '@type' => $post->isPoem() ? 'CreativeWork' : 'Article',
         'headline' => $post->title,
         'description' => $post->excerpt ?: \Illuminate\Support\Str::limit(strip_tags((string) $post->body), 160),
         'datePublished' => $post->published_at?->toIso8601String(),
@@ -38,7 +38,7 @@
     :eyebrow="$post->typeLabel()"
     :title="$post->title"
     :lead="$post->excerpt"
-    :breadcrumbs="[['label' => 'Yazılar', 'url' => route('posts.index')], ['label' => $post->title]]">
+    :breadcrumbs="[['label' => 'Yazılar ve şiirler', 'url' => route('posts.index')], ['label' => $post->title]]">
     <div class="flex flex-col gap-2">
         @if ($post->subtitle)
             <p class="max-w-sm text-sm leading-relaxed text-muted">{{ $post->subtitle }}</p>
@@ -120,7 +120,7 @@
 
         <aside class="reveal space-y-4 lg:sticky lg:top-32 lg:self-start">
             <div class="card p-6">
-                <p class="eyebrow">{{ $post->isAnnouncement() ? 'Duyuru bilgileri' : 'Yazı bilgileri' }}</p>
+                <p class="eyebrow">{{ $post->isPoem() ? 'Şiir bilgileri' : 'Yazı bilgileri' }}</p>
                 <ul class="mt-4 space-y-3.5">
                     <li><x-meta icon="calendar">{{ $post->published_at?->translatedFormat('d F Y') ?: $post->created_at->translatedFormat('d F Y') }}</x-meta></li>
                     <li><x-meta icon="clock">{{ $post->readingMinutes() }} dk okuma</x-meta></li>
@@ -176,7 +176,7 @@
 
             @if ($related->isNotEmpty())
                 <div class="card p-6">
-                    <p class="eyebrow">{{ $post->isAnnouncement() ? 'Diğer duyurular' : 'Benzer yazılar' }}</p>
+                    <p class="eyebrow">{{ $post->isPoem() ? 'Diğer şiirler' : 'Benzer yazılar' }}</p>
                     <ul class="mt-4 divide-y divide-line">
                         @foreach ($related as $item)
                             <li>

@@ -98,8 +98,8 @@ class SiteSettings
             'home_programs_text' => 'Ders, sohbet, kamp ve seminer hatlarımız.',
             'home_events_title' => 'Etkinlik takvimi',
             'home_events_text' => 'Katılıma açık yaklaşan etkinlikler.',
-            'home_posts_title' => 'Yazılar ve duyurular',
-            'home_posts_text' => 'Dernek gündeminden seçmeler.',
+            'home_posts_title' => 'Yazılar ve şiirler',
+            'home_posts_text' => 'Dernek gündeminden yazılar ve şiirler.',
             'home_media_title' => 'Medya arşivi',
             'home_media_text' => 'Program ve etkinliklerden kareler.',
             'home_location_eyebrow' => 'Bizi ziyaret edin',
@@ -111,7 +111,7 @@ class SiteSettings
 
             'programs_intro' => 'Ders, sohbet, kamp ve seminer hatlarımız. Devam eden ve tamamlanan çalışmaları buradan izleyin.',
             'events_intro' => 'Aylara göre yaklaşan programlar. Katılım başvurusu etkinlik detayındadır.',
-            'posts_intro' => 'Dernek gündemine dair yazılar ve resmî duyurular.',
+            'posts_intro' => 'Dernek gündeminden yazılar ve şiirler. Siz de yazınızı veya şiirinizi gönderebilirsiniz.',
             'media_intro' => 'Program ve etkinliklerimizden fotoğraf, video ve ses kayıtları.',
             'membership_intro' => 'Dernek çalışmalarına katılmak için formu doldurun.',
             'donate_intro' => 'İlim, sohbet ve kültür çalışmalarımız bağışlarınızla sürer. Katkınız derneğin resmî hesabına banka havalesi veya EFT ile iletilir.',
@@ -203,7 +203,7 @@ class SiteSettings
                 ],
             ],
             ['label' => 'Faaliyetler', 'url' => '/faaliyetler'],
-            ['label' => 'Yazılar', 'url' => '/yazilar'],
+            ['label' => 'Yazılar ve şiirler', 'url' => '/yazilar'],
             ['label' => 'Medya', 'url' => '/medya'],
             ['label' => 'Vitrin', 'url' => '/vitrin'],
             ['label' => 'Üyelik', 'url' => '/uyelik'],
@@ -349,6 +349,10 @@ class SiteSettings
             return 'Faaliyetler';
         }
 
+        if ($url === '/yazilar' && $label === 'Yazılar') {
+            return 'Yazılar ve şiirler';
+        }
+
         return $label;
     }
 
@@ -369,8 +373,10 @@ class SiteSettings
             'cta_button_url' => ['/programlar' => '/faaliyetler'],
             'home_programs_title' => ['Yaklaşan programlar' => 'Faaliyetlerimiz'],
             'home_programs_text' => ['Dersler, sohbetler ve kitap tahlilleri.' => 'Ders, sohbet, kamp ve seminer hatlarımız.'],
-            'programs_intro' => [
-                'Ders, sohbet, kitap tahlili ve kayıtlı programlar tek takvimde.' => 'Ders, sohbet, kamp ve seminer hatlarımız. Devam eden ve tamamlanan çalışmaları buradan izleyin.',
+            'home_posts_title' => ['Yazılar ve duyurular' => 'Yazılar ve şiirler'],
+            'home_posts_text' => ['Dernek gündeminden seçmeler.' => 'Dernek gündeminden yazılar ve şiirler.'],
+            'posts_intro' => [
+                'Dernek gündemine dair yazılar ve resmî duyurular.' => 'Dernek gündeminden yazılar ve şiirler. Siz de yazınızı veya şiirinizi gönderebilirsiniz.',
             ],
         ];
 

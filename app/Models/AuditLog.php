@@ -175,7 +175,7 @@ class AuditLog extends Model
     public function typeLabel(): string
     {
         return match ($this->model_type) {
-            Post::class => 'Yazı / duyuru',
+            Post::class => 'Yazı / şiir',
             MediaAlbum::class => 'Albüm',
             MediaItem::class => 'Medya öğesi',
             Program::class => 'Program',
@@ -405,7 +405,7 @@ class AuditLog extends Model
         if ($key === 'type') {
             return match ($text) {
                 'article', 'articles' => 'Yazı',
-                'announcement', 'announcements' => 'Duyuru',
+                'poem', 'poems' => 'Şiir',
                 'photo' => 'Fotoğraf',
                 'video' => 'Video',
                 'audio' => 'Ses',

@@ -2,20 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\ProcessVisitorPost;
 use App\Models\Post;
+use App\Support\FormGuard;
+use App\Support\FormStatus;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PostController extends Controller
 {
     public function index(Request $request): View
     {
+        $currentType = Post::normalizeType($request->string('tur')->toString());
+
+        if (! $request->filled('tur') || ! in_array($currentType, ['article', 'poem'], true)) {
+            $currentType = '';
+        }
+
         $posts = Post::query()
             ->with('category')
             ->published()
-            ->when($request->filled('tur'), function (Builder $query) use ($request): void {
-                $query->where('type', Post::normalizeType($request->string('tur')->toString()));
+            ->when($currentType !== '', function (Builder $query) use ($currentType): void {
+                $query->where('type', $currentType);
             })
             ->latest('published_at')
             ->latest()
@@ -24,8 +35,44 @@ class PostController extends Controller
 
         return view('pages.posts.index', [
             'posts' => $posts,
-            'currentType' => $request->string('tur')->toString(),
+            'currentType' => $currentType,
         ]);
+    }
+
+    public function store(Request $request, ProcessVisitorPost $process): RedirectResponse
+    {
+        if (FormGuard::isBot($request)) {
+            return FormStatus::redirect('Yazınız bize ulaşmıştır. En kısa zamanda yayımlanacaktır.', 'posts');
+        }
+
+        $data = $request->validate([
+            'type' => ['required', 'in:article,poem'],
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:180'],
+            'title' => ['required', 'string', 'max:255'],
+            'body' => ['required', 'string', 'max:8000'],
+            'kvkk_accepted' => ['accepted'],
+        ]);
+
+        $body = Post::bodyFromPlainText($data['body']);
+        $excerpt = Str::limit(trim(preg_replace('/\s+/u', ' ', $data['body']) ?? $data['body']), 180);
+
+        $post = Post::query()->create([
+            'type' => $data['type'],
+            'title' => $data['title'],
+            'slug' => Post::uniqueSlug($data['title']),
+            'excerpt' => $excerpt,
+            'body' => $body,
+            'author_name' => $data['name'],
+            'submitter_email' => $data['email'],
+            'submitted_from_public' => true,
+            'is_published' => false,
+            'published_at' => null,
+        ]);
+
+        $process->handle($post);
+
+        return FormStatus::redirect('Yazınız bize ulaşmıştır. En kısa zamanda yayımlanacaktır.', 'posts');
     }
 
     public function show(Post $post): View

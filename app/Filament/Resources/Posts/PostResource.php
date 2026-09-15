@@ -22,11 +22,11 @@ class PostResource extends Resource
 
     protected static ?string $model = Post::class;
 
-    protected static ?string $navigationLabel = 'Yazılar ve duyurular';
+    protected static ?string $navigationLabel = 'Yazılar ve şiirler';
 
-    protected static ?string $modelLabel = 'yazı';
+    protected static ?string $modelLabel = 'yazı / şiir';
 
-    protected static ?string $pluralModelLabel = 'yazılar';
+    protected static ?string $pluralModelLabel = 'yazılar ve şiirler';
 
     protected static string|UnitEnum|null $navigationGroup = 'İçerik';
 
@@ -35,6 +35,16 @@ class PostResource extends Resource
     public static function canAccess(): bool
     {
         return static::editorRoles();
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = Post::query()
+            ->where('submitted_from_public', true)
+            ->where('is_published', false)
+            ->count();
+
+        return $count > 0 ? (string) $count : null;
     }
 
     public static function form(Schema $schema): Schema

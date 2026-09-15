@@ -52,8 +52,8 @@ class DatabaseSeeder extends Seeder
         }
 
         $category = Category::query()->updateOrCreate(
-            ['slug' => 'duyurular'],
-            ['name' => 'Duyurular', 'type' => 'announcement'],
+            ['slug' => 'yazilar'],
+            ['name' => 'Yazılar', 'type' => 'article'],
         );
 
         Program::query()->updateOrCreate(
@@ -101,13 +101,13 @@ class DatabaseSeeder extends Seeder
             [
                 'category_id' => $category->id,
                 'author_id' => $admin?->id,
-                'type' => 'announcement',
+                'type' => 'article',
                 'title' => 'Web sitemiz yayında',
-                'subtitle' => 'Dernek gündemini, programları ve duyuruları buradan izleyebilirsiniz.',
+                'subtitle' => 'Dernek gündemini, programları ve yazıları buradan izleyebilirsiniz.',
                 'excerpt' => 'Dernek faaliyetlerimizi buradan takip edebilirsiniz.',
                 'location' => 'Karacaahmet, Şehitkamil / Gaziantep',
                 'featured_quote' => 'İlim, sohbet ve kültür etrafında duran bir muhit.',
-                'body' => '<p>Hâcer İlim ve Kültür Derneği’nin kurumsal web sitesi yayına alındı. Programlar, duyurular, medya arşivi ve bağış bilgileri bundan böyle buradan paylaşılacak.</p><h2>Neler takip edebilirsiniz?</h2><p>Haftalık sohbetler, dersler ve kitap tahlilleri programlar sayfasında; etkinlikler ayrı bir takvimde yer alır. Yazılar bölümünde ise dernek gündemine dair metinler ve resmî duyurular bulunur.</p><p>İçerikler yönetim panelinden güncellenir. Sorularınız için iletişim formunu kullanabilirsiniz.</p>',
+                'body' => '<p>Hâcer İlim ve Kültür Derneği’nin kurumsal web sitesi yayına alındı. Programlar, medya arşivi ve bağış bilgileri bundan böyle buradan paylaşılacak.</p><h2>Neler takip edebilirsiniz?</h2><p>Haftalık sohbetler, dersler ve kitap tahlilleri faaliyetler sayfasında yer alır. Yazılar ve şiirler bölümünde ise dernek gündemine dair metinler bulunur; siz de yazınızı veya şiirinizi gönderebilirsiniz.</p><p>İçerikler yönetim panelinden güncellenir. Sorularınız için iletişim formunu kullanabilirsiniz.</p>',
                 'published_at' => now(),
                 'is_published' => true,
             ],

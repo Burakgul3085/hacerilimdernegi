@@ -276,8 +276,8 @@ class ManageSettings extends Page
                     ->schema([
                         TextInput::make('home_programs_title')->label('Faaliyetler başlığı')->maxLength(120),
                         TextInput::make('home_programs_text')->label('Faaliyetler açıklaması')->maxLength(200),
-                        TextInput::make('home_posts_title')->label('Yazılar başlığı')->maxLength(120),
-                        TextInput::make('home_posts_text')->label('Yazılar açıklaması')->maxLength(200),
+                        TextInput::make('home_posts_title')->label('Yazılar ve şiirler başlığı')->maxLength(120),
+                        TextInput::make('home_posts_text')->label('Yazılar ve şiirler açıklaması')->maxLength(200),
                         TextInput::make('home_media_title')->label('Medya başlığı')->maxLength(120),
                         TextInput::make('home_media_text')->label('Medya açıklaması')->maxLength(200),
                         TextInput::make('home_location_eyebrow')->label('Konum üst etiketi')->maxLength(80),
@@ -307,7 +307,7 @@ class ManageSettings extends Page
                     ->columns(2)
                     ->schema([
                         Textarea::make('programs_intro')->label('Faaliyetler')->rows(2),
-                        Textarea::make('posts_intro')->label('Yazılar')->rows(2),
+                        Textarea::make('posts_intro')->label('Yazılar ve şiirler')->rows(2),
                         Textarea::make('media_intro')->label('Medya')->rows(2),
                         Textarea::make('membership_intro')->label('Üyelik')->rows(2),
                         Textarea::make('contact_intro')->label('İletişim')->rows(2),

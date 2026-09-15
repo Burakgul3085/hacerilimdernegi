@@ -26,6 +26,8 @@ class NavigationMenuTest extends TestCase
             ->assertDontSee('>Programlar<', false)
             ->assertDontSee('>Projeler<', false)
             ->assertDontSee('>Etkinlikler<', false)
+            ->assertSee('Yazılar ve şiirler')
+            ->assertSee('/yazilar', false)
             ->assertSee('Medya')
             ->assertSee('/medya', false)
             ->assertSee('Vitrin')
@@ -51,7 +53,8 @@ class NavigationMenuTest extends TestCase
             ->assertOk()
             ->assertSee('Hedef ve ilkelerimiz')
             ->assertSee('/vizyon-misyon', false)
-            ->assertDontSee('>Vizyon ve misyon<', false);
+            ->assertDontSee('>Vizyon ve misyon<', false)
+            ->assertSee('Yazılar ve şiirler');
     }
 
     public function test_stored_flat_menu_is_replaced_with_the_grouped_tree(): void
@@ -106,6 +109,6 @@ class NavigationMenuTest extends TestCase
             ->assertSee('Faaliyetler')
             ->assertSee('/faaliyetler', false)
             ->assertDontSee('>Etkinlikler<', false)
-            ->assertSeeInOrder(['Yazılar', 'Medya', 'Vitrin']);
+            ->assertSeeInOrder(['Yazılar ve şiirler', 'Medya', 'Vitrin']);
     }
 }

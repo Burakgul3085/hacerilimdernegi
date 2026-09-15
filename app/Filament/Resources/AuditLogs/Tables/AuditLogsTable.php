@@ -84,7 +84,7 @@ class AuditLogsTable
                 SelectFilter::make('model_type')
                     ->label('Bölüm')
                     ->options([
-                        Post::class => 'Yazı / duyuru',
+                        Post::class => 'Yazı / şiir',
                         MediaAlbum::class => 'Albüm',
                         MediaItem::class => 'Medya öğesi',
                         Program::class => 'Program',

@@ -392,7 +392,7 @@ class FrontendContentTest extends TestCase
     private function makePost(array $attributes = []): Post
     {
         return Post::query()->create([
-            'type' => 'announcement',
+            'type' => 'article',
             'title' => 'Web sitemiz yayında',
             'slug' => 'web-sitemiz-yayinda',
             'excerpt' => 'Kısa özet',

@@ -38,6 +38,7 @@ Route::post('/etkinlikler/{event:slug}/kayit', [EventController::class, 'registe
     ->middleware('throttle:forms')
     ->name('events.register');
 Route::get('/yazilar', [PostController::class, 'index'])->name('posts.index');
+Route::post('/yazilar', [PostController::class, 'store'])->middleware('throttle:forms')->name('posts.store');
 Route::get('/yazilar/{post:slug}', [PostController::class, 'show'])->name('posts.show');
 Route::get('/medya', [MediaController::class, 'index'])->name('media.index');
 Route::get('/medya/{album:slug}', [MediaController::class, 'show'])->name('media.show');

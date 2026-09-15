@@ -199,7 +199,7 @@
             <x-section-heading
                 class="reveal"
                 eyebrow="Gündem"
-                :title="$settings['home_posts_title'] ?: 'Yazılar ve duyurular'"
+                :title="$settings['home_posts_title'] ?: 'Yazılar ve şiirler'"
                 :text="$settings['home_posts_text'] ?: null"
                 link-label="Tümünü gör"
                 :link-url="route('posts.index')" />
