@@ -14,7 +14,7 @@ class RegistrationAnswerHtml
     {
         if ($items === []) {
             return new HtmlString(
-                '<p class="text-sm text-gray-500 dark:text-gray-400">Bu başvuruda ek form cevabı yok.</p>'
+                '<p style="margin:0;font-size:14px;color:#6b7280;">Bu başvuruda ek form cevabı yok.</p>'
             );
         }
 
@@ -24,23 +24,25 @@ class RegistrationAnswerHtml
             $number = str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT);
             $label = e($item['label']);
             $value = nl2br(e($item['value']));
-            $border = $index === 0 ? '' : ' border-t border-gray-200 dark:border-white/10';
+            $margin = $index === array_key_last($items) ? '0' : '0 0 12px';
 
             $rows .= <<<HTML
-                <div class="grid gap-3 py-5 sm:grid-cols-[3.5rem_minmax(0,1fr)]{$border}">
-                    <div class="pt-0.5">
-                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-[11px] font-semibold tracking-wide text-white dark:bg-white dark:text-gray-900">{$number}</span>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">{$label}</p>
-                        <div class="mt-2 text-[15px] leading-relaxed text-gray-900 dark:text-gray-100">{$value}</div>
-                    </div>
-                </div>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:{$margin};border:1px solid #e5e7eb;border-radius:14px;background:#ffffff;border-collapse:separate;overflow:hidden;">
+                    <tr>
+                        <td width="56" valign="top" style="width:56px;padding:16px 0 16px 16px;">
+                            <div style="width:36px;height:36px;border-radius:999px;background:#161513;color:#ffffff;font-size:12px;font-weight:700;letter-spacing:0.04em;line-height:36px;text-align:center;">{$number}</div>
+                        </td>
+                        <td valign="top" style="padding:16px 18px 16px 12px;">
+                            <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8a7a62;">{$label}</p>
+                            <div style="font-size:15px;line-height:1.7;color:#161513;word-break:break-word;">{$value}</div>
+                        </td>
+                    </tr>
+                </table>
                 HTML;
         }
 
         return new HtmlString(
-            '<div class="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 dark:border-white/10 dark:bg-white/5">'.$rows.'</div>'
+            '<div style="display:block;">'.$rows.'</div>'
         );
     }
 
