@@ -19,7 +19,13 @@ class EventRegistrationsTable
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->striped()
             ->columns([
+                TextColumn::make('name')
+                    ->label('Başvuran')
+                    ->searchable()
+                    ->description(fn (EventRegistration $record): string => $record->email)
+                    ->wrap(),
                 TextColumn::make('subject_title')
                     ->label('Program')
                     ->state(fn (EventRegistration $record): string => $record->subjectTitle())
@@ -30,24 +36,41 @@ class EventRegistrationsTable
                                 ->orWhereHas('activity', fn (Builder $activity) => $activity->where('title', 'like', "%{$search}%"));
                         });
                     })
+                    ->description(fn (EventRegistration $record): ?string => filled($record->phone) ? $record->phone : null)
                     ->wrap()
-                    ->limit(40),
-                TextColumn::make('name')->label('Ad')->searchable(),
-                TextColumn::make('email')->label('E-posta')->searchable()->toggleable(),
+                    ->limit(36),
                 TextColumn::make('answers_preview')
-                    ->label('Özet')
-                    ->state(fn (EventRegistration $record): string => $record->answersPreview())
+                    ->label('Form özeti')
+                    ->state(fn (EventRegistration $record): string => $record->answersPreview(64))
                     ->placeholder('—')
+                    ->color('gray')
                     ->wrap()
-                    ->limit(70)
                     ->toggleable(),
-                TextColumn::make('status')->label('Durum')->badge(),
+                TextColumn::make('status')
+                    ->label('Durum')
+                    ->badge()
+                    ->formatStateUsing(fn (ApplicationStatus|string|null $state): string => $state instanceof ApplicationStatus
+                        ? $state->label()
+                        : (string) $state)
+                    ->color(fn (ApplicationStatus|string|null $state): string => match ($state instanceof ApplicationStatus ? $state : ApplicationStatus::tryFrom((string) $state)) {
+                        ApplicationStatus::Approved => 'success',
+                        ApplicationStatus::Rejected => 'danger',
+                        default => 'warning',
+                    }),
                 TextColumn::make('replied_at')
                     ->label('Yanıt')
-                    ->formatStateUsing(fn ($state) => $state ? 'Yanıtlandı' : 'Bekliyor')
+                    ->formatStateUsing(fn ($state): string => $state ? 'Yanıtlandı' : 'Bekliyor')
                     ->badge()
-                    ->color(fn ($state) => $state ? 'success' : 'warning'),
-                TextColumn::make('created_at')->label('Tarih')->since(),
+                    ->color(fn ($state): string => $state ? 'success' : 'gray'),
+                TextColumn::make('created_at')
+                    ->label('Tarih')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at_relative')
+                    ->label('Ne zaman')
+                    ->state(fn (EventRegistration $record): ?string => $record->created_at?->diffForHumans())
+                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderBy('created_at', $direction)),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -66,12 +89,16 @@ class EventRegistrationsTable
                     ),
             ])
             ->recordActions([
-                EditAction::make()->label('Görüntüle'),
+                EditAction::make()
+                    ->label('Dosyayı aç')
+                    ->icon('heroicon-o-folder-open'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Seçilenleri sil'),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Henüz kayıt yok')
+            ->emptyStateDescription('Faaliyet veya program formlarından gelen başvurular burada listelenir.');
     }
 }

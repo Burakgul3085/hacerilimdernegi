@@ -24,9 +24,11 @@ class EventRegistrationResource extends Resource
 
     protected static ?string $navigationLabel = 'Program kayıtları';
 
-    protected static ?string $modelLabel = 'kayıt';
+    protected static ?string $modelLabel = 'başvuru';
 
-    protected static ?string $pluralModelLabel = 'kayıtlar';
+    protected static ?string $pluralModelLabel = 'program kayıtları';
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|UnitEnum|null $navigationGroup = 'Başvurular';
 

@@ -148,13 +148,14 @@ class ActivityRegistrationFormTest extends TestCase
 
         Livewire::test(EditEventRegistration::class, ['record' => $registration->getKey()])
             ->assertOk()
-            ->assertSee('Başvuru dosyası')
             ->assertSee('Form cevapları')
+            ->assertSee('01')
             ->assertSee('Yaş')
             ->assertSee('28')
             ->assertSee('Şehir')
             ->assertSee('Gaziantep')
-            ->assertDontSee('Not / özet');
+            ->assertDontSee('Not / özet')
+            ->assertDontSee('Form answers');
     }
 
     public function test_number_date_and_help_text_are_supported_on_the_public_form(): void
