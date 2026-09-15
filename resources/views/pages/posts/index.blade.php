@@ -31,7 +31,7 @@
             });
         },
     }"
-    @keydown.escape.window="if (formOpen) closeForm()"
+    x-on:keydown.escape.window="formOpen && closeForm()"
 >
 
     <x-page-header
@@ -39,7 +39,7 @@
         title="Yazılar ve şiirler"
         :lead="$settings['posts_intro']"
         :breadcrumbs="[['label' => 'Yazılar ve şiirler']]">
-        <button type="button" class="btn btn-solid posts-submit-cta" @click="openForm()">
+        <button type="button" class="btn btn-solid posts-submit-cta" x-on:click="openForm()">
             <x-ui.icon name="document" class="h-4 w-4" />
             Yazı veya şiir gönder
         </button>
@@ -56,7 +56,7 @@
                     <a href="{{ route('posts.index', ['tur' => 'poem']) }}" class="chip {{ $currentType === 'poem' ? 'chip-active' : '' }}">Şiirler</a>
                 </div>
 
-                <button type="button" class="btn btn-outline posts-submit-cta-secondary sm:hidden" @click="openForm()">
+                <button type="button" class="btn btn-outline posts-submit-cta-secondary sm:hidden" x-on:click="openForm()">
                     <x-ui.icon name="document" class="h-4 w-4" />
                     Gönder
                 </button>
@@ -90,7 +90,7 @@
                             <li><x-meta icon="check">Anında alındı e-postası</x-meta></li>
                             <li><x-meta icon="check">Onaylanınca sitede yayın</x-meta></li>
                         </ul>
-                        <button type="button" class="btn btn-solid mt-2 w-fit" @click="openForm()">
+                        <button type="button" class="btn btn-solid mt-2 w-fit" x-on:click="openForm()">
                             Formu aç
                             <x-ui.icon name="arrow-right" class="h-4 w-4" />
                         </button>
@@ -111,7 +111,7 @@
         aria-labelledby="posts-submit-title"
         id="gonder"
     >
-        <div class="absolute inset-0 bg-forest-deep/55 backdrop-blur-[2px]" @click="closeForm()" aria-hidden="true"></div>
+        <div class="absolute inset-0 bg-forest-deep/55 backdrop-blur-[2px]" x-on:click="closeForm()" aria-hidden="true"></div>
 
         <div
             x-show="formOpen"
@@ -122,7 +122,7 @@
             x-transition:leave-start="translate-y-0 opacity-100 sm:scale-100"
             x-transition:leave-end="translate-y-8 opacity-0 sm:translate-y-4 sm:scale-[0.98]"
             class="posts-submit-modal relative z-10 flex max-h-[min(94vh,44rem)] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl border border-line bg-paper shadow-lift sm:max-h-[min(88vh,44rem)] sm:rounded-3xl"
-            @click.stop
+            x-on:click.stop
         >
             <div class="flex items-start justify-between gap-4 border-b border-line bg-cream/70 px-5 py-4 sm:px-7 sm:py-5">
                 <div class="min-w-0 pr-2">
@@ -132,7 +132,7 @@
                 </div>
                 <button type="button"
                         class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-forest transition hover:border-gold hover:text-gold"
-                        @click="closeForm()"
+                        x-on:click="closeForm()"
                         aria-label="Kapat">
                     <x-ui.icon name="close" class="h-5 w-5" />
                 </button>
@@ -189,7 +189,7 @@
                         Gönder
                         <x-ui.icon name="arrow-right" class="h-4 w-4" />
                     </button>
-                    <button type="button" class="btn btn-outline" @click="closeForm()">Vazgeç</button>
+                    <button type="button" class="btn btn-outline" x-on:click="closeForm()">Vazgeç</button>
                 </div>
             </form>
         </div>
