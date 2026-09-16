@@ -60,8 +60,8 @@ class PublicSitemap
             $entries[] = $this->entry(route('announcements.show', $announcement), $lastmod, 'weekly', '0.6');
         }
 
-        foreach (MediaAlbum::query()->published()->orderBy('id')->get(['slug', 'updated_at']) as $album) {
-            $entries[] = $this->entry(route('media.show', $album), $album->updated_at, 'weekly', '0.5');
+        foreach (MediaAlbum::query()->published()->with('parent')->orderBy('id')->get(['id', 'parent_id', 'slug', 'updated_at']) as $album) {
+            $entries[] = $this->entry($album->publicUrl(), $album->updated_at, 'weekly', '0.5');
         }
 
         foreach (Page::query()->published()->orderBy('id')->get(['slug', 'updated_at']) as $page) {

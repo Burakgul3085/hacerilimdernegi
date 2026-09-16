@@ -4,6 +4,7 @@ namespace App\Filament\Resources\MediaAlbums\Schemas;
 
 use App\Enums\MediaType;
 use App\Filament\Support\ContentUploads;
+use App\Models\MediaAlbum;
 use App\Support\UploadRules;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -21,6 +22,18 @@ class MediaAlbumForm
             ->components([
                 TextInput::make('title')->label('Başlık')->required(),
                 TextInput::make('slug')->label('Bağlantı'),
+                Select::make('parent_id')
+                    ->label('Üst albüm')
+                    ->options(fn (?MediaAlbum $record): array => MediaAlbum::query()
+                        ->roots()
+                        ->when($record, fn ($query) => $query->whereKeyNot($record->getKey()))
+                        ->orderBy('title')
+                        ->pluck('title', 'id')
+                        ->all())
+                    ->searchable()
+                    ->placeholder('Ana albüm — koleksiyonun kendisi')
+                    ->helperText('Boş bırakılırsa ana albüm olur. Bir ana albüm seçilirse onun içinde yayınlanır. İç albümün altına başka albüm eklenemez.')
+                    ->columnSpanFull(),
                 Textarea::make('description')->label('Açıklama'),
                 ContentUploads::gallery('incoming_media', 'media')
                     ->label('Fotoğraf ve videolar')

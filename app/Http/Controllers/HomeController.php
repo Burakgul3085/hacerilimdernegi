@@ -18,7 +18,13 @@ class HomeController extends Controller
             'homeActivities' => $homeActivities,
             'featuredActivity' => $homeActivities->first(),
             'posts' => Post::query()->with('category')->published()->latest('published_at')->latest()->limit(3)->get(),
-            'albums' => MediaAlbum::query()->published()->withCount('items')->latest()->limit(3)->get(),
+            'albums' => MediaAlbum::query()
+                ->published()
+                ->roots()
+                ->withCount(['items', 'children' => fn ($query) => $query->published()])
+                ->latest()
+                ->limit(3)
+                ->get(),
             'settings' => SiteSettings::all(),
         ]);
     }

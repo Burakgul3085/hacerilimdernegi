@@ -111,14 +111,16 @@ class SearchController extends Controller
 
         $albums = MediaAlbum::query()
             ->published()
+            ->with('parent')
+            ->withCount(['children' => fn ($query) => $query->published()])
             ->where(fn ($query) => $query->where('title', 'like', $like)->orWhere('description', 'like', $like))
             ->limit(10)
             ->get()
             ->map(fn (MediaAlbum $album) => [
-                'label' => 'Medya',
+                'label' => $album->parent ? 'Albüm' : ($album->isCollection() ? 'Koleksiyon' : 'Medya'),
                 'title' => $album->title,
-                'excerpt' => $album->description,
-                'url' => route('media.show', $album),
+                'excerpt' => $album->parent?->title ?: $album->description,
+                'url' => $album->publicUrl(),
                 'icon' => 'photo',
             ]);
 
