@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Program başvurularını, faaliyet formundaki sütun seçimine göre Excel dosyasına döker.
+ * Program başvurularını, indirme anındaki kişi ve sütun seçimine göre Excel dosyasına döker.
  * Panel kayıt defteridir; dosya o anın görüntüsüdür ve sunucuda saklanmaz.
  */
 class ExportEventRegistrations
@@ -20,11 +20,18 @@ class ExportEventRegistrations
     public function __construct(private XlsxWorkbook $workbook) {}
 
     /**
+     * @param  list<int|string>|null  $registrationIds
+     * @param  list<string>|null  $columnKeys
      * @return array{filename: string, contents: string}
      */
-    public function handle(?Activity $activity = null, ?ApplicationStatus $status = null, bool $unassignedOnly = false): array
-    {
-        $registrations = $this->registrations($activity, $status, $unassignedOnly);
+    public function handle(
+        ?Activity $activity = null,
+        ?ApplicationStatus $status = null,
+        bool $unassignedOnly = false,
+        ?array $registrationIds = null,
+        ?array $columnKeys = null,
+    ): array {
+        $registrations = $this->registrations($activity, $status, $unassignedOnly, $registrationIds);
         $sheets = [];
         $usedNames = [];
         $coverName = RegistrationExportPlan::sheetName('İçindekiler', $usedNames);
@@ -37,7 +44,7 @@ class ExportEventRegistrations
 
             foreach ($activities as $folder) {
                 $rows = $registrations->get((string) $folder->getKey(), collect());
-                $sheet = $this->activitySheet($folder, $rows, $usedNames);
+                $sheet = $this->activitySheet($folder, $rows, $usedNames, $columnKeys);
                 $sheets[] = $sheet;
                 $indexRows[] = [
                     $folder->title,
@@ -51,7 +58,7 @@ class ExportEventRegistrations
         $unassigned = $registrations->get('0', collect());
 
         if ($unassignedOnly || ($activity === null && $unassigned->isNotEmpty())) {
-            $sheet = $this->plainSheet('Diğer başvurular', $unassigned, $usedNames);
+            $sheet = $this->plainSheet('Diğer başvurular', $unassigned, $usedNames, $columnKeys);
             $sheets[] = $sheet;
             $indexRows[] = [
                 'Diğer başvurular',
@@ -84,9 +91,18 @@ class ExportEventRegistrations
         ];
     }
 
-    public function download(?Activity $activity = null, ?ApplicationStatus $status = null, bool $unassignedOnly = false): StreamedResponse
-    {
-        $workbook = $this->handle($activity, $status, $unassignedOnly);
+    /**
+     * @param  list<int|string>|null  $registrationIds
+     * @param  list<string>|null  $columnKeys
+     */
+    public function download(
+        ?Activity $activity = null,
+        ?ApplicationStatus $status = null,
+        bool $unassignedOnly = false,
+        ?array $registrationIds = null,
+        ?array $columnKeys = null,
+    ): StreamedResponse {
+        $workbook = $this->handle($activity, $status, $unassignedOnly, $registrationIds, $columnKeys);
 
         return response()->streamDownload(function () use ($workbook): void {
             echo $workbook['contents'];
@@ -96,15 +112,25 @@ class ExportEventRegistrations
     }
 
     /**
+     * @param  list<int|string>|null  $registrationIds
      * @return Collection<int|string, Collection<int, EventRegistration>>
      */
-    private function registrations(?Activity $activity, ?ApplicationStatus $status, bool $unassignedOnly): Collection
-    {
+    private function registrations(
+        ?Activity $activity,
+        ?ApplicationStatus $status,
+        bool $unassignedOnly,
+        ?array $registrationIds,
+    ): Collection {
         return EventRegistration::query()
             ->with(['event', 'program', 'activity'])
             ->when($activity !== null, fn ($query) => $query->forActivity($activity))
             ->when($unassignedOnly, fn ($query) => $query->unassigned())
             ->when($status !== null, fn ($query) => $query->where('status', $status))
+            ->when($registrationIds !== null, function ($query) use ($registrationIds) {
+                $ids = array_values(array_filter(array_map('intval', $registrationIds)));
+
+                return $query->whereIn('id', $ids === [] ? [0] : $ids);
+            })
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->get()
@@ -114,12 +140,14 @@ class ExportEventRegistrations
     /**
      * @param  Collection<int, EventRegistration>  $rows
      * @param  array<string, true>  $usedNames
+     * @param  list<string>|null  $columnKeys
      * @return array{name: string, rows: list<list<string>>}
      */
-    private function activitySheet(Activity $activity, Collection $rows, array &$usedNames): array
+    private function activitySheet(Activity $activity, Collection $rows, array &$usedNames, ?array $columnKeys): array
     {
-        $includeLegacy = $rows->contains(fn (EventRegistration $registration): bool => RegistrationExportPlan::needsLegacyNotes($registration));
-        $columns = RegistrationExportPlan::columns($activity, $includeLegacy);
+        $includeLegacy = $rows->contains(fn (EventRegistration $registration): bool => RegistrationExportPlan::needsLegacyNotes($registration))
+            || ($columnKeys !== null && in_array('legacy_notes', $columnKeys, true));
+        $columns = RegistrationExportPlan::columns($activity, $includeLegacy, $columnKeys);
 
         return [
             'name' => RegistrationExportPlan::sheetName($activity->title, $usedNames),
@@ -130,24 +158,14 @@ class ExportEventRegistrations
     /**
      * @param  Collection<int, EventRegistration>  $rows
      * @param  array<string, true>  $usedNames
+     * @param  list<string>|null  $columnKeys
      * @return array{name: string, rows: list<list<string>>}
      */
-    private function plainSheet(string $title, Collection $rows, array &$usedNames): array
+    private function plainSheet(string $title, Collection $rows, array &$usedNames, ?array $columnKeys): array
     {
-        $columns = [
-            ['key' => 'id', 'header' => 'Başvuru no'],
-            ['key' => 'submitted_at', 'header' => 'Başvuru tarihi'],
-            ['key' => 'name', 'header' => 'Ad soyad'],
-            ['key' => 'email', 'header' => 'E-posta'],
-            ['key' => 'phone', 'header' => 'Telefon'],
-            ['key' => 'status', 'header' => 'Durum'],
-            ['key' => 'source', 'header' => 'Kaynak'],
-            ['key' => 'legacy_notes', 'header' => 'Not'],
-        ];
-
         return [
             'name' => RegistrationExportPlan::sheetName($title, $usedNames),
-            'rows' => $this->table($columns, $rows),
+            'rows' => $this->table(RegistrationExportPlan::plainColumns($columnKeys), $rows),
         ];
     }
 

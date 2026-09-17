@@ -67,22 +67,18 @@ class RegistrationExportPlan
     }
 
     /**
+     * İndirme anında seçilebilecek sütunlar. Başvuru no her zaman eklenir, listede yer almaz.
+     *
      * @return list<array{key: string, header: string}>
      */
-    public static function columns(Activity $activity, bool $includeLegacyNotes = false): array
+    public static function availableColumns(Activity $activity, bool $includeLegacyNotes = false): array
     {
-        $columns = [
-            ['key' => 'id', 'header' => 'Başvuru no'],
-        ];
+        $columns = [];
 
-        foreach (self::fixedSelection($activity->excel_columns) as $key => $visible) {
-            if (! $visible) {
-                continue;
-            }
-
+        foreach (self::fixedLabels() as $key => $header) {
             $columns[] = [
                 'key' => $key,
-                'header' => self::fixedLabels()[$key],
+                'header' => $header,
             ];
         }
 
@@ -90,11 +86,6 @@ class RegistrationExportPlan
 
         foreach ($activity->registrationFieldDefinitions() as $field) {
             $currentKeys[] = $field['key'];
-
-            if (($field['excel'] ?? true) === false) {
-                continue;
-            }
-
             $columns[] = [
                 'key' => 'q:'.$field['key'],
                 'header' => $field['label'],
@@ -102,7 +93,7 @@ class RegistrationExportPlan
         }
 
         foreach ($activity->excel_archived_questions ?? [] as $archived) {
-            if (! is_array($archived) || empty($archived['include'])) {
+            if (! is_array($archived)) {
                 continue;
             }
 
@@ -114,12 +105,104 @@ class RegistrationExportPlan
 
             $columns[] = [
                 'key' => 'q:'.$key,
-                'header' => trim((string) ($archived['label'] ?? $key)),
+                'header' => trim((string) ($archived['label'] ?? $key)).' (eski)',
             ];
         }
 
         if ($includeLegacyNotes) {
             $columns[] = ['key' => 'legacy_notes', 'header' => 'Eski not'];
+        }
+
+        return $columns;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function columnOptions(Activity $activity, bool $includeLegacyNotes = false): array
+    {
+        $options = [];
+
+        foreach (self::availableColumns($activity, $includeLegacyNotes) as $column) {
+            $options[$column['key']] = $column['header'];
+        }
+
+        return $options;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function plainColumnOptions(): array
+    {
+        return [
+            'submitted_at' => 'Başvuru tarihi',
+            'name' => 'Ad soyad',
+            'email' => 'E-posta',
+            'phone' => 'Telefon',
+            'status' => 'Durum',
+            'source' => 'Kaynak',
+            'legacy_notes' => 'Not',
+        ];
+    }
+
+    /**
+     * @param  list<string>|null  $selectedKeys  null ise tüm uygun sütunlar
+     * @return list<array{key: string, header: string}>
+     */
+    public static function columns(Activity $activity, bool $includeLegacyNotes = false, ?array $selectedKeys = null): array
+    {
+        $columns = [
+            ['key' => 'id', 'header' => 'Başvuru no'],
+        ];
+
+        $available = self::availableColumns($activity, $includeLegacyNotes);
+
+        if ($selectedKeys === null) {
+            return array_merge($columns, $available);
+        }
+
+        $wanted = array_fill_keys(array_map('strval', $selectedKeys), true);
+
+        foreach ($available as $column) {
+            if (! isset($wanted[$column['key']])) {
+                continue;
+            }
+
+            $columns[] = $column;
+        }
+
+        return $columns;
+    }
+
+    /**
+     * @param  list<string>|null  $selectedKeys
+     * @return list<array{key: string, header: string}>
+     */
+    public static function plainColumns(?array $selectedKeys = null): array
+    {
+        $columns = [
+            ['key' => 'id', 'header' => 'Başvuru no'],
+        ];
+
+        $available = [];
+
+        foreach (self::plainColumnOptions() as $key => $header) {
+            $available[] = ['key' => $key, 'header' => $header];
+        }
+
+        if ($selectedKeys === null) {
+            return array_merge($columns, $available);
+        }
+
+        $wanted = array_fill_keys(array_map('strval', $selectedKeys), true);
+
+        foreach ($available as $column) {
+            if (! isset($wanted[$column['key']])) {
+                continue;
+            }
+
+            $columns[] = $column;
         }
 
         return $columns;

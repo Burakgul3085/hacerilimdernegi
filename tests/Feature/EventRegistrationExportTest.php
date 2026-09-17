@@ -19,16 +19,16 @@ class EventRegistrationExportTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_workbook_gives_each_activity_its_own_sheet_and_selected_answers(): void
+    public function test_workbook_gives_each_activity_its_own_sheet_and_all_answers_by_default(): void
     {
         $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
 
         $poetry = $this->activity('Şiir Atölyesi', 'siir-atolyesi', [
-            ['key' => 'yas', 'label' => 'Yaş', 'type' => 'text', 'excel' => true],
-            ['key' => 'sehir', 'label' => 'Şehir', 'type' => 'text', 'excel' => false],
+            ['key' => 'yas', 'label' => 'Yaş', 'type' => 'text'],
+            ['key' => 'sehir', 'label' => 'Şehir', 'type' => 'text'],
         ]);
         $voyage = $this->activity('Satır Arası Seferleri', 'satir-arasi', [
-            ['key' => 'gemi', 'label' => 'Gemi adı', 'type' => 'text', 'excel' => true],
+            ['key' => 'gemi', 'label' => 'Gemi adı', 'type' => 'text'],
         ]);
 
         $this->registration($poetry, 'Ayşe Yılmaz', 'ayse@example.com', '05320000000', [
@@ -46,7 +46,7 @@ class EventRegistrationExportTest extends TestCase
         $this->assertStringContainsString('Ayşe Yılmaz', $poetrySheet);
         $this->assertStringContainsString('05320000000', $poetrySheet);
         $this->assertStringContainsString('28', $poetrySheet);
-        $this->assertStringNotContainsString('Gaziantep', $poetrySheet);
+        $this->assertStringContainsString('Gaziantep', $poetrySheet);
         $this->assertStringNotContainsString('Mehmet Demir', $poetrySheet);
         $this->assertStringContainsString('Mehmet Demir', $voyageSheet);
         $this->assertStringContainsString('Hacer', $voyageSheet);
@@ -54,12 +54,43 @@ class EventRegistrationExportTest extends TestCase
         $this->assertSame(1, AuditLog::query()->where('action', 'exported')->count());
     }
 
+    public function test_export_honors_selected_people_and_columns(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $activity = $this->activity('Şiir', 'siir', [
+            ['key' => 'yas', 'label' => 'Yaş', 'type' => 'text'],
+            ['key' => 'sehir', 'label' => 'Şehir', 'type' => 'text'],
+        ]);
+        $ayse = $this->registration($activity, 'Ayşe Yılmaz', 'ayse@example.com', '05320000000', [
+            ['key' => 'yas', 'label' => 'Yaş', 'value' => '28'],
+            ['key' => 'sehir', 'label' => 'Şehir', 'value' => 'Gaziantep'],
+        ]);
+        $this->registration($activity, 'Mehmet Demir', 'mehmet@example.com', '05440000000', [
+            ['key' => 'yas', 'label' => 'Yaş', 'value' => '40'],
+            ['key' => 'sehir', 'label' => 'Şehir', 'value' => 'İstanbul'],
+        ]);
+
+        $workbook = app(ExportEventRegistrations::class)->handle(
+            $activity,
+            registrationIds: [$ayse->id],
+            columnKeys: ['name', 'q:yas'],
+        );
+        $sheet = $this->sheet($workbook['contents'], 'Şiir');
+
+        $this->assertStringContainsString('Ayşe Yılmaz', $sheet);
+        $this->assertStringContainsString('28', $sheet);
+        $this->assertStringNotContainsString('Mehmet Demir', $sheet);
+        $this->assertStringNotContainsString('Gaziantep', $sheet);
+        $this->assertStringNotContainsString('05320000000', $sheet);
+    }
+
     public function test_status_filter_and_unassigned_rows_stay_in_their_own_sheet(): void
     {
         $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
 
         $activity = $this->activity('İlmihal', 'ilmihal', [
-            ['key' => 'not', 'label' => 'Not', 'type' => 'textarea', 'excel' => true],
+            ['key' => 'not', 'label' => 'Not', 'type' => 'textarea'],
         ]);
         $this->registration($activity, 'Bekleyen', 'bekleyen@example.com', null, [], ApplicationStatus::Pending);
         $this->registration($activity, 'Onaylı', 'onayli@example.com', null, [], ApplicationStatus::Approved);
@@ -93,10 +124,10 @@ class EventRegistrationExportTest extends TestCase
         $this->assertStringNotContainsString('Bağımsız Başvuran', $this->sheet($all['contents'], 'İlmihal'));
     }
 
-    public function test_removed_question_can_return_with_its_old_answers(): void
+    public function test_removed_question_stays_available_for_export_selection(): void
     {
         $activity = $this->activity('Kamp', 'kamp', [
-            ['key' => 'yas', 'label' => 'Yaş', 'type' => 'number', 'excel' => true],
+            ['key' => 'yas', 'label' => 'Yaş', 'type' => 'number'],
         ]);
         $this->registration($activity, 'Ayşe', 'ayse@example.com', null, [
             ['key' => 'yas', 'label' => 'Yaş', 'value' => '17'],
@@ -104,26 +135,24 @@ class EventRegistrationExportTest extends TestCase
 
         $activity->update([
             'registration_fields' => RegistrationForm::normalize([
-                ['key' => 'sehir', 'label' => 'Şehir', 'type' => 'text', 'excel' => true],
+                ['key' => 'sehir', 'label' => 'Şehir', 'type' => 'text'],
             ]),
         ]);
         $activity->refresh();
 
         $this->assertSame('yas', $activity->excel_archived_questions[0]['key'] ?? null);
-        $this->assertFalse($activity->excel_archived_questions[0]['include'] ?? true);
-        $this->assertStringNotContainsString('>17<', $this->sheet(
-            app(ExportEventRegistrations::class)->handle($activity)['contents'],
-            'Kamp',
-        ));
 
-        $archive = $activity->excel_archived_questions;
-        $archive[0]['include'] = true;
-        $activity->update(['excel_archived_questions' => $archive]);
+        $withoutArchive = app(ExportEventRegistrations::class)->handle(
+            $activity,
+            columnKeys: ['name', 'q:sehir'],
+        );
+        $this->assertStringNotContainsString('>17<', $this->sheet($withoutArchive['contents'], 'Kamp'));
 
-        $this->assertStringContainsString('17', $this->sheet(
-            app(ExportEventRegistrations::class)->handle($activity->refresh())['contents'],
-            'Kamp',
-        ));
+        $withArchive = app(ExportEventRegistrations::class)->handle(
+            $activity,
+            columnKeys: ['name', 'q:yas'],
+        );
+        $this->assertStringContainsString('17', $this->sheet($withArchive['contents'], 'Kamp'));
     }
 
     /**

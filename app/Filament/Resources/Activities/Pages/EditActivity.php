@@ -8,7 +8,6 @@ use App\Filament\Resources\MediaAlbums\MediaAlbumResource;
 use App\Models\Activity;
 use App\Models\MediaAlbum;
 use App\Support\ContentMedia;
-use App\Support\RegistrationExportPlan;
 use App\Support\RegistrationForm;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -148,9 +147,6 @@ class EditActivity extends EditRecord
 
             return $field;
         }, $fields);
-        $data['excel_columns'] = RegistrationExportPlan::fixedSelection(
-            is_array($data['excel_columns'] ?? null) ? $data['excel_columns'] : null,
-        );
 
         return $data;
     }
