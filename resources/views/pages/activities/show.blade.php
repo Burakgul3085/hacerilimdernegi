@@ -27,7 +27,7 @@
                     class="activity-hero-cover"
                 />
                 @if ($activity->galleryMedia() !== [])
-                    <x-content-gallery class="mt-6" framed :items="$activity->galleryMedia()" :alt="$activity->title" />
+                    <x-activity-media-marquee class="mt-6" :items="$activity->galleryMedia()" :alt="$activity->title" />
                 @endif
             </div>
             @if (filled($activity->description))

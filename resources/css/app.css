@@ -819,7 +819,87 @@
         max-height: min(32rem, 68vh);
     }
 
-    .activity-gallery.post-gallery {
+    .activity-marquee {
+        width: 100%;
+    }
+
+    .activity-marquee-viewport {
+        overflow: hidden;
+        border-radius: 1rem;
+        mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+    }
+
+    .activity-marquee-track {
+        display: flex;
+        width: max-content;
+        align-items: stretch;
+        gap: 0;
+        animation: activity-marquee-scroll 42s linear infinite;
+    }
+
+    .activity-marquee:hover .activity-marquee-track {
+        animation-play-state: paused;
+    }
+
+    .activity-marquee-item {
+        display: flex;
+        height: 9.5rem;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        margin: 0 0.75rem 0 0;
+        padding: 0.35rem;
+        border: 0;
+        border-radius: 0.85rem;
+        background: var(--color-paper, #fffdf8);
+        box-shadow: var(--shadow-soft, 0 1px 2px rgb(22 21 19 / 0.06));
+        cursor: zoom-in;
+        line-height: 0;
+    }
+
+    .activity-marquee-item img {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 14rem;
+        max-height: 100%;
+        object-fit: contain;
+        object-position: center;
+        border-radius: 0.55rem;
+        user-select: none;
+    }
+
+    @keyframes activity-marquee-scroll {
+        from {
+            transform: translateX(-50%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .activity-marquee-track {
+            animation: none;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .activity-marquee-item[aria-hidden='true'] {
+            display: none;
+        }
+
+        .activity-marquee-viewport {
+            mask-image: none;
+            -webkit-mask-image: none;
+        }
+    }
+
+    .activity-gallery.post-gallery,
+    .activity-gallery-extras {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 1rem;
@@ -827,7 +907,8 @@
     }
 
     @media (min-width: 640px) {
-        .activity-gallery.post-gallery {
+        .activity-gallery.post-gallery,
+        .activity-gallery-extras {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 1.1rem;
         }
