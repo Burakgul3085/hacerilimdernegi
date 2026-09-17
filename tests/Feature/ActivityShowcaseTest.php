@@ -51,6 +51,25 @@ class ActivityShowcaseTest extends TestCase
             ->assertDontSee('aspect-[16/9]', false);
     }
 
+    public function test_activity_detail_cover_keeps_the_uploaded_ratio_without_cropping(): void
+    {
+        $activity = Activity::factory()->create([
+            'title' => 'Detay afişli faaliyet',
+            'slug' => 'detay-afisli-faaliyet',
+            'image' => 'activities/detay-afis.jpg',
+            'gallery' => ['activities/gallery/kare.jpg'],
+        ]);
+
+        $this->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertSee('activity-hero-cover', false)
+            ->assertSee('activity-cover-img', false)
+            ->assertSee('activity-gallery', false)
+            ->assertSee('activities/detay-afis.jpg', false)
+            ->assertDontSee('aspect-[16/9]', false)
+            ->assertDontSee('object-cover', false);
+    }
+
     public function test_activity_index_lists_published_lines_and_hides_drafts(): void
     {
         $published = Activity::factory()->create([

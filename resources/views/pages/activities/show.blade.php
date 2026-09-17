@@ -18,10 +18,12 @@
 <section class="shell py-14 lg:py-20">
     <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-16">
         <div class="reveal">
-            <x-cover :src="$activity->image" :alt="$activity->title" ratio="aspect-[16/9]" rounded="rounded-2xl" />
-            @if ($activity->galleryMedia() !== [])
-                <x-content-gallery class="mt-4" :items="$activity->galleryMedia()" :alt="$activity->title" />
-            @endif
+            <div class="activity-media">
+                <x-cover :src="$activity->image" :alt="$activity->title" fit="natural" rounded="rounded-2xl" class="activity-hero-cover" />
+                @if ($activity->galleryMedia() !== [])
+                    <x-content-gallery class="mt-4 activity-gallery" :items="$activity->galleryMedia()" :alt="$activity->title" />
+                @endif
+            </div>
             @if (filled($activity->description))
                 <div class="prose-hacer mt-10">{!! $activity->description !!}</div>
             @endif
@@ -118,7 +120,7 @@
                 <span class="rule flex-1"></span>
             </div>
 
-            <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach ($related as $item)
                     <div class="reveal" style="--reveal-delay: {{ $loop->index * 80 }}ms">
                         <x-activity-card :activity="$item" />

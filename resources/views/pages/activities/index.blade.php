@@ -22,7 +22,7 @@
 
 <section class="shell py-12 lg:py-16">
     @if ($activities->isNotEmpty())
-        <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @foreach ($activities as $activity)
                 <div class="reveal" style="--reveal-delay: {{ $loop->index * 70 }}ms">
                     <x-activity-card :activity="$activity" />

@@ -760,12 +760,17 @@
     }
 
     .activity-card {
-        min-height: 100%;
+        width: fit-content;
+        max-width: min(100%, 17.25rem);
+        min-height: auto;
+        margin-inline: auto;
     }
 
     .activity-cover {
         display: block;
-        width: 100%;
+        width: fit-content;
+        max-width: 100%;
+        margin-inline: auto;
         overflow: hidden;
         background: transparent;
         line-height: 0;
@@ -773,16 +778,53 @@
 
     .activity-cover-img {
         display: block;
-        width: 100%;
+        width: auto;
         height: auto;
-        max-width: 100%;
+        max-width: min(100%, 17.25rem);
+        max-height: 15.25rem;
     }
 
     .activity-cover-empty {
         display: flex;
         align-items: center;
         justify-content: center;
+        width: min(100%, 17.25rem);
         min-height: 7.5rem;
+    }
+
+    .activity-hero-cover {
+        width: fit-content;
+        max-width: 100%;
+        margin-inline: 0;
+    }
+
+    .activity-hero-cover .activity-cover-img {
+        max-height: min(34rem, 72vh);
+    }
+
+    .activity-gallery.post-gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        align-items: flex-start;
+    }
+
+    .activity-gallery .post-gallery-item {
+        width: fit-content;
+        max-width: 100%;
+    }
+
+    .activity-gallery .post-gallery-item img {
+        width: auto;
+        height: auto;
+        max-width: min(100%, 13.5rem);
+        max-height: 16rem;
+    }
+
+    .activity-gallery .post-gallery-item video {
+        width: auto;
+        max-width: min(100%, 18rem);
+        max-height: 16rem;
     }
 
     .activity-card .activity-status {
