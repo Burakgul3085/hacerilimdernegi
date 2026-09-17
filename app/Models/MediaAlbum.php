@@ -13,7 +13,7 @@ class MediaAlbum extends Model
 {
     use Auditable;
 
-    protected $fillable = ['parent_id', 'title', 'slug', 'description', 'cover', 'is_published'];
+    protected $fillable = ['parent_id', 'activity_id', 'title', 'slug', 'description', 'cover', 'is_published'];
 
     protected function casts(): array
     {
@@ -39,6 +39,14 @@ class MediaAlbum extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    /**
+     * @return BelongsTo<Activity, $this>
+     */
+    public function activity(): BelongsTo
+    {
+        return $this->belongsTo(Activity::class);
     }
 
     /**

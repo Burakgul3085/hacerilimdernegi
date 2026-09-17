@@ -13,7 +13,7 @@ class MediaItem extends Model
     use Auditable;
 
     protected $fillable = [
-        'media_album_id', 'type', 'title', 'path', 'external_url', 'caption', 'sort_order',
+        'media_album_id', 'type', 'title', 'path', 'source_path', 'external_url', 'caption', 'sort_order',
     ];
 
     protected function casts(): array
