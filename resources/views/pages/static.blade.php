@@ -77,11 +77,11 @@
                     <p class="eyebrow text-center">{{ $tier->label() }}</p>
 
                     <div @class([
-                        'mt-7 flex flex-wrap justify-center gap-6',
+                        'mt-7 flex flex-wrap justify-center gap-4 sm:gap-5',
                     ])>
                         @foreach ($members as $index => $member)
                             @php
-                                $cardWidth = $featured ? 'w-full max-w-sm' : 'w-full max-w-[16.5rem]';
+                                $cardWidth = $featured ? 'w-full max-w-[17rem]' : 'w-full max-w-[12.5rem]';
                             @endphp
                             <x-board-member
                                 class="reveal {{ $cardWidth }}"

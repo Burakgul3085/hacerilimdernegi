@@ -16,8 +16,7 @@
     <div @class([
         'board-photo relative w-full overflow-hidden',
         'bg-cream-deep' => blank($photoUrl),
-        'aspect-[4/5]' => blank($photoUrl) && $featured,
-        'aspect-square' => blank($photoUrl) && ! $featured,
+        'aspect-[4/5]' => blank($photoUrl),
     ])>
         @if ($photoUrl)
             <img src="{{ $photoUrl }}" alt="{{ $name }}" loading="lazy" decoding="async"
@@ -28,13 +27,13 @@
         @endif
     </div>
 
-    <div class="px-5 py-5 text-center {{ $featured ? 'sm:px-8 sm:py-6' : '' }}">
+    <div class="px-4 py-4 text-center {{ $featured ? 'sm:px-5 sm:py-5' : '' }}">
         @if (filled($title))
             <p class="eyebrow">{{ $title }}</p>
         @endif
-        <h3 class="mt-2 font-display leading-snug text-forest {{ $featured ? 'text-3xl' : 'text-2xl' }}">{{ $name }}</h3>
+        <h3 class="mt-2 font-display leading-snug text-forest {{ $featured ? 'text-[1.55rem] sm:text-[1.7rem]' : 'text-[1.2rem]' }}">{{ $name }}</h3>
         @if (filled($bio))
-            <p class="mt-3 text-sm leading-relaxed text-muted">{{ $bio }}</p>
+            <p class="mt-2 text-[13px] leading-relaxed text-muted">{{ $bio }}</p>
         @endif
     </div>
 </article>
