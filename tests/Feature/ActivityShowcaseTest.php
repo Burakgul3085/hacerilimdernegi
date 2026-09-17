@@ -47,14 +47,14 @@ class ActivityShowcaseTest extends TestCase
             ->assertOk()
             ->assertSee('media-frame', false)
             ->assertSee('media-frame-img', false)
-            ->assertSee('media-frame-blur', false)
+            ->assertDontSee('media-frame-blur', false)
             ->assertSee('aspect-[4/5]', false)
             ->assertSee('activities/afis.jpg', false)
             ->assertDontSee('group-hover:scale-[1.08]', false)
             ->assertDontSee('aspect-[16/9]', false);
     }
 
-    public function test_activity_detail_cover_and_gallery_use_framed_media_slots(): void
+    public function test_activity_detail_cover_and_gallery_use_compact_frames_without_blur(): void
     {
         $activity = Activity::factory()->create([
             'title' => 'Detay afişli faaliyet',
@@ -66,12 +66,13 @@ class ActivityShowcaseTest extends TestCase
         $this->get(route('activities.show', $activity))
             ->assertOk()
             ->assertSee('activity-hero-cover', false)
-            ->assertSee('media-frame', false)
-            ->assertSee('media-frame-img', false)
+            ->assertSee('activity-cover-img', false)
             ->assertSee('activity-gallery', false)
-            ->assertSee('aspect-[3/2]', false)
+            ->assertSee('activity-gallery-tile', false)
             ->assertSee('activities/detay-afis.jpg', false)
-            ->assertDontSee('aspect-[16/9]', false);
+            ->assertDontSee('media-frame-blur', false)
+            ->assertDontSee('aspect-[16/9]', false)
+            ->assertDontSee('aspect-[3/2]', false);
     }
 
     public function test_activity_index_lists_published_lines_and_hides_drafts(): void

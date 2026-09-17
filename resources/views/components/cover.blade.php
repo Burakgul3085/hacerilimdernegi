@@ -16,7 +16,6 @@
 @if ($frame)
     <div {{ $attributes->merge(['class' => trim('media-frame '.$ratio.' '.$rounded)]) }}>
         @if ($url)
-            <img src="{{ $url }}" alt="" aria-hidden="true" loading="lazy" decoding="async" class="media-frame-blur">
             <img src="{{ $url }}" alt="{{ $alt }}" loading="lazy" decoding="async" class="media-frame-img">
         @else
             <div class="media-frame-empty">

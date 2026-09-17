@@ -22,8 +22,7 @@
                 <x-cover
                     :src="$activity->image"
                     :alt="$activity->title"
-                    fit="frame"
-                    ratio="aspect-[3/2]"
+                    fit="natural"
                     rounded="rounded-2xl"
                     class="activity-hero-cover"
                 />
