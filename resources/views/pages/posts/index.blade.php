@@ -66,7 +66,7 @@
                 <x-empty-state class="mt-10 reveal" icon="document" title="Henüz yazı yok"
                                text="Yayınlanan yazı ve şiirler bu sayfada listelenir." />
             @else
-                <div class="posts-grid mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div class="posts-grid mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     @foreach ($posts as $post)
                         <div class="reveal" style="--reveal-delay: {{ $loop->index * 70 }}ms">
                             <x-post-card :post="$post" />

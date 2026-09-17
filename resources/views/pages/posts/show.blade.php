@@ -53,17 +53,17 @@
         <div class="reveal min-w-0" x-data="{ lightbox: null }" @keydown.escape.window="lightbox = null">
             @if ($coverUrl)
                 <button type="button"
-                        class="post-cover"
+                        class="activity-hero-cover post-cover rounded-2xl"
                         data-src="{{ $coverUrl }}"
                         x-on:click="lightbox = $el.dataset.src">
-                    <img src="{{ $coverUrl }}" alt="{{ $post->title }}" class="post-cover-img" loading="lazy" decoding="async">
+                    <img src="{{ $coverUrl }}" alt="{{ $post->title }}" class="activity-cover-img" loading="lazy" decoding="async">
                 </button>
             @else
-                <x-cover :src="$post->image" :alt="$post->title" rounded="rounded-2xl" fit="contain" />
+                <x-cover :src="$post->image" :alt="$post->title" fit="natural" rounded="rounded-2xl" class="activity-hero-cover" />
             @endif
 
             @if ($post->galleryMedia() !== [])
-                <x-content-gallery class="mt-3" :items="$post->galleryMedia()" :alt="$post->title" />
+                <x-activity-media-marquee class="mt-6" :items="$post->galleryMedia()" :alt="$post->title" />
             @endif
 
             @if (filled($post->featured_quote))

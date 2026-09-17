@@ -80,10 +80,13 @@ class PostPageTest extends TestCase
             ->assertSee('data-url="'.route('posts.show', $post, absolute: true).'"', false)
             ->assertSee('og:type" content="article', false)
             ->assertSee('property="og:image" content="'.$post->coverAbsoluteUrl().'"', false)
-            ->assertSee('post-cover-img', false)
-            ->assertSee('post-gallery-item', false)
+            ->assertSee('activity-hero-cover', false)
+            ->assertSee('activity-cover-img', false)
+            ->assertSee('activity-marquee', false)
+            ->assertSee('activity-marquee-item', false)
             ->assertDontSee('object-cover', false)
-            ->assertDontSee('aspect-[16/9]', false);
+            ->assertDontSee('aspect-[16/9]', false)
+            ->assertDontSee('post-gallery-item', false);
     }
 
     public function test_related_posts_prefer_the_same_type(): void
@@ -195,7 +198,9 @@ class PostPageTest extends TestCase
         $this->get(route('posts.index'))
             ->assertOk()
             ->assertSee('Şiirler')
-            ->assertSee('post-media-img', false)
+            ->assertSee('media-frame', false)
+            ->assertSee('media-frame-img', false)
+            ->assertSee('aspect-[4/5]', false)
             ->assertDontSee('aspect-[16/9]', false)
             ->assertDontSee('>Duyurular<', false);
     }
@@ -226,7 +231,7 @@ class PostPageTest extends TestCase
 
     public function test_a_post_dated_later_today_still_appears_on_the_site(): void
     {
-        $this->freezeTime();
+        $this->travelTo(now()->startOfDay()->setTime(10, 0));
 
         $post = $this->makePost([
             'title' => 'Aynı gün yazı',

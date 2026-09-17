@@ -204,7 +204,7 @@
                 link-label="Tümünü gör"
                 :link-url="route('posts.index')" />
 
-            <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div class="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ($posts as $post)
                     <div class="reveal" style="--reveal-delay: {{ $loop->index * 90 }}ms"><x-post-card :post="$post" /></div>
                 @endforeach
