@@ -8,6 +8,8 @@ use ZipArchive;
 /**
  * Hâcer kurumsal Excel şablonuyla çok sayfalı xlsx üretir.
  * Dosya indirme sonrası saklanmaz.
+ *
+ * Not: Birleşik hücre (merge) kullanılmaz; Excel onarım/boş dosya hatalarına yol açıyordu.
  */
 class XlsxWorkbook
 {
@@ -120,7 +122,7 @@ class XlsxWorkbook
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">'
-            .'<Application>'.$this->xml(HacerXlsxTemplate::ORGANIZATION).'</Application>'
+            .'<Application>Microsoft Excel</Application>'
             .'<Company>'.$this->xml(HacerXlsxTemplate::ORGANIZATION).'</Company>'
             .'</Properties>';
     }
@@ -161,56 +163,46 @@ class XlsxWorkbook
 
     private function styles(): string
     {
-        $forest = HacerXlsxTemplate::COLOR_FOREST;
-        $gold = HacerXlsxTemplate::COLOR_GOLD;
-        $cream = HacerXlsxTemplate::COLOR_CREAM;
-        $paper = HacerXlsxTemplate::COLOR_PAPER;
-        $line = HacerXlsxTemplate::COLOR_LINE;
-        $goldSoft = HacerXlsxTemplate::COLOR_GOLD_SOFT;
-        $muted = HacerXlsxTemplate::COLOR_MUTED;
-
+        // fill 0 = none, fill 1 = gray125 (Excel zorunlu sırası)
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-            .'<fonts count="6">'
-            .'<font><sz val="11"/><color rgb="FF161513"/><name val="Calibri"/></font>'
-            .'<font><b/><sz val="16"/><color rgb="'.$paper.'"/><name val="Calibri"/></font>'
-            .'<font><sz val="10"/><color rgb="'.$goldSoft.'"/><name val="Calibri"/></font>'
-            .'<font><b/><sz val="11"/><color rgb="'.$paper.'"/><name val="Calibri"/></font>'
-            .'<font><i/><sz val="10"/><color rgb="'.$muted.'"/><name val="Calibri"/></font>'
-            .'<font><b/><sz val="11"/><color rgb="FF161513"/><name val="Calibri"/></font>'
+            .'<fonts count="5">'
+            .'<font><sz val="11"/><color rgb="FF161513"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><b/><sz val="14"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><sz val="10"/><color rgb="FFD4CBBE"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><b/><sz val="11"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><sz val="9"/><color rgb="FF6B6560"/><name val="Calibri"/><family val="2"/></font>'
             .'</fonts>'
-            .'<fills count="6">'
+            .'<fills count="5">'
             .'<fill><patternFill patternType="none"/></fill>'
             .'<fill><patternFill patternType="gray125"/></fill>'
-            .'<fill><patternFill patternType="solid"><fgColor rgb="'.$forest.'"/></patternFill></fill>'
-            .'<fill><patternFill patternType="solid"><fgColor rgb="'.$gold.'"/></patternFill></fill>'
-            .'<fill><patternFill patternType="solid"><fgColor rgb="'.$cream.'"/></patternFill></fill>'
-            .'<fill><patternFill patternType="solid"><fgColor rgb="'.$paper.'"/></patternFill></fill>'
+            .'<fill><patternFill patternType="solid"><fgColor rgb="FF161513"/></patternFill></fill>'
+            .'<fill><patternFill patternType="solid"><fgColor rgb="FF8A7A62"/></patternFill></fill>'
+            .'<fill><patternFill patternType="solid"><fgColor rgb="FFFBF6EC"/></patternFill></fill>'
             .'</fills>'
-            .'<borders count="3">'
+            .'<borders count="2">'
             .'<border><left/><right/><top/><bottom/><diagonal/></border>'
             .'<border>'
-            .'<left style="thin"><color rgb="'.$line.'"/></left>'
-            .'<right style="thin"><color rgb="'.$line.'"/></right>'
-            .'<top style="thin"><color rgb="'.$line.'"/></top>'
-            .'<bottom style="thin"><color rgb="'.$line.'"/></bottom>'
-            .'</border>'
-            .'<border>'
-            .'<left style="thin"><color rgb="'.$gold.'"/></left>'
-            .'<right style="thin"><color rgb="'.$gold.'"/></right>'
-            .'<top style="thin"><color rgb="'.$gold.'"/></top>'
-            .'<bottom style="medium"><color rgb="'.$gold.'"/></bottom>'
+            .'<left style="thin"><color rgb="FFE6DFD3"/></left>'
+            .'<right style="thin"><color rgb="FFE6DFD3"/></right>'
+            .'<top style="thin"><color rgb="FFE6DFD3"/></top>'
+            .'<bottom style="thin"><color rgb="FFE6DFD3"/></bottom>'
             .'</border>'
             .'</borders>'
             .'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-            .'<cellXfs count="7">'
-            .'<xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
+            .'<cellXfs count="6">'
+            // 0 body
+            .'<xf numFmtId="49" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
+            // 1 brand title
             .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
+            // 2 brand subtitle
             .'<xf numFmtId="49" fontId="2" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
-            .'<xf numFmtId="49" fontId="5" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
-            .'<xf numFmtId="49" fontId="3" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
-            .'<xf numFmtId="49" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
-            .'<xf numFmtId="49" fontId="4" fillId="5" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
+            // 3 cream meta / spacer
+            .'<xf numFmtId="49" fontId="0" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
+            // 4 table header
+            .'<xf numFmtId="49" fontId="3" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+            // 5 zebra / footer
+            .'<xf numFmtId="49" fontId="4" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
             .'</cellXfs>'
             .'</styleSheet>';
     }
@@ -229,27 +221,30 @@ class XlsxWorkbook
         $brandRows = HacerXlsxTemplate::BRAND_ROWS;
         $headerRowNumber = $brandRows + 1;
         $dataStart = $headerRowNumber + 1;
-        $canMerge = $columnCount > 1;
         $rowMarkup = '';
 
-        $brand = [
-            1 => ['text' => HacerXlsxTemplate::ORGANIZATION, 'style' => '1', 'height' => 28],
-            2 => ['text' => HacerXlsxTemplate::subtitleLine($context), 'style' => '2', 'height' => 20],
-            3 => ['text' => filled($summary) ? $summary : ' ', 'style' => '3', 'height' => 18],
-            4 => ['text' => ' ', 'style' => '3', 'height' => 8],
+        $brandLines = [
+            1 => ['text' => HacerXlsxTemplate::ORGANIZATION, 'style' => '1', 'height' => 26],
+            2 => ['text' => HacerXlsxTemplate::subtitleLine($context), 'style' => '2', 'height' => 18],
+            3 => ['text' => filled($summary) ? (string) $summary : '', 'style' => '3', 'height' => 18],
+            4 => ['text' => '', 'style' => '3', 'height' => 8],
         ];
 
-        foreach ($brand as $rowNumber => $meta) {
-            // Birleşik satırda yalnızca A hücresi yazılır; diğer hücreler Excel'i bozar.
-            $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.$meta['height'].'" customHeight="1">'
-                .$this->inlineCell('A'.$rowNumber, $meta['text'], $meta['style'])
-                .'</row>';
+        foreach ($brandLines as $rowNumber => $meta) {
+            $cells = '';
+
+            for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
+                $value = $columnIndex === 1 ? $meta['text'] : '';
+                $cells .= $this->inlineCell($this->columnLetter($columnIndex).$rowNumber, $value, $meta['style']);
+            }
+
+            $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.$meta['height'].'" customHeight="1">'.$cells.'</row>';
         }
 
         foreach ($rows as $rowIndex => $row) {
             $rowNumber = $headerRowNumber + $rowIndex;
             $isHeader = $rowIndex === 0;
-            $isAlt = ! $isHeader && $rowIndex % 2 === 0;
+            $isAlt = ! $isHeader && ($rowIndex % 2 === 0);
             $style = $isHeader ? '4' : ($isAlt ? '5' : '0');
             $cells = '';
 
@@ -266,42 +261,24 @@ class XlsxWorkbook
 
         $lastDataRow = $headerRowNumber + count($rows) - 1;
         $footerRow = $lastDataRow + 1;
-        $rowMarkup .= '<row r="'.$footerRow.'" ht="32" customHeight="1">'
-            .$this->inlineCell('A'.$footerRow, HacerXlsxTemplate::footerNote(), '6')
-            .'</row>';
-
-        $merges = '';
-        $mergeCount = 0;
-
-        if ($canMerge) {
-            for ($row = 1; $row <= $brandRows; $row++) {
-                $merges .= '<mergeCell ref="A'.$row.':'.$lastColumn.$row.'"/>';
-                $mergeCount++;
-            }
-
-            $merges .= '<mergeCell ref="A'.$footerRow.':'.$lastColumn.$footerRow.'"/>';
-            $mergeCount++;
-        }
-
-        $cols = '';
+        $footerCells = '';
 
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $width = match (true) {
-                $columnIndex === 1 => 14.0,
-                $columnIndex === 2 => 18.0,
-                $columnIndex === 3 => 24.0,
-                $columnIndex === 4 => 28.0,
-                default => 18.0,
-            };
-            $cols .= '<col min="'.$columnIndex.'" max="'.$columnIndex.'" width="'.$width.'" customWidth="1"/>';
+            $value = $columnIndex === 1 ? HacerXlsxTemplate::footerNote() : '';
+            $footerCells .= $this->inlineCell($this->columnLetter($columnIndex).$footerRow, $value, '5');
         }
+
+        $rowMarkup .= '<row r="'.$footerRow.'" ht="30" customHeight="1">'.$footerCells.'</row>';
+
+        $cols = '<col min="1" max="'.$columnCount.'" width="20" customWidth="1"/>';
 
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+            .'<dimension ref="A1:'.$lastColumn.$footerRow.'"/>'
             .'<sheetViews><sheetView workbookViewId="0"><pane ySplit="'.$headerRowNumber.'" topLeftCell="A'.$dataStart.'" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
+            .'<sheetFormatPr defaultRowHeight="15"/>'
             .'<cols>'.$cols.'</cols>'
             .'<sheetData>'.$rowMarkup.'</sheetData>'
-            .($mergeCount > 0 ? '<mergeCells count="'.$mergeCount.'">'.$merges.'</mergeCells>' : '')
             .'<autoFilter ref="A'.$headerRowNumber.':'.$lastColumn.$lastDataRow.'"/>'
             .'</worksheet>';
     }

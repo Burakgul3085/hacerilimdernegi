@@ -77,10 +77,11 @@ class EventRegistrationExportTest extends TestCase
         }
 
         $sheet = (string) $zip->getFromName('xl/worksheets/sheet2.xml');
-        $this->assertStringContainsString('<mergeCell ref="A1:', $sheet);
-        $this->assertDoesNotMatchRegularExpression('/<c r="B1"/', $sheet);
+        $this->assertStringNotContainsString('<mergeCells', $sheet);
+        $this->assertStringContainsString('<dimension ref="A1:', $sheet);
         $this->assertStringContainsString('Ayşe', $sheet);
         $this->assertStringContainsString('Gaziantep', $sheet);
+        $this->assertStringContainsString('Hâcer İlim ve Kültür Topluluğu', $sheet);
 
         $zip->close();
         @unlink($path);
