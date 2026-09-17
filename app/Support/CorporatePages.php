@@ -36,10 +36,11 @@ final class CorporatePages
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
             ],
             self::MESSAGE_SLUG => [
-                'title' => 'Başkanın Mesajı',
-                'excerpt' => 'Dernek başkanının ziyaretçilere mesajı.',
+                'title' => 'Yöneticinin Mesajı',
+                'excerpt' => 'Dernek yöneticisinin ziyaretçilere mesajı.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
             ],
+
             self::BOARD_SLUG => [
                 'title' => 'Yönetim Kadrosu',
                 'excerpt' => 'Dernek yönetiminde görev alan isimler.',

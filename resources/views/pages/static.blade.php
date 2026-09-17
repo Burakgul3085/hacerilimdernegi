@@ -216,13 +216,14 @@
                 delay="0ms"
             />
             <x-about-path
-                title="Başkanın Mesajı"
-                text="Dernek başkanının ziyaretçilere sözü."
+                title="Yöneticinin Mesajı"
+                text="Dernek yöneticisinin ziyaretçilere sözü."
                 :href="route('corporate.message')"
                 icon="quote"
                 index="02"
                 delay="90ms"
             />
+
             <x-about-path
                 title="Yönetim Kadrosu"
                 text="Görev dağılımı ve kurumsal yapı."

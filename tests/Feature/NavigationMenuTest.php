@@ -18,7 +18,8 @@ class NavigationMenuTest extends TestCase
             ->assertSee('Hedef ve İlkelerimiz')
             ->assertSee('/vizyon-misyon', false)
             ->assertDontSee('>Vizyon ve misyon<', false)
-            ->assertSee('Başkanın Mesajı')
+            ->assertSee('Yöneticinin Mesajı')
+
             ->assertSee('Yönetim Kadrosu')
             ->assertSee('Dernek Tüzüğü')
             ->assertSee('Faaliyetler')
@@ -57,6 +58,27 @@ class NavigationMenuTest extends TestCase
             ->assertSee('/vizyon-misyon', false)
             ->assertDontSee('>Vizyon ve misyon<', false)
             ->assertSee("Kalemim'İZ");
+    }
+
+    public function test_stored_president_message_menu_label_is_renamed_to_manager_message(): void
+    {
+        SiteSettings::put('nav_items', json_encode([
+            [
+                'label' => 'Kurumsal',
+                'url' => '/hakkimizda',
+                'children' => [
+                    ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
+                    ['label' => 'Başkanın Mesajı', 'url' => '/baskanin-mesaji'],
+                ],
+            ],
+            ['label' => 'Yazılar', 'url' => '/yazilar'],
+        ], JSON_UNESCAPED_UNICODE));
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Yöneticinin Mesajı')
+            ->assertSee('/baskanin-mesaji', false)
+            ->assertDontSee('>Başkanın Mesajı<', false);
     }
 
     public function test_announcements_menu_item_is_inserted_next_to_posts_when_missing(): void

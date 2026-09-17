@@ -198,7 +198,8 @@ class SiteSettings
                 'children' => [
                     ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
                     ['label' => 'Hedef ve İlkelerimiz', 'url' => '/vizyon-misyon'],
-                    ['label' => 'Başkanın Mesajı', 'url' => '/baskanin-mesaji'],
+                    ['label' => 'Yöneticinin Mesajı', 'url' => '/baskanin-mesaji'],
+
                     ['label' => 'Yönetim Kadrosu', 'url' => '/yonetim-kadrosu'],
                     ['label' => 'Dernek Tüzüğü', 'url' => '/dernek-tuzugu'],
                 ],
@@ -351,8 +352,8 @@ class SiteSettings
             return 'Hedef ve İlkelerimiz';
         }
 
-        if ($url === '/baskanin-mesaji' && $label === 'Başkanın mesajı') {
-            return 'Başkanın Mesajı';
+        if ($url === '/baskanin-mesaji' && in_array($label, ['Başkanın mesajı', 'Başkanın Mesajı'], true)) {
+            return 'Yöneticinin Mesajı';
         }
 
         if ($url === '/yonetim-kadrosu' && $label === 'Yönetim kadrosu') {

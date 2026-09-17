@@ -32,7 +32,8 @@ class CorporatePageTest extends TestCase
     {
         return [
             'vision' => ['/vizyon-misyon', 'Hedef ve İlkelerimiz'],
-            'message' => ['/baskanin-mesaji', 'Başkanın Mesajı'],
+            'message' => ['/baskanin-mesaji', 'Yöneticinin Mesajı'],
+
             'board' => ['/yonetim-kadrosu', 'Yönetim Kadrosu'],
             'bylaws' => ['/dernek-tuzugu', 'Dernek Tüzüğü'],
         ];
@@ -254,7 +255,8 @@ class CorporatePageTest extends TestCase
     public function test_message_page_shows_the_person_icon_and_default_title_without_a_photo(): void
     {
         $this->get('/baskanin-mesaji')
-            ->assertSee('Başkanın Mesajı')
+            ->assertSee('Yöneticinin Mesajı')
+
             ->assertSee('Hâcer İlim ve Kültür Derneği Başkanı')
             ->assertSee('president-silhouette', false)
             ->assertDontSee('page-aside-photo', false)
