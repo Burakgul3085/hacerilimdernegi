@@ -11,7 +11,6 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -39,7 +38,7 @@ class RegistrationExcelAction
             ->modalDescription('Yalnızca seçtiğiniz başvurular ve alanlar iner. Paneldeki kayıtlar değişmez.')
             ->modalSubmitActionLabel('İndir')
             ->fillForm(fn (Activity $record): array => self::activityDefaults($record))
-            ->schema(fn (Activity $record): array => self::activitySchema($record))
+            ->schema(fn (Activity $record): array => self::activitySchema((int) $record->getKey()))
             ->action(function (array $data, Activity $record, ExportEventRegistrations $export) {
                 return self::downloadActivity($data, $record, $export);
             });
@@ -47,6 +46,8 @@ class RegistrationExcelAction
 
     private static function forActivity(string $name, Activity $activity): Action
     {
+        $activityId = (int) $activity->getKey();
+
         return Action::make($name)
             ->label('Excel\'e aktar')
             ->icon('heroicon-o-arrow-down-tray')
@@ -54,16 +55,17 @@ class RegistrationExcelAction
             ->modalHeading($activity->title)
             ->modalDescription('Yalnızca seçtiğiniz başvurular ve alanlar iner. Paneldeki kayıtlar değişmez. Başvuru numarası her dosyada durur.')
             ->modalSubmitActionLabel('İndir')
-            ->fillForm(fn (): array => self::activityDefaults($activity))
-            ->schema(self::activitySchema($activity))
-            ->action(function (array $data, ExportEventRegistrations $export) use ($activity) {
-                return self::downloadActivity($data, $activity, $export);
+            ->fillForm(fn (): array => self::activityDefaults(Activity::query()->findOrFail($activityId)))
+            ->schema(fn (): array => self::activitySchema($activityId))
+            ->action(function (array $data, ExportEventRegistrations $export) use ($activityId) {
+                return self::downloadActivity($data, Activity::query()->findOrFail($activityId), $export);
             });
     }
 
     private static function forUnassigned(string $name): Action
     {
         $columnOptions = RegistrationExportPlan::plainColumnOptions();
+        $people = self::registrationOptions(unassignedOnly: true);
 
         return Action::make($name)
             ->label('Excel indir')
@@ -78,14 +80,16 @@ class RegistrationExcelAction
                 'column_keys' => array_keys($columnOptions),
             ])
             ->schema([
-                self::statusSelect(fn (mixed $state, Set $set): mixed => $set(
-                    'registration_ids',
-                    array_keys(self::registrationOptions(status: filled($state) ? ApplicationStatus::from((string) $state) : null, unassignedOnly: true)),
-                )),
-                self::peopleList(fn (Get $get): array => self::registrationOptions(
-                    status: filled($get('status')) ? ApplicationStatus::from((string) $get('status')) : null,
-                    unassignedOnly: true,
-                )),
+                self::statusSelect(function (mixed $state, Set $set): mixed {
+                    return $set(
+                        'registration_ids',
+                        array_keys(self::registrationOptions(
+                            status: self::statusFromState($state),
+                            unassignedOnly: true,
+                        )),
+                    );
+                }),
+                self::peopleList($people),
                 self::columnsList($columnOptions),
             ])
             ->action(function (array $data, ExportEventRegistrations $export) {
@@ -138,24 +142,23 @@ class RegistrationExcelAction
     /**
      * @return list<Component>
      */
-    private static function activitySchema(Activity $activity): array
+    private static function activitySchema(int $activityId): array
     {
+        $activity = Activity::query()->findOrFail($activityId);
+        $people = self::registrationOptions(activity: $activity);
         $columnOptions = RegistrationExportPlan::columnOptions($activity, includeLegacyNotes: true);
 
         return [
-            self::statusSelect(function (mixed $state, Set $set) use ($activity): mixed {
+            self::statusSelect(function (mixed $state, Set $set) use ($activityId): mixed {
                 return $set(
                     'registration_ids',
                     array_keys(self::registrationOptions(
-                        activity: $activity,
-                        status: filled($state) ? ApplicationStatus::from((string) $state) : null,
+                        activity: Activity::query()->findOrFail($activityId),
+                        status: self::statusFromState($state),
                     )),
                 );
             }),
-            self::peopleList(fn (Get $get): array => self::registrationOptions(
-                activity: $activity,
-                status: filled($get('status')) ? ApplicationStatus::from((string) $get('status')) : null,
-            )),
+            self::peopleList($people),
             self::columnsList($columnOptions),
         ];
     }
@@ -165,6 +168,7 @@ class RegistrationExcelAction
         return Select::make('status')
             ->label('Durum')
             ->placeholder('Tümü')
+            ->helperText('Değiştirince o durumdakiler işaretlenir. İsim listesi aynı kalır; istediğinizi tek tek açıp kapatabilirsiniz.')
             ->options(collect(ApplicationStatus::cases())->mapWithKeys(
                 fn (ApplicationStatus $status): array => [$status->value => $status->label()],
             ))
@@ -173,19 +177,27 @@ class RegistrationExcelAction
     }
 
     /**
-     * @param  \Closure(): array<string, string>  $options
+     * @param  array<string, string>  $options
      */
-    private static function peopleList(\Closure $options): CheckboxList
+    private static function peopleList(array $options): CheckboxList
     {
+        $count = count($options);
+
         return CheckboxList::make('registration_ids')
-            ->label('Başvurular')
+            ->label('Başvuranlar')
             ->options($options)
-            ->searchable()
             ->bulkToggleable()
             ->columns(1)
             ->required()
             ->minItems(1)
-            ->helperText('Tümünü seç / seçimi temizle ile hızlıca daraltın.');
+            ->validationMessages([
+                'required' => 'En az bir başvuran seçin.',
+                'min' => 'En az bir başvuran seçin.',
+            ])
+            ->helperText($count === 0
+                ? 'Bu faaliyette henüz başvuran yok.'
+                : $count.' başvuran listede. “Tümünü seç” / “Tüm seçimi kaldır” ile toplu işlem yapın; ya da tek tek işaretleyin.')
+            ->extraAttributes(['class' => 'max-h-72 overflow-y-auto rounded-lg border border-gray-200 p-3 dark:border-gray-700']);
     }
 
     /**
@@ -196,11 +208,14 @@ class RegistrationExcelAction
         return CheckboxList::make('column_keys')
             ->label('Excel alanları')
             ->options($options)
-            ->searchable()
             ->bulkToggleable()
             ->columns(2)
             ->required()
             ->minItems(1)
+            ->validationMessages([
+                'required' => 'En az bir alan seçin.',
+                'min' => 'En az bir alan seçin.',
+            ])
             ->helperText('Başvuru numarası her dosyada otomatik durur.');
     }
 
@@ -216,15 +231,28 @@ class RegistrationExcelAction
             ->when($activity !== null, fn (Builder $query): Builder => $query->forActivity($activity))
             ->when($unassignedOnly, fn (Builder $query): Builder => $query->unassigned())
             ->when($status !== null, fn (Builder $query): Builder => $query->where('status', $status))
-            ->orderByDesc('created_at')
+            ->orderBy('name')
             ->orderByDesc('id')
             ->get()
             ->mapWithKeys(function (EventRegistration $registration): array {
-                $label = trim($registration->name.' · '.$registration->email.' · #'.$registration->getKey());
+                $parts = array_filter([
+                    $registration->name,
+                    $registration->email,
+                    '#'.$registration->getKey(),
+                ]);
 
-                return [(string) $registration->getKey() => $label];
+                return [(string) $registration->getKey() => implode(' · ', $parts)];
             })
             ->all();
+    }
+
+    private static function statusFromState(mixed $state): ?ApplicationStatus
+    {
+        if (! filled($state)) {
+            return null;
+        }
+
+        return ApplicationStatus::from((string) $state);
     }
 
     /**

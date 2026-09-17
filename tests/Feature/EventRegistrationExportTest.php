@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Actions\ExportEventRegistrations;
 use App\Enums\ApplicationStatus;
 use App\Enums\UserRole;
+use App\Filament\Resources\EventRegistrations\Pages\ListActivityRegistrations;
 use App\Models\Activity;
 use App\Models\AuditLog;
 use App\Models\Event;
@@ -12,12 +13,39 @@ use App\Models\EventRegistration;
 use App\Models\User;
 use App\Support\RegistrationForm;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 use ZipArchive;
 
 class EventRegistrationExportTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_activity_excel_modal_lists_all_applicants_selected_by_default(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $activity = $this->activity('Şiir', 'siir-modal', [
+            ['key' => 'yas', 'label' => 'Yaş', 'type' => 'text'],
+        ]);
+        $ayse = $this->registration($activity, 'Ayşe Yılmaz', 'ayse@example.com', null, [
+            ['key' => 'yas', 'label' => 'Yaş', 'value' => '28'],
+        ]);
+        $mehmet = $this->registration($activity, 'Mehmet Demir', 'mehmet@example.com', null, [
+            ['key' => 'yas', 'label' => 'Yaş', 'value' => '40'],
+        ]);
+
+        Livewire::test(ListActivityRegistrations::class, ['activity' => $activity->getKey()])
+            ->mountAction('excelActivity')
+            ->assertActionDataSet([
+                'registration_ids' => [
+                    (string) $ayse->id,
+                    (string) $mehmet->id,
+                ],
+            ])
+            ->assertSee('Ayşe Yılmaz')
+            ->assertSee('Mehmet Demir');
+    }
 
     public function test_workbook_gives_each_activity_its_own_sheet_and_all_answers_by_default(): void
     {
