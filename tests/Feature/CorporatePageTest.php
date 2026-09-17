@@ -141,12 +141,15 @@ class CorporatePageTest extends TestCase
             ])
             ->assertSee('/storage/pages/board/zeliha.jpg', false)
             ->assertSee('board-photo-fit', false)
+            ->assertSee('board-hijab-placeholder.png', false)
+            ->assertSee('board-photo-placeholder', false)
             ->assertDontSee('board-photo-fill', false)
             ->assertDontSee('object-cover', false)
             ->assertSee('board-directory', false)
             ->assertDontSee('Görünmemeli')
             ->assertDontSee('Başkanlık')
             ->assertDontSee('Başkan yardımcıları')
+            ->assertDontSee('>TG<', false)
             ->assertDontSee('yönetim panelinden eklenecektir')
             ->assertDontSee('page-aside-photo', false);
     }

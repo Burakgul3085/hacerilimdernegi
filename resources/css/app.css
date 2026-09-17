@@ -115,6 +115,16 @@
         height: auto;
     }
 
+    .board-photo-placeholder {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+    }
+
     .president-portrait::after {
         content: '';
         position: absolute;

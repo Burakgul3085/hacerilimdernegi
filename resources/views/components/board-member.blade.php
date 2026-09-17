@@ -9,6 +9,7 @@
 
 @php
     $photoUrl = filled($photo) ? \Illuminate\Support\Facades\Storage::disk('public')->url($photo) : null;
+    $placeholderUrl = asset('images/board-hijab-placeholder.png');
 @endphp
 
 <article {{ $attributes->merge(['class' => 'board-card card card-hover min-w-0 overflow-hidden'.($featured ? ' board-card-featured' : '')]) }}>
@@ -22,9 +23,8 @@
             <img src="{{ $photoUrl }}" alt="{{ $name }}" loading="lazy" decoding="async"
                  class="board-photo-fit">
         @else
-            <div class="flex h-full w-full items-center justify-center">
-                <span class="font-display text-4xl tracking-wide text-gold/80 {{ $featured ? 'sm:text-5xl' : '' }}">{{ $initials }}</span>
-            </div>
+            <img src="{{ $placeholderUrl }}" alt="" aria-hidden="true" loading="lazy" decoding="async"
+                 class="board-photo-placeholder">
         @endif
     </div>
 
