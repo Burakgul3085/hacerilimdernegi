@@ -62,6 +62,7 @@ class NestedMediaAlbumTest extends TestCase
             ->assertOk()
             ->assertSee('album-media-gallery', false)
             ->assertSee('album-media-tile', false)
+            ->assertSee('album-media-frame', false)
             ->assertSee('/storage/media/kamp-kare.jpg', false)
             ->assertDontSee('object-cover', false)
             ->assertDontSee('aspect-[4/3]', false)

@@ -895,61 +895,93 @@
     }
 
     .album-media-gallery {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.65rem;
-        align-items: flex-start;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    @media (min-width: 640px) {
+        .album-media-gallery {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.1rem;
+        }
+    }
+
+    .album-media-gallery-video {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    @media (min-width: 640px) {
+        .album-media-gallery-video {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
     }
 
     .album-media-tile {
-        display: block;
-        width: fit-content;
-        max-width: 100%;
+        display: flex;
+        width: 100%;
+        flex-direction: column;
         margin: 0;
         padding: 0;
         border: 0;
-        overflow: hidden;
-        border-radius: 0.9rem;
         background: transparent;
         cursor: zoom-in;
-        line-height: 0;
         text-align: left;
     }
 
-    .album-media-tile img {
+    .album-media-frame {
+        display: flex;
+        aspect-ratio: 4 / 5;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 1rem;
+        background: var(--color-paper, #fffdf8);
+        box-shadow: var(--shadow-soft, 0 1px 2px rgb(22 21 19 / 0.06));
+        line-height: 0;
+    }
+
+    .album-media-frame img {
         display: block;
         width: auto;
         height: auto;
-        max-width: min(100%, 11.5rem);
-        max-height: 14rem;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        object-position: center;
     }
 
     .album-media-tile-video {
         cursor: default;
     }
 
+    .album-media-gallery-video .album-media-frame {
+        aspect-ratio: 16 / 10;
+        background: #161513;
+    }
+
     .album-media-tile-video video {
         display: block;
         width: auto;
         height: auto;
-        max-width: min(100%, 16rem);
-        max-height: 14rem;
-        background: #161513;
-        border-radius: 0.9rem;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        background: transparent;
+        border-radius: 0;
     }
 
     .album-media-caption {
         display: block;
-        max-width: min(100%, 11.5rem);
-        padding: 0.55rem 0.15rem 0;
+        width: 100%;
+        max-width: none;
+        padding: 0.65rem 0.1rem 0;
         font-size: 0.8125rem;
         line-height: 1.45;
         color: var(--color-muted, #6b6560);
         white-space: normal;
-    }
-
-    .album-media-tile-video .album-media-caption {
-        max-width: min(100%, 16rem);
     }
 
     .activity-card .activity-status {

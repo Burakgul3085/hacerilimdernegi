@@ -118,7 +118,9 @@
                         @php $url = \Illuminate\Support\Facades\Storage::disk('public')->url($item->path); @endphp
                         <button type="button" class="album-media-tile group"
                                 x-on:click="open = true; src = '{{ $url }}'; caption = @js($item->caption ?: $item->title)">
-                            <img src="{{ $url }}" alt="{{ $item->title }}" loading="lazy" decoding="async">
+                            <span class="album-media-frame">
+                                <img src="{{ $url }}" alt="{{ $item->title }}" loading="lazy" decoding="async">
+                            </span>
                             @if (filled($item->caption ?: $item->title))
                                 <span class="album-media-caption">{{ $item->caption ?: $item->title }}</span>
                             @endif
@@ -132,7 +134,9 @@
                     @foreach ($groups['videos'] as $item)
                         @php $url = \Illuminate\Support\Facades\Storage::disk('public')->url($item->path); @endphp
                         <figure class="album-media-tile album-media-tile-video">
-                            <video src="{{ $url }}" controls playsinline preload="metadata"></video>
+                            <div class="album-media-frame">
+                                <video src="{{ $url }}" controls playsinline preload="metadata"></video>
+                            </div>
                             @if (filled($item->caption ?: $item->title))
                                 <figcaption class="album-media-caption">{{ $item->caption ?: $item->title }}</figcaption>
                             @endif
