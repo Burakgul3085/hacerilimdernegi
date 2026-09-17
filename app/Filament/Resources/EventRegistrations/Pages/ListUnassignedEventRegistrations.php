@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EventRegistrations\Pages;
 
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
+use App\Filament\Resources\EventRegistrations\RegistrationExcelAction;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
@@ -37,6 +38,7 @@ class ListUnassignedEventRegistrations extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            RegistrationExcelAction::make('excelUnassigned', unassignedOnly: true),
             Action::make('back')
                 ->label('Tüm faaliyetler')
                 ->icon('heroicon-o-arrow-left')

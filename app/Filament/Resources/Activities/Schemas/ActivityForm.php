@@ -8,6 +8,7 @@ use App\Support\RegistrationForm;
 use App\Support\UploadRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -79,9 +80,13 @@ class ActivityForm
                                     ->default('text')
                                     ->required()
                                     ->live(),
+                                Hidden::make('key'),
                                 Toggle::make('required')
                                     ->label('Zorunlu')
                                     ->default(false),
+                                Toggle::make('excel')
+                                    ->label('Excel\'de görünsün')
+                                    ->default(true),
                                 TextInput::make('placeholder')
                                     ->label('Yer tutucu')
                                     ->maxLength(120)
@@ -119,6 +124,36 @@ class ActivityForm
 
                                 return $label.$required;
                             }),
+                    ]),
+
+                Section::make('Excel sütunları')
+                    ->description('İndirilen dosyada hangi bilgiler görünsün. İşaretlenmeyen soru panelde kalır, Excel\'e girmez. Başvuru numarası her dosyada durur.')
+                    ->columns(2)
+                    ->schema([
+                        Toggle::make('excel_columns.submitted_at')->label('Başvuru tarihi')->default(true),
+                        Toggle::make('excel_columns.name')->label('Ad soyad')->default(true),
+                        Toggle::make('excel_columns.email')->label('E-posta')->default(true),
+                        Toggle::make('excel_columns.phone')->label('Telefon')->default(true),
+                        Toggle::make('excel_columns.status')->label('Durum')->default(true),
+                        Toggle::make('excel_columns.source')->label('Kaynak')->default(true),
+                        Toggle::make('excel_columns.replied')->label('Yanıt')->default(false),
+                        Toggle::make('excel_columns.kvkk')->label('KVKK')->default(false),
+                        Repeater::make('excel_archived_questions')
+                            ->label('Kaldırılan sorular')
+                            ->helperText('Formdan silinen soruların eski cevapları. Yeniden işaretlerseniz sonraki Excel\'de geri gelir.')
+                            ->addable(false)
+                            ->deletable(false)
+                            ->reorderable(false)
+                            ->defaultItems(0)
+                            ->columnSpanFull()
+                            ->visible(fn ($get): bool => filled($get('excel_archived_questions')))
+                            ->schema([
+                                Hidden::make('key'),
+                                Hidden::make('label'),
+                                Toggle::make('include')
+                                    ->label(fn ($get): string => 'Excel\'de göster: '.($get('label') ?: 'Eski soru'))
+                                    ->default(false),
+                            ]),
                     ]),
 
                 Section::make('Metin')

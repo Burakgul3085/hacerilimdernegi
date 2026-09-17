@@ -4,6 +4,7 @@ namespace App\Filament\Resources\EventRegistrations\Pages;
 
 use App\Enums\ApplicationStatus;
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
+use App\Filament\Resources\EventRegistrations\RegistrationExcelAction;
 use App\Models\Activity;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
@@ -78,6 +79,7 @@ class ListActivityRegistrations extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            RegistrationExcelAction::make('excelActivity', $this->activityRecord()),
             Action::make('back')
                 ->label('Tüm faaliyetler')
                 ->icon('heroicon-o-arrow-left')

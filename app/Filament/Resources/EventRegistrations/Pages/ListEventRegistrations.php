@@ -4,6 +4,7 @@ namespace App\Filament\Resources\EventRegistrations\Pages;
 
 use App\Enums\ApplicationStatus;
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
+use App\Filament\Resources\EventRegistrations\RegistrationExcelAction;
 use App\Filament\Resources\EventRegistrations\Tables\EventRegistrationFoldersTable;
 use App\Models\Activity;
 use App\Models\EventRegistration;
@@ -73,11 +74,16 @@ class ListEventRegistrations extends Page implements HasTable
     {
         $unassignedCount = EventRegistration::query()->unassigned()->count();
 
+        $actions = [
+            RegistrationExcelAction::make(),
+        ];
+
         if ($unassignedCount === 0) {
-            return [];
+            return $actions;
         }
 
         return [
+            ...$actions,
             Action::make('unassigned')
                 ->label('Diğer başvurular ('.$unassignedCount.')')
                 ->icon('heroicon-o-question-mark-circle')

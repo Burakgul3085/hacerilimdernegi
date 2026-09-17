@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ActivityStatus;
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasContentGallery;
+use App\Support\RegistrationExportPlan;
 use App\Support\RegistrationForm;
 use Database\Factories\ActivityFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,7 +24,7 @@ class Activity extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'slug', 'excerpt', 'cadence', 'description', 'highlights', 'image', 'gallery', 'status', 'sort_order', 'is_published', 'registration_open', 'registration_fields',
+        'title', 'slug', 'excerpt', 'cadence', 'description', 'highlights', 'image', 'gallery', 'status', 'sort_order', 'is_published', 'registration_open', 'registration_fields', 'excel_columns', 'excel_archived_questions',
     ];
 
     protected function casts(): array
@@ -33,6 +34,8 @@ class Activity extends Model
             'gallery' => 'array',
             'highlights' => 'array',
             'registration_fields' => 'array',
+            'excel_columns' => 'array',
+            'excel_archived_questions' => 'array',
             'sort_order' => 'integer',
             'is_published' => 'boolean',
             'registration_open' => 'boolean',
@@ -47,7 +50,16 @@ class Activity extends Model
             }
 
             if ($activity->isDirty('registration_fields')) {
+                $previous = $activity->getOriginal('registration_fields');
                 $activity->registration_fields = RegistrationForm::normalize($activity->registration_fields);
+
+                if ($activity->exists) {
+                    $activity->excel_archived_questions = RegistrationExportPlan::mergeArchive(
+                        $previous,
+                        $activity->registration_fields,
+                        $activity->excel_archived_questions,
+                    );
+                }
             }
         });
     }

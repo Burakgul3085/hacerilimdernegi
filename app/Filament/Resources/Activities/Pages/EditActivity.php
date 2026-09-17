@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Activities\Pages;
 
 use App\Filament\Resources\Activities\ActivityResource;
 use App\Models\Activity;
+use App\Support\RegistrationExportPlan;
 use App\Support\RegistrationForm;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -57,6 +58,9 @@ class EditActivity extends EditRecord
 
             return $field;
         }, $fields);
+        $data['excel_columns'] = RegistrationExportPlan::fixedSelection(
+            is_array($data['excel_columns'] ?? null) ? $data['excel_columns'] : null,
+        );
 
         return $data;
     }

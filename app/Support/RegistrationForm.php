@@ -53,7 +53,7 @@ class RegistrationForm
     /**
      * Kayıt alanı tanımlanmamış eski faaliyetler için varsayılan “Not” alanı.
      *
-     * @return list<array{key: string, label: string, type: string, required: bool, help: string, placeholder: string, options: list<string>}>
+     * @return list<array{key: string, label: string, type: string, required: bool, excel: bool, help: string, placeholder: string, options: list<string>}>
      */
     public static function defaultFields(): array
     {
@@ -63,6 +63,7 @@ class RegistrationForm
                 'label' => 'Not',
                 'type' => 'textarea',
                 'required' => false,
+                'excel' => true,
                 'help' => '',
                 'placeholder' => 'Eklemek istedikleriniz',
                 'options' => [],
@@ -71,7 +72,7 @@ class RegistrationForm
     }
 
     /**
-     * @return list<array{key: string, label: string, type: string, required: bool, help: string, placeholder: string, options: list<string>}>
+     * @return list<array{key: string, label: string, type: string, required: bool, excel: bool, help: string, placeholder: string, options: list<string>}>
      */
     public static function normalize(mixed $fields): array
     {
@@ -117,6 +118,7 @@ class RegistrationForm
                 'label' => Str::limit($label, 120, ''),
                 'type' => $type,
                 'required' => (bool) ($field['required'] ?? false),
+                'excel' => array_key_exists('excel', $field) ? (bool) $field['excel'] : true,
                 'help' => Str::limit(trim((string) ($field['help'] ?? '')), 280, ''),
                 'placeholder' => Str::limit(trim((string) ($field['placeholder'] ?? '')), 120, ''),
                 'options' => $options,

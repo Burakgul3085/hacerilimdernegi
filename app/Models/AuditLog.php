@@ -168,6 +168,7 @@ class AuditLog extends Model
             'created' => 'Ekledi',
             'updated' => 'Güncelledi',
             'deleted' => 'Sildi',
+            'exported' => 'Excel indirdi',
             default => (string) $this->action,
         };
     }
@@ -222,6 +223,7 @@ class AuditLog extends Model
             'created' => 'ekledi',
             'updated' => 'güncelledi',
             'deleted' => 'sildi',
+            'exported' => 'Excel olarak indirdi',
             default => (string) $this->action,
         };
 
@@ -247,6 +249,10 @@ class AuditLog extends Model
             NewsletterSubscriber::class => 'e-bülten kaydını',
             default => 'kaydını',
         };
+
+        if ($this->action === 'exported') {
+            return $who.' «'.$label.'» başvurularını Excel olarak indirdi.';
+        }
 
         $sentence = $who.' «'.$label.'» '.$noun.' '.$verb;
 

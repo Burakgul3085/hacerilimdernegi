@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\EventRegistrations\Tables;
 
+use App\Actions\ExportEventRegistrations;
 use App\Enums\ActivityStatus;
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
 use App\Models\Activity;
@@ -53,6 +54,10 @@ class EventRegistrationFoldersTable
             ])
             ->recordUrl(fn (Activity $record): string => EventRegistrationResource::getUrl('applicants', ['activity' => $record]))
             ->recordActions([
+                Action::make('excel')
+                    ->label('Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(fn (Activity $record, ExportEventRegistrations $export) => $export->download($record)),
                 Action::make('open')
                     ->label('Başvuruları aç')
                     ->icon('heroicon-o-users')
