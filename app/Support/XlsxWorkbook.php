@@ -94,14 +94,12 @@ class XlsxWorkbook
 
     private function packageRels(): string
     {
-        return <<<'XML'
-            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-              <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
-              <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
-              <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
-            </Relationships>
-            XML;
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            .'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            .'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+            .'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>'
+            .'<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>'
+            .'</Relationships>';
     }
 
     private function coreProps(string $title): string
@@ -121,10 +119,9 @@ class XlsxWorkbook
     private function appProps(): string
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-            .'<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">'
+            .'<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">'
             .'<Application>'.$this->xml(HacerXlsxTemplate::ORGANIZATION).'</Application>'
             .'<Company>'.$this->xml(HacerXlsxTemplate::ORGANIZATION).'</Company>'
-            .'<Manager>'.$this->xml(HacerXlsxTemplate::DOCUMENT_KIND).'</Manager>'
             .'</Properties>';
     }
 
@@ -172,52 +169,50 @@ class XlsxWorkbook
         $goldSoft = HacerXlsxTemplate::COLOR_GOLD_SOFT;
         $muted = HacerXlsxTemplate::COLOR_MUTED;
 
-        return <<<XML
-            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-            <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-              <fonts count="6">
-                <font><sz val="11"/><color rgb="FF161513"/><name val="Calibri"/></font>
-                <font><b/><sz val="16"/><color rgb="{$paper}"/><name val="Calibri"/></font>
-                <font><sz val="10"/><color rgb="{$goldSoft}"/><name val="Calibri"/></font>
-                <font><b/><sz val="11"/><color rgb="{$paper}"/><name val="Calibri"/></font>
-                <font><sz val="10"/><color rgb="{$muted}"/><name val="Calibri"/><i/></font>
-                <font><b/><sz val="11"/><color rgb="FF161513"/><name val="Calibri"/></font>
-              </fonts>
-              <fills count="6">
-                <fill><patternFill patternType="none"/></fill>
-                <fill><patternFill patternType="gray125"/></fill>
-                <fill><patternFill patternType="solid"><fgColor rgb="{$forest}"/></patternFill></fill>
-                <fill><patternFill patternType="solid"><fgColor rgb="{$gold}"/></patternFill></fill>
-                <fill><patternFill patternType="solid"><fgColor rgb="{$cream}"/></patternFill></fill>
-                <fill><patternFill patternType="solid"><fgColor rgb="{$paper}"/></patternFill></fill>
-              </fills>
-              <borders count="3">
-                <border><left/><right/><top/><bottom/><diagonal/></border>
-                <border>
-                  <left style="thin"><color rgb="{$line}"/></left>
-                  <right style="thin"><color rgb="{$line}"/></right>
-                  <top style="thin"><color rgb="{$line}"/></top>
-                  <bottom style="thin"><color rgb="{$line}"/></bottom>
-                </border>
-                <border>
-                  <left style="thin"><color rgb="{$gold}"/></left>
-                  <right style="thin"><color rgb="{$gold}"/></right>
-                  <top style="thin"><color rgb="{$gold}"/></top>
-                  <bottom style="medium"><color rgb="{$gold}"/></bottom>
-                </border>
-              </borders>
-              <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-              <cellXfs count="7">
-                <xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
-                <xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>
-                <xf numFmtId="49" fontId="2" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
-                <xf numFmtId="49" fontId="5" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
-                <xf numFmtId="49" fontId="3" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-                <xf numFmtId="49" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
-                <xf numFmtId="49" fontId="4" fillId="5" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
-              </cellXfs>
-            </styleSheet>
-            XML;
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            .'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+            .'<fonts count="6">'
+            .'<font><sz val="11"/><color rgb="FF161513"/><name val="Calibri"/></font>'
+            .'<font><b/><sz val="16"/><color rgb="'.$paper.'"/><name val="Calibri"/></font>'
+            .'<font><sz val="10"/><color rgb="'.$goldSoft.'"/><name val="Calibri"/></font>'
+            .'<font><b/><sz val="11"/><color rgb="'.$paper.'"/><name val="Calibri"/></font>'
+            .'<font><i/><sz val="10"/><color rgb="'.$muted.'"/><name val="Calibri"/></font>'
+            .'<font><b/><sz val="11"/><color rgb="FF161513"/><name val="Calibri"/></font>'
+            .'</fonts>'
+            .'<fills count="6">'
+            .'<fill><patternFill patternType="none"/></fill>'
+            .'<fill><patternFill patternType="gray125"/></fill>'
+            .'<fill><patternFill patternType="solid"><fgColor rgb="'.$forest.'"/></patternFill></fill>'
+            .'<fill><patternFill patternType="solid"><fgColor rgb="'.$gold.'"/></patternFill></fill>'
+            .'<fill><patternFill patternType="solid"><fgColor rgb="'.$cream.'"/></patternFill></fill>'
+            .'<fill><patternFill patternType="solid"><fgColor rgb="'.$paper.'"/></patternFill></fill>'
+            .'</fills>'
+            .'<borders count="3">'
+            .'<border><left/><right/><top/><bottom/><diagonal/></border>'
+            .'<border>'
+            .'<left style="thin"><color rgb="'.$line.'"/></left>'
+            .'<right style="thin"><color rgb="'.$line.'"/></right>'
+            .'<top style="thin"><color rgb="'.$line.'"/></top>'
+            .'<bottom style="thin"><color rgb="'.$line.'"/></bottom>'
+            .'</border>'
+            .'<border>'
+            .'<left style="thin"><color rgb="'.$gold.'"/></left>'
+            .'<right style="thin"><color rgb="'.$gold.'"/></right>'
+            .'<top style="thin"><color rgb="'.$gold.'"/></top>'
+            .'<bottom style="medium"><color rgb="'.$gold.'"/></bottom>'
+            .'</border>'
+            .'</borders>'
+            .'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+            .'<cellXfs count="7">'
+            .'<xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
+            .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
+            .'<xf numFmtId="49" fontId="2" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
+            .'<xf numFmtId="49" fontId="5" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
+            .'<xf numFmtId="49" fontId="3" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+            .'<xf numFmtId="49" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
+            .'<xf numFmtId="49" fontId="4" fillId="5" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
+            .'</cellXfs>'
+            .'</styleSheet>';
     }
 
     /**
@@ -234,32 +229,21 @@ class XlsxWorkbook
         $brandRows = HacerXlsxTemplate::BRAND_ROWS;
         $headerRowNumber = $brandRows + 1;
         $dataStart = $headerRowNumber + 1;
+        $canMerge = $columnCount > 1;
         $rowMarkup = '';
 
         $brand = [
-            1 => ['text' => HacerXlsxTemplate::ORGANIZATION, 'style' => '1'],
-            2 => ['text' => HacerXlsxTemplate::subtitleLine($context), 'style' => '2'],
-            3 => ['text' => $summary ?: ' ', 'style' => '3'],
-            4 => ['text' => ' ', 'style' => '3'],
+            1 => ['text' => HacerXlsxTemplate::ORGANIZATION, 'style' => '1', 'height' => 28],
+            2 => ['text' => HacerXlsxTemplate::subtitleLine($context), 'style' => '2', 'height' => 20],
+            3 => ['text' => filled($summary) ? $summary : ' ', 'style' => '3', 'height' => 18],
+            4 => ['text' => ' ', 'style' => '3', 'height' => 8],
         ];
 
         foreach ($brand as $rowNumber => $meta) {
-            $cells = '';
-
-            for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-                $reference = $this->columnLetter($columnIndex).$rowNumber;
-                $value = $columnIndex === 1 ? $meta['text'] : '';
-                $cells .= '<c r="'.$reference.'" t="inlineStr" s="'.$meta['style'].'"><is><t xml:space="preserve">'.$this->xml($value).'</t></is></c>';
-            }
-
-            $height = match ($rowNumber) {
-                1 => ' ht="28" customHeight="1"',
-                2 => ' ht="20" customHeight="1"',
-                3 => ' ht="18" customHeight="1"',
-                default => ' ht="8" customHeight="1"',
-            };
-
-            $rowMarkup .= '<row r="'.$rowNumber.'"'.$height.'>'.$cells.'</row>';
+            // Birleşik satırda yalnızca A hücresi yazılır; diğer hücreler Excel'i bozar.
+            $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.$meta['height'].'" customHeight="1">'
+                .$this->inlineCell('A'.$rowNumber, $meta['text'], $meta['style'])
+                .'</row>';
         }
 
         foreach ($rows as $rowIndex => $row) {
@@ -270,50 +254,47 @@ class XlsxWorkbook
             $cells = '';
 
             for ($columnIndex = 0; $columnIndex < $columnCount; $columnIndex++) {
-                $reference = $this->columnLetter($columnIndex + 1).$rowNumber;
-                $value = (string) ($row[$columnIndex] ?? '');
-                $cells .= '<c r="'.$reference.'" t="inlineStr" s="'.$style.'"><is><t xml:space="preserve">'.$this->xml($value).'</t></is></c>';
+                $cells .= $this->inlineCell(
+                    $this->columnLetter($columnIndex + 1).$rowNumber,
+                    (string) ($row[$columnIndex] ?? ''),
+                    $style,
+                );
             }
 
             $rowMarkup .= '<row r="'.$rowNumber.'" ht="18" customHeight="1">'.$cells.'</row>';
         }
 
         $lastDataRow = $headerRowNumber + count($rows) - 1;
-        $footerRow = $lastDataRow + 2;
-        $footerCells = '';
-
-        for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $reference = $this->columnLetter($columnIndex).$footerRow;
-            $value = $columnIndex === 1 ? HacerXlsxTemplate::footerNote() : '';
-            $footerCells .= '<c r="'.$reference.'" t="inlineStr" s="6"><is><t xml:space="preserve">'.$this->xml($value).'</t></is></c>';
-        }
-
-        $rowMarkup .= '<row r="'.$footerRow.'" ht="32" customHeight="1">'.$footerCells.'</row>';
+        $footerRow = $lastDataRow + 1;
+        $rowMarkup .= '<row r="'.$footerRow.'" ht="32" customHeight="1">'
+            .$this->inlineCell('A'.$footerRow, HacerXlsxTemplate::footerNote(), '6')
+            .'</row>';
 
         $merges = '';
-        for ($row = 1; $row <= $brandRows; $row++) {
-            if ($columnCount > 1) {
+        $mergeCount = 0;
+
+        if ($canMerge) {
+            for ($row = 1; $row <= $brandRows; $row++) {
                 $merges .= '<mergeCell ref="A'.$row.':'.$lastColumn.$row.'"/>';
+                $mergeCount++;
             }
-        }
-        if ($columnCount > 1) {
+
             $merges .= '<mergeCell ref="A'.$footerRow.':'.$lastColumn.$footerRow.'"/>';
+            $mergeCount++;
         }
-        $mergeCount = ($columnCount > 1 ? $brandRows + 1 : 0);
 
         $cols = '';
+
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $width = match ($columnIndex) {
-                1 => 14,
-                2 => 18,
-                3 => 22,
-                4 => 28,
-                default => 18,
+            $width = match (true) {
+                $columnIndex === 1 => 14.0,
+                $columnIndex === 2 => 18.0,
+                $columnIndex === 3 => 24.0,
+                $columnIndex === 4 => 28.0,
+                default => 18.0,
             };
             $cols .= '<col min="'.$columnIndex.'" max="'.$columnIndex.'" width="'.$width.'" customWidth="1"/>';
         }
-
-        $filterEnd = max($headerRowNumber, $lastDataRow);
 
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
@@ -321,10 +302,13 @@ class XlsxWorkbook
             .'<cols>'.$cols.'</cols>'
             .'<sheetData>'.$rowMarkup.'</sheetData>'
             .($mergeCount > 0 ? '<mergeCells count="'.$mergeCount.'">'.$merges.'</mergeCells>' : '')
-            .'<autoFilter ref="A'.$headerRowNumber.':'.$lastColumn.$filterEnd.'"/>'
-            .'<pageSetup orientation="landscape" fitToPage="1" fitToWidth="1" fitToHeight="0"/>'
-            .'<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.2" footer="0.2"/>'
+            .'<autoFilter ref="A'.$headerRowNumber.':'.$lastColumn.$lastDataRow.'"/>'
             .'</worksheet>';
+    }
+
+    private function inlineCell(string $reference, string $value, string $style): string
+    {
+        return '<c r="'.$reference.'" t="inlineStr" s="'.$style.'"><is><t xml:space="preserve">'.$this->xml($value).'</t></is></c>';
     }
 
     private function columnLetter(int $index): string

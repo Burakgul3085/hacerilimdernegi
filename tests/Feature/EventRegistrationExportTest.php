@@ -39,6 +39,53 @@ class EventRegistrationExportTest extends TestCase
         $this->assertStringContainsString('Ayşe', $sheet);
     }
 
+    public function test_workbook_xml_parts_are_well_formed_for_excel(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $activity = $this->activity('Deneme', 'deneme-xml', [
+            ['key' => 'yas', 'label' => 'Yaş', 'type' => 'text'],
+            ['key' => 'sehir', 'label' => 'Şehir', 'type' => 'text'],
+        ]);
+        $this->registration($activity, 'Ayşe', 'ayse@example.com', '0532', [
+            ['key' => 'yas', 'label' => 'Yaş', 'value' => '20'],
+            ['key' => 'sehir', 'label' => 'Şehir', 'value' => 'Gaziantep'],
+        ]);
+
+        $contents = app(ExportEventRegistrations::class)->handle($activity)['contents'];
+        $path = tempnam(sys_get_temp_dir(), 'xlsx');
+        file_put_contents($path, $contents);
+
+        $zip = new ZipArchive;
+        $this->assertTrue($zip->open($path));
+
+        foreach ([
+            '[Content_Types].xml',
+            '_rels/.rels',
+            'docProps/core.xml',
+            'docProps/app.xml',
+            'xl/workbook.xml',
+            'xl/styles.xml',
+            'xl/_rels/workbook.xml.rels',
+            'xl/worksheets/sheet1.xml',
+            'xl/worksheets/sheet2.xml',
+        ] as $part) {
+            $xml = $zip->getFromName($part);
+            $this->assertIsString($xml, $part);
+            $this->assertStringStartsWith('<?xml', $xml, $part);
+            $this->assertNotFalse(simplexml_load_string($xml), $part.' parse failed');
+        }
+
+        $sheet = (string) $zip->getFromName('xl/worksheets/sheet2.xml');
+        $this->assertStringContainsString('<mergeCell ref="A1:', $sheet);
+        $this->assertDoesNotMatchRegularExpression('/<c r="B1"/', $sheet);
+        $this->assertStringContainsString('Ayşe', $sheet);
+        $this->assertStringContainsString('Gaziantep', $sheet);
+
+        $zip->close();
+        @unlink($path);
+    }
+
     public function test_activity_excel_modal_lists_all_applicants_selected_by_default(): void
     {
         $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
