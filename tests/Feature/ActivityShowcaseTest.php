@@ -35,7 +35,7 @@ class ActivityShowcaseTest extends TestCase
             ->assertSee('Yüzüne ve tecvid');
     }
 
-    public function test_activity_cards_show_covers_at_their_uploaded_ratio(): void
+    public function test_activity_cards_use_equal_framed_media_slots(): void
     {
         Activity::factory()->create([
             'title' => 'Afişli faaliyet',
@@ -45,13 +45,16 @@ class ActivityShowcaseTest extends TestCase
 
         $this->get('/faaliyetler')
             ->assertOk()
-            ->assertSee('activity-cover-img', false)
+            ->assertSee('media-frame', false)
+            ->assertSee('media-frame-img', false)
+            ->assertSee('media-frame-blur', false)
+            ->assertSee('aspect-[4/5]', false)
             ->assertSee('activities/afis.jpg', false)
             ->assertDontSee('group-hover:scale-[1.08]', false)
             ->assertDontSee('aspect-[16/9]', false);
     }
 
-    public function test_activity_detail_cover_keeps_the_uploaded_ratio_without_cropping(): void
+    public function test_activity_detail_cover_and_gallery_use_framed_media_slots(): void
     {
         $activity = Activity::factory()->create([
             'title' => 'Detay afişli faaliyet',
@@ -63,11 +66,12 @@ class ActivityShowcaseTest extends TestCase
         $this->get(route('activities.show', $activity))
             ->assertOk()
             ->assertSee('activity-hero-cover', false)
-            ->assertSee('activity-cover-img', false)
+            ->assertSee('media-frame', false)
+            ->assertSee('media-frame-img', false)
             ->assertSee('activity-gallery', false)
+            ->assertSee('aspect-[3/2]', false)
             ->assertSee('activities/detay-afis.jpg', false)
-            ->assertDontSee('aspect-[16/9]', false)
-            ->assertDontSee('object-cover', false);
+            ->assertDontSee('aspect-[16/9]', false);
     }
 
     public function test_activity_index_lists_published_lines_and_hides_drafts(): void

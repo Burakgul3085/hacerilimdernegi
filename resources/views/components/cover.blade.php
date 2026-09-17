@@ -10,9 +10,22 @@
     $url = filled($src) ? \Illuminate\Support\Facades\Storage::disk('public')->url($src) : null;
     $natural = $fit === 'natural';
     $contain = $fit === 'contain';
+    $frame = $fit === 'frame';
 @endphp
 
-@if ($natural)
+@if ($frame)
+    <div {{ $attributes->merge(['class' => trim('media-frame '.$ratio.' '.$rounded)]) }}>
+        @if ($url)
+            <img src="{{ $url }}" alt="" aria-hidden="true" loading="lazy" decoding="async" class="media-frame-blur">
+            <img src="{{ $url }}" alt="{{ $alt }}" loading="lazy" decoding="async" class="media-frame-img">
+        @else
+            <div class="media-frame-empty">
+                <img src="{{ \App\Support\SiteSettings::logoUrl() }}" alt="" aria-hidden="true"
+                     class="h-12 w-auto max-w-[46%] object-contain opacity-25">
+            </div>
+        @endif
+    </div>
+@elseif ($natural)
     <div {{ $attributes->merge(['class' => trim('activity-cover '.$rounded)]) }}>
         @if ($url)
             <img src="{{ $url }}" alt="{{ $alt }}" loading="lazy" decoding="async" class="activity-cover-img">

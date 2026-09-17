@@ -1,6 +1,7 @@
 @props([
     'items' => [],
     'alt' => '',
+    'framed' => false,
 ])
 
 @php
@@ -11,16 +12,24 @@
 @endphp
 
 @if ($items !== [])
-    <div {{ $attributes->class('post-gallery') }} x-data="{ lightbox: null }" @keydown.escape.window="lightbox = null">
+    <div {{ $attributes->class(['post-gallery', 'activity-gallery' => $framed]) }} x-data="{ lightbox: null }" @keydown.escape.window="lightbox = null">
         @foreach ($items as $index => $item)
             @if (($item['kind'] ?? 'image') === 'video')
-                <div class="post-gallery-item post-gallery-item-video">
+                <div @class(['post-gallery-item post-gallery-item-video', 'media-frame aspect-[4/5]' => $framed])>
                     <video src="{{ $item['url'] }}" controls playsinline preload="metadata"></video>
                 </div>
             @elseif (($item['kind'] ?? 'image') === 'audio')
                 <div class="post-gallery-item post-gallery-item-audio">
                     <audio src="{{ $item['url'] }}" controls preload="metadata"></audio>
                 </div>
+            @elseif ($framed)
+                <button type="button"
+                        class="post-gallery-item media-frame aspect-[4/5] group"
+                        data-src="{{ $item['url'] }}"
+                        x-on:click="lightbox = $el.dataset.src">
+                    <img src="{{ $item['url'] }}" alt="" aria-hidden="true" loading="lazy" decoding="async" class="media-frame-blur">
+                    <img src="{{ $item['url'] }}" alt="{{ $alt }} görseli {{ $index + 1 }}" loading="lazy" decoding="async" class="media-frame-img">
+                </button>
             @else
                 <button type="button"
                         class="post-gallery-item group"

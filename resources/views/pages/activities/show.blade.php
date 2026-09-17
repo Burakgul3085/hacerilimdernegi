@@ -19,9 +19,16 @@
     <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-16">
         <div class="reveal">
             <div class="activity-media">
-                <x-cover :src="$activity->image" :alt="$activity->title" fit="natural" rounded="rounded-2xl" class="activity-hero-cover" />
+                <x-cover
+                    :src="$activity->image"
+                    :alt="$activity->title"
+                    fit="frame"
+                    ratio="aspect-[3/2]"
+                    rounded="rounded-2xl"
+                    class="activity-hero-cover"
+                />
                 @if ($activity->galleryMedia() !== [])
-                    <x-content-gallery class="mt-4 activity-gallery" :items="$activity->galleryMedia()" :alt="$activity->title" />
+                    <x-content-gallery class="mt-4" framed :items="$activity->galleryMedia()" :alt="$activity->title" />
                 @endif
             </div>
             @if (filled($activity->description))
