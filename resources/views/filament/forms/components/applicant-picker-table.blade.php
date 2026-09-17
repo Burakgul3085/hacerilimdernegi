@@ -30,19 +30,19 @@
             return this.selected.map(String).includes(String(id))
         },
     }"
-    class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900"
+    style="overflow:hidden;border:1px solid #e6dfd3;border-radius:12px;background:#fffcf8;"
     wire:ignore.self
 >
-    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-[#fbf6ec] px-3 py-2.5 dark:border-gray-700 dark:bg-gray-800">
-        <div class="text-sm font-medium text-[#161513] dark:text-gray-100">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:#fbf6ec;border-bottom:1px solid #e6dfd3;">
+        <div style="font-size:14px;font-weight:600;color:#161513;">
             {{ count($applicants) }} başvuran
         </div>
 
         @if (! $isDisabled && $applicants !== [])
-            <div class="flex items-center gap-3 text-sm">
+            <div style="display:flex;align-items:center;gap:16px;font-size:13px;">
                 <button
                     type="button"
-                    class="font-medium text-[#8a7a62] hover:underline"
+                    style="font-weight:600;color:#8a7a62;background:none;border:0;cursor:pointer;padding:0;"
                     x-show="! allSelected"
                     x-on:click="toggleAll()"
                 >
@@ -50,7 +50,7 @@
                 </button>
                 <button
                     type="button"
-                    class="font-medium text-[#8a7a62] hover:underline"
+                    style="font-weight:600;color:#8a7a62;background:none;border:0;cursor:pointer;padding:0;"
                     x-show="allSelected"
                     x-cloak
                     x-on:click="toggleAll()"
@@ -61,25 +61,30 @@
         @endif
     </div>
 
-    <div class="max-h-80 overflow-auto">
-        <table class="w-full min-w-[36rem] border-collapse text-sm">
-            <thead class="sticky top-0 z-10 bg-[#161513] text-[#fffcf8]">
-                <tr>
-                    <th class="w-10 px-3 py-2.5 text-left font-medium"></th>
-                    <th class="px-3 py-2.5 text-left font-medium">Ad soyad</th>
-                    <th class="px-3 py-2.5 text-left font-medium">E-posta</th>
-                    <th class="px-3 py-2.5 text-left font-medium">Telefon</th>
-                    <th class="px-3 py-2.5 text-left font-medium">Durum</th>
-                    <th class="px-3 py-2.5 text-right font-medium">No</th>
+    <div style="max-height:22rem;overflow:auto;">
+        <table style="width:100%;min-width:720px;border-collapse:collapse;table-layout:fixed;font-size:13px;line-height:1.35;">
+            <colgroup>
+                <col style="width:44px">
+                <col style="width:22%">
+                <col style="width:30%">
+                <col style="width:18%">
+                <col style="width:14%">
+                <col style="width:10%">
+            </colgroup>
+            <thead>
+                <tr style="background:#161513;color:#fffcf8;">
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;"></th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;">Ad soyad</th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;">E-posta</th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;">Telefon</th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;">Durum</th>
+                    <th style="padding:10px 12px;text-align:right;font-weight:600;">No</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+            <tbody>
                 @forelse ($applicants as $index => $applicant)
-                    <tr @class([
-                        'bg-white dark:bg-gray-900' => $index % 2 === 0,
-                        'bg-[#fbf6ec]/40 dark:bg-gray-800/40' => $index % 2 === 1,
-                    ])>
-                        <td class="px-3 py-2.5 align-middle">
+                    <tr style="background:{{ $index % 2 === 0 ? '#ffffff' : '#fbf6ec' }};border-top:1px solid #ebe4d8;">
+                        <td style="padding:10px 12px;vertical-align:middle;">
                             <input
                                 type="checkbox"
                                 class="fi-checkbox-input"
@@ -89,27 +94,27 @@
                                 x-on:change="toggleOne(@js($applicant['id']))"
                             />
                         </td>
-                        <td class="px-3 py-2.5 align-middle font-medium text-[#161513] dark:text-gray-100">
+                        <td style="padding:10px 12px;vertical-align:middle;font-weight:600;color:#161513;word-break:break-word;">
                             {{ $applicant['name'] }}
                         </td>
-                        <td class="px-3 py-2.5 align-middle text-gray-600 dark:text-gray-300">
+                        <td style="padding:10px 12px;vertical-align:middle;color:#3a3733;word-break:break-word;">
                             {{ $applicant['email'] }}
                         </td>
-                        <td class="px-3 py-2.5 align-middle text-gray-600 dark:text-gray-300">
+                        <td style="padding:10px 12px;vertical-align:middle;color:#3a3733;white-space:nowrap;">
                             {{ $applicant['phone'] }}
                         </td>
-                        <td class="px-3 py-2.5 align-middle">
-                            <span class="inline-flex rounded-full bg-[#d4cbbe]/50 px-2 py-0.5 text-xs font-medium text-[#3a3733] dark:bg-gray-700 dark:text-gray-200">
+                        <td style="padding:10px 12px;vertical-align:middle;">
+                            <span style="display:inline-block;border-radius:999px;background:#d4cbbe66;color:#3a3733;padding:2px 10px;font-size:12px;font-weight:600;">
                                 {{ $applicant['status'] }}
                             </span>
                         </td>
-                        <td class="px-3 py-2.5 align-middle text-right tabular-nums text-gray-500">
+                        <td style="padding:10px 12px;vertical-align:middle;text-align:right;color:#6b6560;font-variant-numeric:tabular-nums;">
                             #{{ $applicant['id'] }}
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-3 py-8 text-center text-gray-500">
+                        <td colspan="6" style="padding:32px 12px;text-align:center;color:#6b6560;">
                             Bu listede başvuran yok.
                         </td>
                     </tr>
@@ -119,7 +124,7 @@
     </div>
 
     @if ($applicants !== [])
-        <div class="border-t border-gray-200 px-3 py-2 text-xs text-gray-500 dark:border-gray-700">
+        <div style="border-top:1px solid #e6dfd3;padding:10px 16px;font-size:12px;color:#6b6560;background:#fffcf8;">
             İstediğiniz satırları işaretleyin. Durum filtresi yalnızca seçimi günceller.
         </div>
     @endif

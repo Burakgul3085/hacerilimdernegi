@@ -9,7 +9,7 @@ use ZipArchive;
  * Hâcer kurumsal Excel şablonuyla çok sayfalı xlsx üretir.
  * Dosya indirme sonrası saklanmaz.
  *
- * Not: Birleşik hücre (merge) kullanılmaz; Excel onarım/boş dosya hatalarına yol açıyordu.
+ * Birleşik hücre kullanılmaz; sütun genişlikleri ve satır yükseklikleri metni okunaklı tutar.
  */
 class XlsxWorkbook
 {
@@ -163,12 +163,11 @@ class XlsxWorkbook
 
     private function styles(): string
     {
-        // fill 0 = none, fill 1 = gray125 (Excel zorunlu sırası)
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             .'<fonts count="5">'
             .'<font><sz val="11"/><color rgb="FF161513"/><name val="Calibri"/><family val="2"/></font>'
-            .'<font><b/><sz val="14"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><b/><sz val="16"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
             .'<font><sz val="10"/><color rgb="FFD4CBBE"/><name val="Calibri"/><family val="2"/></font>'
             .'<font><b/><sz val="11"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
             .'<font><sz val="9"/><color rgb="FF6B6560"/><name val="Calibri"/><family val="2"/></font>'
@@ -191,17 +190,11 @@ class XlsxWorkbook
             .'</borders>'
             .'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
             .'<cellXfs count="6">'
-            // 0 body
             .'<xf numFmtId="49" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
-            // 1 brand title
-            .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
-            // 2 brand subtitle
+            .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
             .'<xf numFmtId="49" fontId="2" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
-            // 3 cream meta / spacer
             .'<xf numFmtId="49" fontId="0" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
-            // 4 table header
             .'<xf numFmtId="49" fontId="3" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
-            // 5 zebra / footer
             .'<xf numFmtId="49" fontId="4" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
             .'</cellXfs>'
             .'</styleSheet>';
@@ -221,13 +214,15 @@ class XlsxWorkbook
         $brandRows = HacerXlsxTemplate::BRAND_ROWS;
         $headerRowNumber = $brandRows + 1;
         $dataStart = $headerRowNumber + 1;
+        $headers = array_values($rows[0] ?? []);
         $rowMarkup = '';
 
         $brandLines = [
-            1 => ['text' => HacerXlsxTemplate::ORGANIZATION, 'style' => '1', 'height' => 26],
-            2 => ['text' => HacerXlsxTemplate::subtitleLine($context), 'style' => '2', 'height' => 18],
-            3 => ['text' => filled($summary) ? (string) $summary : '', 'style' => '3', 'height' => 18],
-            4 => ['text' => '', 'style' => '3', 'height' => 8],
+            1 => ['text' => HacerXlsxTemplate::ORGANIZATION, 'style' => '1', 'height' => 34],
+            2 => ['text' => filled($context) ? (string) $context : ' ', 'style' => '2', 'height' => 20],
+            3 => ['text' => HacerXlsxTemplate::documentLine(), 'style' => '2', 'height' => 20],
+            4 => ['text' => filled($summary) ? (string) $summary : ' ', 'style' => '3', 'height' => 20],
+            5 => ['text' => '', 'style' => '3', 'height' => 10],
         ];
 
         foreach ($brandLines as $rowNumber => $meta) {
@@ -256,7 +251,7 @@ class XlsxWorkbook
                 );
             }
 
-            $rowMarkup .= '<row r="'.$rowNumber.'" ht="18" customHeight="1">'.$cells.'</row>';
+            $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.($isHeader ? '22' : '20').'" customHeight="1">'.$cells.'</row>';
         }
 
         $lastDataRow = $headerRowNumber + count($rows) - 1;
@@ -268,15 +263,26 @@ class XlsxWorkbook
             $footerCells .= $this->inlineCell($this->columnLetter($columnIndex).$footerRow, $value, '5');
         }
 
-        $rowMarkup .= '<row r="'.$footerRow.'" ht="30" customHeight="1">'.$footerCells.'</row>';
+        $rowMarkup .= '<row r="'.$footerRow.'" ht="36" customHeight="1">'.$footerCells.'</row>';
 
-        $cols = '<col min="1" max="'.$columnCount.'" width="20" customWidth="1"/>';
+        $cols = '';
+
+        for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
+            $header = (string) ($headers[$columnIndex - 1] ?? '');
+            $width = HacerXlsxTemplate::columnWidth($header);
+
+            if ($columnIndex === 1) {
+                $width = max($width, 36.0);
+            }
+
+            $cols .= '<col min="'.$columnIndex.'" max="'.$columnIndex.'" width="'.$width.'" customWidth="1"/>';
+        }
 
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             .'<dimension ref="A1:'.$lastColumn.$footerRow.'"/>'
-            .'<sheetViews><sheetView workbookViewId="0"><pane ySplit="'.$headerRowNumber.'" topLeftCell="A'.$dataStart.'" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
-            .'<sheetFormatPr defaultRowHeight="15"/>'
+            .'<sheetViews><sheetView workbookViewId="0" showGridLines="0"><pane ySplit="'.$headerRowNumber.'" topLeftCell="A'.$dataStart.'" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
+            .'<sheetFormatPr defaultRowHeight="18"/>'
             .'<cols>'.$cols.'</cols>'
             .'<sheetData>'.$rowMarkup.'</sheetData>'
             .'<autoFilter ref="A'.$headerRowNumber.':'.$lastColumn.$lastDataRow.'"/>'

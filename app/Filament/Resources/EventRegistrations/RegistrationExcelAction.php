@@ -13,6 +13,7 @@ use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -36,6 +37,7 @@ class RegistrationExcelAction
         return Action::make($name)
             ->label('Excel')
             ->icon('heroicon-o-arrow-down-tray')
+            ->modalWidth(Width::SevenExtraLarge)
             ->modalHeading(fn (Activity $record): string => $record->title)
             ->modalDescription('Yalnızca seçtiğiniz başvurular ve alanlar iner. Paneldeki kayıtlar değişmez.')
             ->modalSubmitActionLabel('İndir')
@@ -54,6 +56,7 @@ class RegistrationExcelAction
             ->label('Excel\'e aktar')
             ->icon('heroicon-o-arrow-down-tray')
             ->color('gray')
+            ->modalWidth(Width::SevenExtraLarge)
             ->modalHeading($activity->title)
             ->modalDescription('Yalnızca seçtiğiniz başvurular ve alanlar iner. Paneldeki kayıtlar değişmez. Başvuru numarası her dosyada durur.')
             ->modalSubmitActionLabel('İndir')
@@ -73,6 +76,7 @@ class RegistrationExcelAction
             ->label('Excel indir')
             ->icon('heroicon-o-arrow-down-tray')
             ->color('gray')
+            ->modalWidth(Width::SevenExtraLarge)
             ->modalHeading('Diğer başvurular')
             ->modalDescription('Yalnızca seçtiğiniz başvurular ve alanlar iner. Paneldeki kayıtlar değişmez.')
             ->modalSubmitActionLabel('İndir')
