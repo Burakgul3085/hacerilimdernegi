@@ -34,15 +34,15 @@ class VisitorPostApproved extends Notification implements SendsViaPhpMailer
         $postUrl = $this->post->publicUrl();
 
         $text = "Merhaba {$this->post->byline()},\n\n"
-            ."{$this->post->typeLabel()} metniniz onaylanmıştır. Yazılar ve şiirler sayfasında yayındadır:\n{$postUrl}\n\n"
+            ."{$this->post->typeLabel()} metniniz onaylanmıştır. Kalemim'İZ sayfasında yayındadır:\n{$postUrl}\n\n"
             ."Saygılarımızla,\n{$siteName}";
 
         $html = MailTemplate::render([
             'title' => $mailTitle,
             'preheader' => "{$this->post->typeLabel()} metniniz sitede yayındadır.",
-            'eyebrow' => 'Yazılar ve şiirler',
+            'eyebrow' => "Kalemim'İZ",
             'greeting' => "Merhaba {$name},",
-            'intro' => '<p style="margin:0;">'.$kind.' metniniz onaylanmıştır. Artık <strong style="color:#161513;">Yazılar ve şiirler</strong> sayfasında yayınlanmaktadır.</p>',
+            'intro' => '<p style="margin:0;">'.$kind.' metniniz onaylanmıştır. Artık <strong style="color:#161513;">Kalemim\'İZ</strong> sayfasında yayınlanmaktadır.</p>',
             'highlight' => '<p style="margin:0 0 6px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#8a7a62;">'.$kind.'</p>'
                 .'<p style="margin:0;font-family:Georgia,\'Times New Roman\',serif;font-size:16px;line-height:1.4;color:#161513;">'.$title.'</p>',
             'body' => '<p style="margin:0;">Metninizi sitedeki sayfasından okuyabilir ve paylaşabilirsiniz.</p>',

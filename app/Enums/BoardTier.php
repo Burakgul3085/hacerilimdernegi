@@ -11,7 +11,7 @@ enum BoardTier: int
     {
         return match ($this) {
             self::Leader => 'Yönetici',
-            self::Team => 'Yönetim kadrosu',
+            self::Team => 'Yönetim Kadrosu',
         };
     }
 
@@ -27,7 +27,7 @@ enum BoardTier: int
     {
         return match ($this) {
             self::Leader => 'Yönetici',
-            self::Team => 'Yönetim kadrosu',
+            self::Team => 'Yönetim Kadrosu',
         };
     }
 

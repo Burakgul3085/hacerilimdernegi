@@ -208,7 +208,7 @@
 
         <div class="mt-10 grid gap-5 lg:grid-cols-3">
             <x-about-path
-                title="Hedef ve ilkelerimiz"
+                title="Hedef ve İlkelerimiz"
                 text="Derneğin yönü, gayesi ve çalışma ilkeleri."
                 :href="route('corporate.vision')"
                 icon="sparkles"
@@ -216,7 +216,7 @@
                 delay="0ms"
             />
             <x-about-path
-                title="Başkanın mesajı"
+                title="Başkanın Mesajı"
                 text="Dernek başkanının ziyaretçilere sözü."
                 :href="route('corporate.message')"
                 icon="quote"
@@ -224,7 +224,7 @@
                 delay="90ms"
             />
             <x-about-path
-                title="Yönetim kadrosu"
+                title="Yönetim Kadrosu"
                 text="Görev dağılımı ve kurumsal yapı."
                 :href="route('corporate.board')"
                 icon="users"

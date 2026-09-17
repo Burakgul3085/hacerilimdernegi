@@ -31,10 +31,10 @@ class CorporatePageTest extends TestCase
     public static function prettyPages(): array
     {
         return [
-            'vision' => ['/vizyon-misyon', 'Hedef ve ilkelerimiz'],
-            'message' => ['/baskanin-mesaji', 'Başkanın mesajı'],
-            'board' => ['/yonetim-kadrosu', 'Yönetim kadrosu'],
-            'bylaws' => ['/dernek-tuzugu', 'Dernek tüzüğü'],
+            'vision' => ['/vizyon-misyon', 'Hedef ve İlkelerimiz'],
+            'message' => ['/baskanin-mesaji', 'Başkanın Mesajı'],
+            'board' => ['/yonetim-kadrosu', 'Yönetim Kadrosu'],
+            'bylaws' => ['/dernek-tuzugu', 'Dernek Tüzüğü'],
         ];
     }
 
@@ -56,7 +56,7 @@ class CorporatePageTest extends TestCase
 
         $this->get('/vizyon-misyon')
             ->assertOk()
-            ->assertSee('Hedef ve ilkelerimiz')
+            ->assertSee('Hedef ve İlkelerimiz')
             ->assertSee('Derneğin yönü, gayesi ve çalışma ilkeleri.')
             ->assertDontSee('Gizli taslak')
             ->assertDontSee('Gizli vizyon')
@@ -66,7 +66,7 @@ class CorporatePageTest extends TestCase
     public function test_bylaws_page_does_not_show_the_decorative_image(): void
     {
         $this->get('/dernek-tuzugu')
-            ->assertSee('Dernek tüzüğü')
+            ->assertSee('Dernek Tüzüğü')
             ->assertDontSee('bylaws-pdf', false)
             ->assertDontSee('page-aside-photo', false);
     }
@@ -78,7 +78,7 @@ class CorporatePageTest extends TestCase
         ]);
 
         $this->get('/dernek-tuzugu')
-            ->assertSee('Dernek tüzüğü')
+            ->assertSee('Dernek Tüzüğü')
             ->assertSee('bylaws-pdf', false)
             ->assertSee('/storage/pages/documents/tuzuk.pdf', false)
             ->assertSee('min-height: 35rem', false)
@@ -91,7 +91,7 @@ class CorporatePageTest extends TestCase
     public function test_board_page_does_not_show_the_decorative_image(): void
     {
         $this->get('/yonetim-kadrosu')
-            ->assertSee('Yönetim kadrosu')
+            ->assertSee('Yönetim Kadrosu')
             ->assertDontSee('page-aside-photo', false);
     }
 
@@ -129,12 +129,12 @@ class CorporatePageTest extends TestCase
         ]);
 
         $this->get('/yonetim-kadrosu')
-            ->assertSee('Yönetim kadrosu')
+            ->assertSee('Yönetim Kadrosu')
             ->assertSeeInOrder([
                 'Yönetici',
                 'Zeliha Şule Yılmaz',
                 'Psikolog - Sağlık Bakanlığı',
-                'Yönetim kadrosu',
+                'Yönetim Kadrosu',
                 'Tuğba Gün',
                 'Sınıf Öğretmeni - MEB',
                 'Zeynep Ak',
@@ -175,7 +175,7 @@ class CorporatePageTest extends TestCase
 
         $this->get('/yonetim-kadrosu')
             ->assertSeeInOrder([
-                'Yönetim kadrosu',
+                'Yönetim Kadrosu',
                 'Eski Üye',
                 'Eski Sayman',
             ])
@@ -254,7 +254,7 @@ class CorporatePageTest extends TestCase
     public function test_message_page_shows_the_person_icon_and_default_title_without_a_photo(): void
     {
         $this->get('/baskanin-mesaji')
-            ->assertSee('Başkanın mesajı')
+            ->assertSee('Başkanın Mesajı')
             ->assertSee('Hâcer İlim ve Kültür Derneği Başkanı')
             ->assertSee('president-silhouette', false)
             ->assertDontSee('page-aside-photo', false)
@@ -354,7 +354,7 @@ class CorporatePageTest extends TestCase
     public function test_vision_page_does_not_show_the_decorative_image(): void
     {
         $this->get('/vizyon-misyon')
-            ->assertSee('Hedef ve ilkelerimiz')
+            ->assertSee('Hedef ve İlkelerimiz')
             ->assertSee('vision-mission', false)
             ->assertSee('Yazı henüz eklenmedi')
             ->assertDontSee('page-aside-photo', false)

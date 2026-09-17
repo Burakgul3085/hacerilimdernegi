@@ -15,18 +15,18 @@ class NavigationMenuTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('Kurumsal')
-            ->assertSee('Hedef ve ilkelerimiz')
+            ->assertSee('Hedef ve İlkelerimiz')
             ->assertSee('/vizyon-misyon', false)
             ->assertDontSee('>Vizyon ve misyon<', false)
-            ->assertSee('Başkanın mesajı')
-            ->assertSee('Yönetim kadrosu')
-            ->assertSee('Dernek tüzüğü')
+            ->assertSee('Başkanın Mesajı')
+            ->assertSee('Yönetim Kadrosu')
+            ->assertSee('Dernek Tüzüğü')
             ->assertSee('Faaliyetler')
             ->assertSee('/faaliyetler', false)
             ->assertDontSee('>Programlar<', false)
             ->assertDontSee('>Projeler<', false)
             ->assertDontSee('>Etkinlikler<', false)
-            ->assertSee('Yazılar ve şiirler')
+            ->assertSee("Kalemim'İZ")
             ->assertSee('/yazilar', false)
             ->assertSee('Duyurular')
             ->assertSee('/duyurular', false)
@@ -53,10 +53,10 @@ class NavigationMenuTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('Hedef ve ilkelerimiz')
+            ->assertSee('Hedef ve İlkelerimiz')
             ->assertSee('/vizyon-misyon', false)
             ->assertDontSee('>Vizyon ve misyon<', false)
-            ->assertSee('Yazılar ve şiirler');
+            ->assertSee("Kalemim'İZ");
     }
 
     public function test_announcements_menu_item_is_inserted_next_to_posts_when_missing(): void
@@ -75,7 +75,7 @@ class NavigationMenuTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSeeInOrder(['Yazılar ve şiirler', 'Duyurular', 'Medya'])
+            ->assertSeeInOrder(["Kalemim'İZ", 'Duyurular', 'Medya'])
             ->assertSee('/duyurular', false);
     }
 
@@ -131,6 +131,6 @@ class NavigationMenuTest extends TestCase
             ->assertSee('Faaliyetler')
             ->assertSee('/faaliyetler', false)
             ->assertDontSee('>Etkinlikler<', false)
-            ->assertSeeInOrder(['Yazılar ve şiirler', 'Medya', 'Vitrin']);
+            ->assertSeeInOrder(["Kalemim'İZ", 'Medya', 'Vitrin']);
     }
 }

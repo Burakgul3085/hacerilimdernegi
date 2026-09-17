@@ -52,7 +52,7 @@ class PageForm
                     ->visible(fn (Get $get): bool => CorporatePages::isBylaws((string) $get('slug')))
                     ->columnSpanFull(),
                 Repeater::make('board_members')
-                    ->label('Yönetim kadrosu')
+                    ->label('Yönetim Kadrosu')
                     ->addActionLabel('Kişi ekle')
                     ->itemLabel(fn (array $state): ?string => filled($state['name'] ?? null)
                         ? trim(($state['name'] ?? '').(filled($state['title'] ?? null) ? ' — '.$state['title'] : ''), ' —')

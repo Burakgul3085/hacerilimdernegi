@@ -24,11 +24,11 @@ class PostResource extends Resource
 
     protected static ?string $model = Post::class;
 
-    protected static ?string $navigationLabel = 'Yazılar ve şiirler';
+    protected static ?string $navigationLabel = "Kalemim'İZ";
 
     protected static ?string $modelLabel = 'yazı / şiir';
 
-    protected static ?string $pluralModelLabel = 'yazılar ve şiirler';
+    protected static ?string $pluralModelLabel = "Kalemim'İZ";
 
     protected static string|UnitEnum|null $navigationGroup = 'İçerik';
 

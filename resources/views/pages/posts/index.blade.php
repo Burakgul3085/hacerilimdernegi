@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Yazılar ve şiirler')
+@section('title', "Kalemim'İZ")
 @section('description', $settings['posts_intro'])
 
 @section('content')
@@ -36,9 +36,9 @@
 
     <x-page-header
         eyebrow="Gündem"
-        title="Yazılar ve şiirler"
+        title="Kalemim'İZ"
         :lead="$settings['posts_intro']"
-        :breadcrumbs="[['label' => 'Yazılar ve şiirler']]">
+        :breadcrumbs="[['label' => 'Kalemim\'İZ']]">
         <button type="button" class="btn btn-solid posts-submit-cta" x-on:click="openForm()">
             <x-ui.icon name="document" class="h-4 w-4" />
             Yazı veya şiir gönder
@@ -128,7 +128,7 @@
                 <div class="min-w-0 pr-2">
                     <p class="eyebrow">Gönderi</p>
                     <h2 id="posts-submit-title" class="mt-1 font-display text-2xl leading-snug text-forest sm:text-3xl">Yazı veya şiir gönder</h2>
-                    <p class="mt-2 text-sm leading-relaxed text-muted">Onay sonrası Yazılar ve şiirler sayfasında yayınlanır.</p>
+                    <p class="mt-2 text-sm leading-relaxed text-muted">Onay sonrası Kalemim'İZ sayfasında yayınlanır.</p>
                 </div>
                 <button type="button"
                         class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-forest transition hover:border-gold hover:text-gold"

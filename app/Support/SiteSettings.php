@@ -98,7 +98,7 @@ class SiteSettings
             'home_programs_text' => 'Ders, sohbet, kamp ve seminer hatlarımız.',
             'home_events_title' => 'Etkinlik takvimi',
             'home_events_text' => 'Katılıma açık yaklaşan etkinlikler.',
-            'home_posts_title' => 'Yazılar ve şiirler',
+            'home_posts_title' => "Kalemim'İZ",
             'home_posts_text' => 'Dernek gündeminden yazılar ve şiirler.',
             'home_media_title' => 'Medya arşivi',
             'home_media_text' => 'Program ve etkinliklerden kareler.',
@@ -197,14 +197,14 @@ class SiteSettings
                 'url' => '/hakkimizda',
                 'children' => [
                     ['label' => 'Hakkımızda', 'url' => '/hakkimizda'],
-                    ['label' => 'Hedef ve ilkelerimiz', 'url' => '/vizyon-misyon'],
-                    ['label' => 'Başkanın mesajı', 'url' => '/baskanin-mesaji'],
-                    ['label' => 'Yönetim kadrosu', 'url' => '/yonetim-kadrosu'],
-                    ['label' => 'Dernek tüzüğü', 'url' => '/dernek-tuzugu'],
+                    ['label' => 'Hedef ve İlkelerimiz', 'url' => '/vizyon-misyon'],
+                    ['label' => 'Başkanın Mesajı', 'url' => '/baskanin-mesaji'],
+                    ['label' => 'Yönetim Kadrosu', 'url' => '/yonetim-kadrosu'],
+                    ['label' => 'Dernek Tüzüğü', 'url' => '/dernek-tuzugu'],
                 ],
             ],
             ['label' => 'Faaliyetler', 'url' => '/faaliyetler'],
-            ['label' => 'Yazılar ve şiirler', 'url' => '/yazilar'],
+            ['label' => "Kalemim'İZ", 'url' => '/yazilar'],
             ['label' => 'Duyurular', 'url' => '/duyurular'],
             ['label' => 'Medya', 'url' => '/medya'],
             ['label' => 'Vitrin', 'url' => '/vitrin'],
@@ -345,23 +345,35 @@ class SiteSettings
             return 'Vitrin';
         }
 
-        if ($url === '/vizyon-misyon' && $label === 'Vizyon ve misyon') {
-            return 'Hedef ve ilkelerimiz';
+        if ($url === '/vizyon-misyon' && in_array($label, ['Vizyon ve misyon', 'Hedef ve ilkelerimiz'], true)) {
+            return 'Hedef ve İlkelerimiz';
+        }
+
+        if ($url === '/baskanin-mesaji' && $label === 'Başkanın mesajı') {
+            return 'Başkanın Mesajı';
+        }
+
+        if ($url === '/yonetim-kadrosu' && $label === 'Yönetim kadrosu') {
+            return 'Yönetim Kadrosu';
+        }
+
+        if ($url === '/dernek-tuzugu' && $label === 'Dernek tüzüğü') {
+            return 'Dernek Tüzüğü';
         }
 
         if ($url === '/faaliyetler' && $label === 'Programlar') {
             return 'Faaliyetler';
         }
 
-        if ($url === '/yazilar' && $label === 'Yazılar') {
-            return 'Yazılar ve şiirler';
+        if ($url === '/yazilar' && in_array($label, ['Yazılar', 'Yazılar ve şiirler', 'Yazılar ve Şiirler'], true)) {
+            return "Kalemim'İZ";
         }
 
         return $label;
     }
 
     /**
-     * Kayıtlı menüde Duyurular yoksa Yazılar ve şiirler’in hemen yanına ekler.
+     * Kayıtlı menüde Duyurular yoksa Kalemim'İZ’in hemen yanına ekler.
      *
      * @param  list<array{label: string, url: string, children?: list<array{label: string, url: string}>}>  $items
      * @return list<array{label: string, url: string, children?: list<array{label: string, url: string}>}>
@@ -413,7 +425,11 @@ class SiteSettings
             'cta_button_url' => ['/programlar' => '/faaliyetler'],
             'home_programs_title' => ['Yaklaşan programlar' => 'Faaliyetlerimiz'],
             'home_programs_text' => ['Dersler, sohbetler ve kitap tahlilleri.' => 'Ders, sohbet, kamp ve seminer hatlarımız.'],
-            'home_posts_title' => ['Yazılar ve duyurular' => 'Yazılar ve şiirler'],
+            'home_posts_title' => [
+                'Yazılar ve duyurular' => "Kalemim'İZ",
+                'Yazılar ve şiirler' => "Kalemim'İZ",
+                'Yazılar ve Şiirler' => "Kalemim'İZ",
+            ],
             'home_posts_text' => ['Dernek gündeminden seçmeler.' => 'Dernek gündeminden yazılar ve şiirler.'],
             'posts_intro' => [
                 'Dernek gündemine dair yazılar ve resmî duyurular.' => 'Dernek gündeminden yazılar ve şiirler. Siz de yazınızı veya şiirinizi gönderebilirsiniz.',

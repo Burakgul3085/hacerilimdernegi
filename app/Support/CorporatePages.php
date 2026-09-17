@@ -31,22 +31,22 @@ final class CorporatePages
                 'body' => '<p>Hâcer İlim ve Kültür Derneği, 2017’den bu yana Gaziantep’te ilim ve kültür faaliyetleri yürüten bağımsız bir topluluktur.</p><p>Gayemiz; Kur’an-ı Kerim’i ve hadis-i şerifleri daha iyi anlayıp hayatımıza geçirmek, ilim ve kardeşlik etrafında faydalı çalışmalar yapmaktır.</p><h2>Faaliyetlerimiz</h2><p>Kur’an-ı Kerim ve hadis dersleri, ilmihâl dersleri, lise gençlik ve çocuk çalışmaları, seminerler, kitap tahlilleri ve kamplar düzenlenir. Programların güncel tarih ve kapsamı etkinlik takviminde duyurulur.</p><p>Adres: Karacaahmet, 38012 Nolu Cadde No: 38/H, 27590 Şehitkamil / Gaziantep.</p>',
             ],
             self::VISION_SLUG => [
-                'title' => 'Hedef ve ilkelerimiz',
+                'title' => 'Hedef ve İlkelerimiz',
                 'excerpt' => 'Derneğin yönü, gayesi ve çalışma ilkeleri.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
             ],
             self::MESSAGE_SLUG => [
-                'title' => 'Başkanın mesajı',
+                'title' => 'Başkanın Mesajı',
                 'excerpt' => 'Dernek başkanının ziyaretçilere mesajı.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
             ],
             self::BOARD_SLUG => [
-                'title' => 'Yönetim kadrosu',
+                'title' => 'Yönetim Kadrosu',
                 'excerpt' => 'Dernek yönetiminde görev alan isimler.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
             ],
             self::BYLAWS_SLUG => [
-                'title' => 'Dernek tüzüğü',
+                'title' => 'Dernek Tüzüğü',
                 'excerpt' => 'Hâcer İlim ve Kültür Derneği tüzüğü.',
                 'body' => '<p>Bu sayfanın içeriği yönetim panelinden eklenecektir.</p>',
             ],

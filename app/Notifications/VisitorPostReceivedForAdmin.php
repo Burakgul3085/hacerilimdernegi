@@ -74,7 +74,7 @@ class VisitorPostReceivedForAdmin extends Notification implements SendsViaPhpMai
             'highlight' => $details,
             'body' => '<p style="margin:0 0 8px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8a7a62;">Özet</p>'
                 .'<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:15px;line-height:1.75;color:#3a3733;">'.$excerpt.'</div>',
-            'closing' => 'Onaylamak için yönetim panelindeki <strong>Yazılar ve şiirler</strong> bölümünü kullanın.',
+            'closing' => 'Onaylamak için yönetim panelindeki <strong>Kalemim\'İZ</strong> bölümünü kullanın.',
             'cta_label' => 'Gönderiyi aç',
             'cta_url' => $panelUrl,
         ]);

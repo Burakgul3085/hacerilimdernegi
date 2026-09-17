@@ -38,7 +38,7 @@
     :eyebrow="$post->typeLabel()"
     :title="$post->title"
     :lead="$post->excerpt"
-    :breadcrumbs="[['label' => 'Yazılar ve şiirler', 'url' => route('posts.index')], ['label' => $post->title]]">
+    :breadcrumbs="[['label' => 'Kalemim\'İZ', 'url' => route('posts.index')], ['label' => $post->title]]">
     <div class="flex flex-col gap-2">
         @if ($post->subtitle)
             <p class="max-w-sm text-sm leading-relaxed text-muted">{{ $post->subtitle }}</p>

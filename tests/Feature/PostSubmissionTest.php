@@ -37,7 +37,7 @@ class PostSubmissionTest extends TestCase
     {
         $this->get(route('posts.index'))
             ->assertOk()
-            ->assertSee('Yazılar ve şiirler')
+            ->assertSee("Kalemim'İZ")
             ->assertSee('Yazı veya şiir gönder')
             ->assertSee('Formu aç')
             ->assertSee('Şiirler')
