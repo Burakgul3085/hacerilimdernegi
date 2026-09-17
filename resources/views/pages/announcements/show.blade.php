@@ -44,17 +44,17 @@
         <div class="reveal min-w-0" x-data="{ lightbox: null }" x-on:keydown.escape.window="lightbox = null">
             @if ($coverUrl)
                 <button type="button"
-                        class="post-cover"
+                        class="activity-hero-cover post-cover rounded-2xl"
                         data-src="{{ $coverUrl }}"
                         x-on:click="lightbox = $el.dataset.src">
-                    <img src="{{ $coverUrl }}" alt="{{ $announcement->title }}" class="post-cover-img" loading="lazy" decoding="async">
+                    <img src="{{ $coverUrl }}" alt="{{ $announcement->title }}" class="activity-cover-img" loading="lazy" decoding="async">
                 </button>
             @else
-                <x-cover :src="$announcement->image" :alt="$announcement->title" rounded="rounded-2xl" fit="contain" />
+                <x-cover :src="$announcement->image" :alt="$announcement->title" fit="natural" rounded="rounded-2xl" class="activity-hero-cover" />
             @endif
 
             @if ($announcement->galleryMedia() !== [])
-                <x-content-gallery class="mt-3" :items="$announcement->galleryMedia()" :alt="$announcement->title" />
+                <x-activity-media-marquee class="mt-6" :items="$announcement->galleryMedia()" :alt="$announcement->title" />
             @endif
 
             <div class="prose-hacer mt-10">{!! $announcement->body !!}</div>

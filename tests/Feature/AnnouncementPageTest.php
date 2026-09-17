@@ -26,6 +26,8 @@ class AnnouncementPageTest extends TestCase
             ->assertSee('Duyurular')
             ->assertSee('Ramazan programı duyurusu')
             ->assertSee(route('announcements.show', $visible), false)
+            ->assertSee('media-frame', false)
+            ->assertSee('aspect-[4/5]', false)
             ->assertDontSee('Taslak duyuru');
     }
 
@@ -47,6 +49,11 @@ class AnnouncementPageTest extends TestCase
             ->assertSee('2 dk okuma')
             ->assertSee('/storage/announcements/cover.jpg', false)
             ->assertSee('/storage/announcements/gallery/one.jpg', false)
+            ->assertSee('activity-hero-cover', false)
+            ->assertSee('activity-cover-img', false)
+            ->assertSee('activity-marquee', false)
+            ->assertSee('activity-marquee-item', false)
+            ->assertDontSee('post-gallery-item', false)
             ->assertSee('Bağlantıyı kopyala')
             ->assertSee('https://wa.me/?text=', false);
     }

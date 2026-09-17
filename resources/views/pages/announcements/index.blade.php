@@ -17,7 +17,7 @@
             <x-empty-state class="reveal" icon="document" title="Henüz duyuru yok"
                            text="Yayınlanan duyurular bu sayfada listelenir." />
         @else
-            <div class="posts-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div class="posts-grid grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ($announcements as $announcement)
                     <div class="reveal" style="--reveal-delay: {{ $loop->index * 70 }}ms">
                         <x-announcement-card :announcement="$announcement" />
