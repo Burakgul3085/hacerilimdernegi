@@ -26,9 +26,9 @@ class EventRegistrationsTable
                     ->searchable()
                     ->description(fn (EventRegistration $record): string => $record->email)
                     ->wrap(),
-                TextColumn::make('subject_title')
-                    ->label('Program')
-                    ->state(fn (EventRegistration $record): string => $record->subjectTitle())
+                TextColumn::make('source_label')
+                    ->label('Kaynak')
+                    ->state(fn (EventRegistration $record): string => $record->sourceLabel())
                     ->searchable(query: function (Builder $query, string $search): void {
                         $query->where(function (Builder $builder) use ($search): void {
                             $builder->whereHas('event', fn (Builder $event) => $event->where('title', 'like', "%{$search}%"))

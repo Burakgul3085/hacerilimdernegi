@@ -62,6 +62,7 @@ class EventController extends Controller
         $registration = EventRegistration::query()->create([
             ...$data,
             'event_id' => $event->id,
+            'activity_id' => $event->activity_id,
             'kvkk_accepted' => true,
             'status' => ApplicationStatus::Pending,
         ]);

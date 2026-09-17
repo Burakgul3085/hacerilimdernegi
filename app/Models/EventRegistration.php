@@ -6,10 +6,12 @@ use App\Enums\ApplicationStatus;
 use App\Models\Concerns\Auditable;
 use App\Support\MailTemplate;
 use App\Support\RegistrationForm;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class EventRegistration extends Model
@@ -121,6 +123,90 @@ class EventRegistration extends Model
 
         return $this->activity?->title
             ?: ($this->program?->title ?: ($this->event?->title ?: 'Program'));
+    }
+
+    /**
+     * Başvurunun hangi formdan geldiğini gösterir. Faaliyet klasörünün içinde
+     * faaliyet adı tekrarlanmaz; etkinlik veya program adı varsa o yazılır.
+     */
+    public function sourceLabel(): string
+    {
+        $this->loadMissing(['event', 'program']);
+
+        if ($this->event) {
+            return $this->event->title;
+        }
+
+        if ($this->program) {
+            return $this->program->title;
+        }
+
+        if ($this->activity_id) {
+            return 'Faaliyet formu';
+        }
+
+        return '—';
+    }
+
+    /**
+     * @param  Builder<EventRegistration>  $query
+     * @return Builder<EventRegistration>
+     */
+    public function scopeForActivity(Builder $query, Activity|int $activity): Builder
+    {
+        $activityId = $activity instanceof Activity ? $activity->getKey() : $activity;
+
+        return $query->where($query->qualifyColumn('activity_id'), $activityId);
+    }
+
+    /**
+     * @param  Builder<EventRegistration>  $query
+     * @return Builder<EventRegistration>
+     */
+    public function scopeUnassigned(Builder $query): Builder
+    {
+        return $query->whereNull($query->qualifyColumn('activity_id'));
+    }
+
+    /**
+     * Eski etkinlik ve program başvurularını, bağlı oldukları faaliyetin klasörüne taşır.
+     * activity_id dolu kayıtlar olduğu gibi kalır.
+     */
+    public static function fileUnderParentActivity(): void
+    {
+        DB::update(<<<'SQL'
+            update event_registrations
+            set activity_id = (
+                select events.activity_id
+                from events
+                where events.id = event_registrations.event_id
+            )
+            where activity_id is null
+              and event_id is not null
+              and exists (
+                  select 1
+                  from events
+                  where events.id = event_registrations.event_id
+                    and events.activity_id is not null
+              )
+        SQL);
+
+        DB::update(<<<'SQL'
+            update event_registrations
+            set activity_id = (
+                select programs.activity_id
+                from programs
+                where programs.id = event_registrations.program_id
+            )
+            where activity_id is null
+              and program_id is not null
+              and exists (
+                  select 1
+                  from programs
+                  where programs.id = event_registrations.program_id
+                    and programs.activity_id is not null
+              )
+        SQL);
     }
 
     /**

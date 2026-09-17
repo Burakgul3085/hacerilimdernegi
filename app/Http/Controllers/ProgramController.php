@@ -57,6 +57,7 @@ class ProgramController extends Controller
         $registration = EventRegistration::query()->create([
             ...$data,
             'program_id' => $program->id,
+            'activity_id' => $program->activity_id,
             'kvkk_accepted' => true,
             'status' => ApplicationStatus::Pending,
         ]);

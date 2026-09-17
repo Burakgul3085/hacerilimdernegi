@@ -38,6 +38,28 @@ class EditEventRegistration extends EditRecord
         return $record->subjectTitle().' · '.$record->created_at?->translatedFormat('d F Y, H:i');
     }
 
+    /**
+     * @return array<string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        /** @var EventRegistration $record */
+        $record = $this->getRecord();
+        $record->loadMissing('activity');
+
+        $breadcrumbs = [
+            EventRegistrationResource::getUrl() => 'Program kayıtları',
+        ];
+
+        if ($record->activity) {
+            $breadcrumbs[EventRegistrationResource::getUrl('applicants', ['activity' => $record->activity])] = $record->activity->title;
+        }
+
+        $breadcrumbs[] = $record->name;
+
+        return $breadcrumbs;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

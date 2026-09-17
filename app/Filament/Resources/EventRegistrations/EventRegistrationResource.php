@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\EventRegistrations;
 
+use App\Enums\ApplicationStatus;
 use App\Filament\Concerns\AuthorizesByRole;
 use App\Filament\Resources\EventRegistrations\Pages\EditEventRegistration;
+use App\Filament\Resources\EventRegistrations\Pages\ListActivityRegistrations;
 use App\Filament\Resources\EventRegistrations\Pages\ListEventRegistrations;
+use App\Filament\Resources\EventRegistrations\Pages\ListUnassignedEventRegistrations;
 use App\Filament\Resources\EventRegistrations\Schemas\EventRegistrationForm;
 use App\Filament\Resources\EventRegistrations\Tables\EventRegistrationsTable;
 use App\Models\EventRegistration;
@@ -13,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
@@ -39,6 +43,23 @@ class EventRegistrationResource extends Resource
         return static::editorRoles();
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = EventRegistration::query()->where('status', ApplicationStatus::Pending)->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): string|Htmlable|null
+    {
+        return 'Bekleyen başvurular';
+    }
+
     public static function canCreate(): bool
     {
         return false;
@@ -63,6 +84,8 @@ class EventRegistrationResource extends Resource
     {
         return [
             'index' => ListEventRegistrations::route('/'),
+            'applicants' => ListActivityRegistrations::route('/faaliyet/{activity}'),
+            'unassigned' => ListUnassignedEventRegistrations::route('/diger'),
             'edit' => EditEventRegistration::route('/{record}/edit'),
         ];
     }
