@@ -117,7 +117,7 @@ class SiteSettings
             'membership_intro' => 'Dernek çalışmalarına katılmak için formu doldurun.',
             'donate_intro' => 'İlim, sohbet ve kültür çalışmalarımız bağışlarınızla sürer. Katkınız derneğin resmî hesabına banka havalesi veya EFT ile iletilir.',
             'contact_intro' => 'Bizimle iletişime geçebilirsiniz.',
-            'live_intro' => 'Instagram hesabından seçilen kareler ve kısa videolar, sitede vitrin olarak durur.',
+            'live_intro' => 'Ânlık paylaşımlar, duyurular ve daha fazlası...',
 
             'membership_card_title' => 'Birlikte daha güçlüyüz',
             'membership_card_text' => 'İlim, kültür ve kardeşlik çalışmalarında sen de yerini al.',
@@ -248,6 +248,8 @@ class SiteSettings
             'Ders ve sohbet yayınları bu sayfadan takip edilir.',
             'Instagram paylaşımlarımız bu sayfada yer alır.',
             'Derneğin Instagram hesabından seçilen kareler ve kısa videolar.',
+            'Instagram hesabından seçilen kareler ve kısa videolar, sitede vitrin olarak durur.',
+            'Instagram hesabımızdan seçilen kareler ve kısa videolar burada durur.',
         ];
 
         if (in_array($intro, $legacy, true)) {

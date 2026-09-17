@@ -244,7 +244,7 @@
                     </span>
                     <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-light">Vitrin</p>
                 </div>
-                <h2 class="mt-5 font-display text-3xl leading-snug sm:text-4xl">Dernekten kareler</h2>
+                <h2 class="mt-5 font-display text-3xl leading-snug sm:text-4xl">İnstagram'da Hâcer</h2>
                 <p class="mt-4 max-w-md text-sm leading-relaxed text-cream/70">{{ \App\Support\SiteSettings::socialIntro() }}</p>
                 <a href="{{ route('social') }}" class="btn btn-cream mt-8">
                     Vitrine bak
