@@ -35,6 +35,22 @@ class ActivityShowcaseTest extends TestCase
             ->assertSee('Yüzüne ve tecvid');
     }
 
+    public function test_activity_cards_show_covers_at_their_uploaded_ratio(): void
+    {
+        Activity::factory()->create([
+            'title' => 'Afişli faaliyet',
+            'slug' => 'afisli-faaliyet',
+            'image' => 'activities/afis.jpg',
+        ]);
+
+        $this->get('/faaliyetler')
+            ->assertOk()
+            ->assertSee('activity-cover-img', false)
+            ->assertSee('activities/afis.jpg', false)
+            ->assertDontSee('group-hover:scale-[1.08]', false)
+            ->assertDontSee('aspect-[16/9]', false);
+    }
+
     public function test_activity_index_lists_published_lines_and_hides_drafts(): void
     {
         $published = Activity::factory()->create([

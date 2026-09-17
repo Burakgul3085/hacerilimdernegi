@@ -8,10 +8,22 @@
 
 @php
     $url = filled($src) ? \Illuminate\Support\Facades\Storage::disk('public')->url($src) : null;
+    $natural = $fit === 'natural';
     $contain = $fit === 'contain';
 @endphp
 
-@if ($contain && $url)
+@if ($natural)
+    <div {{ $attributes->merge(['class' => trim('activity-cover '.$rounded)]) }}>
+        @if ($url)
+            <img src="{{ $url }}" alt="{{ $alt }}" loading="lazy" decoding="async" class="activity-cover-img">
+        @else
+            <div class="activity-cover-empty">
+                <img src="{{ \App\Support\SiteSettings::logoUrl() }}" alt="" aria-hidden="true"
+                     class="h-12 w-auto max-w-[46%] object-contain opacity-25">
+            </div>
+        @endif
+    </div>
+@elseif ($contain && $url)
     <div {{ $attributes->merge(['class' => trim($rounded.' flex justify-center overflow-hidden')]) }}>
         <img src="{{ $url }}" alt="{{ $alt }}" loading="lazy" decoding="async"
              class="post-media-img">

@@ -1,7 +1,7 @@
 @props(['activity'])
 
 <a href="{{ route('activities.show', $activity) }}" class="group card card-hover activity-card flex flex-col overflow-hidden">
-    <x-cover :src="$activity->image" :alt="$activity->title" ratio="aspect-[16/9]" />
+    <x-cover :src="$activity->image" :alt="$activity->title" fit="natural" />
 
     <div class="flex flex-1 flex-col px-5 py-4">
         <p @class([

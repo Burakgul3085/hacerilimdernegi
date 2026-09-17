@@ -752,6 +752,28 @@
         min-height: 100%;
     }
 
+    .activity-cover {
+        display: block;
+        width: 100%;
+        overflow: hidden;
+        background: transparent;
+        line-height: 0;
+    }
+
+    .activity-cover-img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+    }
+
+    .activity-cover-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 7.5rem;
+    }
+
     .activity-card .activity-status {
         @apply inline-flex w-fit items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em];
     }
