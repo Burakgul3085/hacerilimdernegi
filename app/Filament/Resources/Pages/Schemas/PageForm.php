@@ -101,15 +101,15 @@ class PageForm
                     ->visible(fn (Get $get): bool => CorporatePages::isMessage((string) $get('slug'))),
                 ContentUploads::withEditorUploads(
                     RichEditor::make('vision')
-                        ->label('Vizyon')
-                        ->helperText('Derneğin yönü ve gelecek ufku. Sitede soldaki kartta görünür.')
+                        ->label('Hedef')
+                        ->helperText('Derneğin hedefi. Sitede soldaki kartta görünür.')
                         ->visible(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
                         ->columnSpanFull(),
                 ),
                 ContentUploads::withEditorUploads(
                     RichEditor::make('mission')
-                        ->label('Misyon')
-                        ->helperText('Derneğin gayesi ve çalışma ilkeleri. Sitede sağdaki kartta görünür.')
+                        ->label('İlkeler')
+                        ->helperText('Derneğin çalışma ilkeleri. Sitede sağdaki kartta görünür.')
                         ->visible(fn (Get $get): bool => CorporatePages::isVision((string) $get('slug')))
                         ->columnSpanFull(),
                 ),

@@ -113,7 +113,7 @@
         <div class="shell relative">
             <div class="vision-mission-grid">
                 <x-vision-card
-                    title="Vizyon"
+                    title="Hedef"
                     index="01"
                     icon="sparkles"
                     eyebrow="Yönümüz"
@@ -127,7 +127,7 @@
                 </div>
 
                 <x-vision-card
-                    title="Misyon"
+                    title="İlkeler"
                     index="02"
                     icon="heart"
                     eyebrow="Gayemiz"

@@ -345,9 +345,9 @@ class CorporatePageTest extends TestCase
 
         $this->get('/vizyon-misyon')
             ->assertSeeInOrder([
-                'Vizyon',
+                'Hedef',
                 'İlim ve kardeşlikte örnek bir topluluk olmak.',
-                'Misyon',
+                'İlkeler',
                 'Kur’an ve sünnet ışığında faydalı çalışmalar yürütmek.',
             ])
             ->assertSee('vision-card', false)
