@@ -32,6 +32,42 @@ class NestedMediaAlbumTest extends TestCase
             ->assertDontSee('A kişi semineri');
     }
 
+    public function test_media_album_cards_and_photos_match_activity_media_framing(): void
+    {
+        $album = MediaAlbum::query()->create([
+            'title' => 'Kamp albümü',
+            'slug' => 'kamp-albumu-cerceve',
+            'cover' => 'albums/kamp.jpg',
+            'description' => 'Kamp kareleri',
+            'is_published' => true,
+        ]);
+
+        MediaItem::query()->create([
+            'media_album_id' => $album->id,
+            'type' => 'photo',
+            'title' => 'Kamp karesi',
+            'path' => 'media/kamp-kare.jpg',
+            'sort_order' => 1,
+        ]);
+
+        $this->get(route('media.index'))
+            ->assertOk()
+            ->assertSee('album-card', false)
+            ->assertSee('media-frame', false)
+            ->assertSee('aspect-[4/5]', false)
+            ->assertDontSee('aspect-[4/3]', false)
+            ->assertDontSee('media-frame-blur', false);
+
+        $this->get(route('media.show', $album))
+            ->assertOk()
+            ->assertSee('album-media-gallery', false)
+            ->assertSee('album-media-tile', false)
+            ->assertSee('/storage/media/kamp-kare.jpg', false)
+            ->assertDontSee('object-cover', false)
+            ->assertDontSee('aspect-[4/3]', false)
+            ->assertDontSee('media-frame-blur', false);
+    }
+
     public function test_collection_page_lists_children_and_search_filters_them(): void
     {
         $parent = $this->makeCollection();

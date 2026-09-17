@@ -80,7 +80,7 @@
             <x-empty-state icon="folder" title="{{ $query !== '' ? 'Sonuç yok' : 'İç albüm yok' }}"
                            text="{{ $query !== '' ? 'Bu aramayla eşleşen albüm bulunamadı.' : 'Yayınlanan iç albümler burada kart olarak listelenir.' }}" />
         @else
-            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ($children as $child)
                     <div class="reveal" style="--reveal-delay: {{ $loop->index * 60 }}ms">
                         <x-album-card :album="$child" />
@@ -113,17 +113,14 @@
             @endphp
 
             @if ($showPhotos)
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="album-media-gallery">
                     @foreach ($groups['photos'] as $item)
                         @php $url = \Illuminate\Support\Facades\Storage::disk('public')->url($item->path); @endphp
-                        <button type="button" class="group card card-hover overflow-hidden text-left"
+                        <button type="button" class="album-media-tile group"
                                 x-on:click="open = true; src = '{{ $url }}'; caption = @js($item->caption ?: $item->title)">
-                            <div class="aspect-[4/3] overflow-hidden bg-cream-deep">
-                                <img src="{{ $url }}" alt="{{ $item->title }}" loading="lazy"
-                                     class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]">
-                            </div>
+                            <img src="{{ $url }}" alt="{{ $item->title }}" loading="lazy" decoding="async">
                             @if (filled($item->caption ?: $item->title))
-                                <p class="px-5 py-4 text-sm text-muted">{{ $item->caption ?: $item->title }}</p>
+                                <span class="album-media-caption">{{ $item->caption ?: $item->title }}</span>
                             @endif
                         </button>
                     @endforeach
@@ -131,13 +128,13 @@
             @endif
 
             @if ($showVideos)
-                <div class="{{ $showPhotos ? 'mt-12' : '' }} grid gap-4 sm:grid-cols-2">
+                <div class="{{ $showPhotos ? 'mt-12' : '' }} album-media-gallery album-media-gallery-video">
                     @foreach ($groups['videos'] as $item)
                         @php $url = \Illuminate\Support\Facades\Storage::disk('public')->url($item->path); @endphp
-                        <figure class="card overflow-hidden">
-                            <video src="{{ $url }}" controls playsinline preload="metadata" class="album-video"></video>
+                        <figure class="album-media-tile album-media-tile-video">
+                            <video src="{{ $url }}" controls playsinline preload="metadata"></video>
                             @if (filled($item->caption ?: $item->title))
-                                <figcaption class="px-5 py-4 text-sm text-muted">{{ $item->caption ?: $item->title }}</figcaption>
+                                <figcaption class="album-media-caption">{{ $item->caption ?: $item->title }}</figcaption>
                             @endif
                         </figure>
                     @endforeach
