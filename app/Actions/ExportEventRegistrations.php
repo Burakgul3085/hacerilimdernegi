@@ -6,6 +6,7 @@ use App\Enums\ApplicationStatus;
 use App\Models\Activity;
 use App\Models\AuditLog;
 use App\Models\EventRegistration;
+use App\Support\HacerXlsxTemplate;
 use App\Support\RegistrationExportPlan;
 use App\Support\XlsxWorkbook;
 use Illuminate\Support\Collection;
@@ -36,6 +37,8 @@ class ExportEventRegistrations
         $usedNames = [];
         $coverName = RegistrationExportPlan::sheetName('İçindekiler', $usedNames);
         $indexRows = [['Faaliyet', 'Başvuru', 'Bekleyen', 'Sayfa']];
+        $totalRows = 0;
+        $totalPending = 0;
 
         if (! $unassignedOnly) {
             $activities = $activity === null
@@ -44,12 +47,15 @@ class ExportEventRegistrations
 
             foreach ($activities as $folder) {
                 $rows = $registrations->get((string) $folder->getKey(), collect());
+                $pending = $rows->filter(fn (EventRegistration $registration): bool => $registration->status === ApplicationStatus::Pending)->count();
                 $sheet = $this->activitySheet($folder, $rows, $usedNames, $columnKeys);
                 $sheets[] = $sheet;
+                $totalRows += $rows->count();
+                $totalPending += $pending;
                 $indexRows[] = [
                     $folder->title,
                     (string) $rows->count(),
-                    (string) $rows->filter(fn (EventRegistration $registration): bool => $registration->status === ApplicationStatus::Pending)->count(),
+                    (string) $pending,
                     $sheet['name'],
                 ];
             }
@@ -58,18 +64,23 @@ class ExportEventRegistrations
         $unassigned = $registrations->get('0', collect());
 
         if ($unassignedOnly || ($activity === null && $unassigned->isNotEmpty())) {
+            $pending = $unassigned->filter(fn (EventRegistration $registration): bool => $registration->status === ApplicationStatus::Pending)->count();
             $sheet = $this->plainSheet('Diğer başvurular', $unassigned, $usedNames, $columnKeys);
             $sheets[] = $sheet;
+            $totalRows += $unassigned->count();
+            $totalPending += $pending;
             $indexRows[] = [
                 'Diğer başvurular',
                 (string) $unassigned->count(),
-                (string) $unassigned->filter(fn (EventRegistration $registration): bool => $registration->status === ApplicationStatus::Pending)->count(),
+                (string) $pending,
                 $sheet['name'],
             ];
         }
 
         array_unshift($sheets, [
             'name' => $coverName,
+            'context' => 'İçindekiler',
+            'summary' => $totalRows.' başvuru  ·  '.$totalPending.' bekleyen  ·  '.(count($sheets)).' faaliyet sayfası',
             'rows' => $indexRows,
         ]);
 
@@ -87,7 +98,10 @@ class ExportEventRegistrations
 
         return [
             'filename' => $filename,
-            'contents' => $this->workbook->build('Hacer başvurular', $sheets),
+            'contents' => $this->workbook->build(
+                HacerXlsxTemplate::ORGANIZATION.' — '.$filename,
+                $sheets,
+            ),
         ];
     }
 
@@ -141,16 +155,19 @@ class ExportEventRegistrations
      * @param  Collection<int, EventRegistration>  $rows
      * @param  array<string, true>  $usedNames
      * @param  list<string>|null  $columnKeys
-     * @return array{name: string, rows: list<list<string>>}
+     * @return array{name: string, context: string, summary: string, rows: list<list<string>>}
      */
     private function activitySheet(Activity $activity, Collection $rows, array &$usedNames, ?array $columnKeys): array
     {
         $includeLegacy = $rows->contains(fn (EventRegistration $registration): bool => RegistrationExportPlan::needsLegacyNotes($registration))
             || ($columnKeys !== null && in_array('legacy_notes', $columnKeys, true));
         $columns = RegistrationExportPlan::columns($activity, $includeLegacy, $columnKeys);
+        $pending = $rows->filter(fn (EventRegistration $registration): bool => $registration->status === ApplicationStatus::Pending)->count();
 
         return [
             'name' => RegistrationExportPlan::sheetName($activity->title, $usedNames),
+            'context' => $activity->title,
+            'summary' => $rows->count().' başvuru  ·  '.$pending.' bekleyen  ·  '.count($columns).' sütun',
             'rows' => $this->table($columns, $rows),
         ];
     }
@@ -159,13 +176,18 @@ class ExportEventRegistrations
      * @param  Collection<int, EventRegistration>  $rows
      * @param  array<string, true>  $usedNames
      * @param  list<string>|null  $columnKeys
-     * @return array{name: string, rows: list<list<string>>}
+     * @return array{name: string, context: string, summary: string, rows: list<list<string>>}
      */
     private function plainSheet(string $title, Collection $rows, array &$usedNames, ?array $columnKeys): array
     {
+        $columns = RegistrationExportPlan::plainColumns($columnKeys);
+        $pending = $rows->filter(fn (EventRegistration $registration): bool => $registration->status === ApplicationStatus::Pending)->count();
+
         return [
             'name' => RegistrationExportPlan::sheetName($title, $usedNames),
-            'rows' => $this->table(RegistrationExportPlan::plainColumns($columnKeys), $rows),
+            'context' => $title,
+            'summary' => $rows->count().' başvuru  ·  '.$pending.' bekleyen  ·  '.count($columns).' sütun',
+            'rows' => $this->table($columns, $rows),
         ];
     }
 

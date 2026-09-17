@@ -4,6 +4,7 @@ namespace App\Filament\Resources\EventRegistrations;
 
 use App\Actions\ExportEventRegistrations;
 use App\Enums\ApplicationStatus;
+use App\Filament\Forms\Components\ApplicantPickerTable;
 use App\Models\Activity;
 use App\Models\EventRegistration;
 use App\Support\RegistrationExportPlan;
@@ -13,6 +14,7 @@ use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class RegistrationExcelAction
 {
@@ -65,7 +67,7 @@ class RegistrationExcelAction
     private static function forUnassigned(string $name): Action
     {
         $columnOptions = RegistrationExportPlan::plainColumnOptions();
-        $people = self::registrationOptions(unassignedOnly: true);
+        $people = self::registrationRows(unassignedOnly: true);
 
         return Action::make($name)
             ->label('Excel indir')
@@ -76,20 +78,20 @@ class RegistrationExcelAction
             ->modalSubmitActionLabel('İndir')
             ->fillForm(fn (): array => [
                 'status' => null,
-                'registration_ids' => array_keys(self::registrationOptions(unassignedOnly: true)),
+                'registration_ids' => array_column(self::registrationRows(unassignedOnly: true), 'id'),
                 'column_keys' => array_keys($columnOptions),
             ])
             ->schema([
                 self::statusSelect(function (mixed $state, Set $set): mixed {
                     return $set(
                         'registration_ids',
-                        array_keys(self::registrationOptions(
+                        array_column(self::registrationRows(
                             status: self::statusFromState($state),
                             unassignedOnly: true,
-                        )),
+                        ), 'id'),
                     );
                 }),
-                self::peopleList($people),
+                self::peopleTable($people),
                 self::columnsList($columnOptions),
             ])
             ->action(function (array $data, ExportEventRegistrations $export) {
@@ -134,7 +136,7 @@ class RegistrationExcelAction
     {
         return [
             'status' => null,
-            'registration_ids' => array_keys(self::registrationOptions(activity: $activity)),
+            'registration_ids' => array_column(self::registrationRows(activity: $activity), 'id'),
             'column_keys' => array_keys(RegistrationExportPlan::columnOptions($activity, includeLegacyNotes: true)),
         ];
     }
@@ -145,20 +147,20 @@ class RegistrationExcelAction
     private static function activitySchema(int $activityId): array
     {
         $activity = Activity::query()->findOrFail($activityId);
-        $people = self::registrationOptions(activity: $activity);
+        $people = self::registrationRows(activity: $activity);
         $columnOptions = RegistrationExportPlan::columnOptions($activity, includeLegacyNotes: true);
 
         return [
             self::statusSelect(function (mixed $state, Set $set) use ($activityId): mixed {
                 return $set(
                     'registration_ids',
-                    array_keys(self::registrationOptions(
+                    array_column(self::registrationRows(
                         activity: Activity::query()->findOrFail($activityId),
                         status: self::statusFromState($state),
-                    )),
+                    ), 'id'),
                 );
             }),
-            self::peopleList($people),
+            self::peopleTable($people),
             self::columnsList($columnOptions),
         ];
     }
@@ -168,7 +170,7 @@ class RegistrationExcelAction
         return Select::make('status')
             ->label('Durum')
             ->placeholder('Tümü')
-            ->helperText('Değiştirince o durumdakiler işaretlenir. İsim listesi aynı kalır; istediğinizi tek tek açıp kapatabilirsiniz.')
+            ->helperText('Değiştirince o durumdakiler işaretlenir. Tablo aynı kalır; satırları tek tek açıp kapatabilirsiniz.')
             ->options(collect(ApplicationStatus::cases())->mapWithKeys(
                 fn (ApplicationStatus $status): array => [$status->value => $status->label()],
             ))
@@ -177,27 +179,20 @@ class RegistrationExcelAction
     }
 
     /**
-     * @param  array<string, string>  $options
+     * @param  list<array{id: string, name: string, email: string, phone: string, status: string}>  $rows
      */
-    private static function peopleList(array $options): CheckboxList
+    private static function peopleTable(array $rows): ApplicantPickerTable
     {
-        $count = count($options);
-
-        return CheckboxList::make('registration_ids')
+        return ApplicantPickerTable::make('registration_ids')
             ->label('Başvuranlar')
-            ->options($options)
-            ->bulkToggleable()
-            ->columns(1)
+            ->applicants($rows)
             ->required()
             ->minItems(1)
             ->validationMessages([
                 'required' => 'En az bir başvuran seçin.',
                 'min' => 'En az bir başvuran seçin.',
             ])
-            ->helperText($count === 0
-                ? 'Bu faaliyette henüz başvuran yok.'
-                : $count.' başvuran listede. “Tümünü seç” / “Tüm seçimi kaldır” ile toplu işlem yapın; ya da tek tek işaretleyin.')
-            ->extraAttributes(['class' => 'max-h-72 overflow-y-auto rounded-lg border border-gray-200 p-3 dark:border-gray-700']);
+            ->helperText('Kurumsal Excel’e yalnızca işaretli satırlar yazılır.');
     }
 
     /**
@@ -220,29 +215,37 @@ class RegistrationExcelAction
     }
 
     /**
-     * @return array<string, string>
+     * @return list<array{id: string, name: string, email: string, phone: string, status: string}>
      */
-    private static function registrationOptions(
+    private static function registrationRows(
         ?Activity $activity = null,
         ?ApplicationStatus $status = null,
         bool $unassignedOnly = false,
     ): array {
-        return EventRegistration::query()
+        /** @var Collection<int, EventRegistration> $registrations */
+        $registrations = EventRegistration::query()
             ->when($activity !== null, fn (Builder $query): Builder => $query->forActivity($activity))
             ->when($unassignedOnly, fn (Builder $query): Builder => $query->unassigned())
             ->when($status !== null, fn (Builder $query): Builder => $query->where('status', $status))
             ->orderBy('name')
             ->orderByDesc('id')
-            ->get()
-            ->mapWithKeys(function (EventRegistration $registration): array {
-                $parts = array_filter([
-                    $registration->name,
-                    $registration->email,
-                    '#'.$registration->getKey(),
-                ]);
+            ->get();
 
-                return [(string) $registration->getKey() => implode(' · ', $parts)];
+        return $registrations
+            ->map(function (EventRegistration $registration): array {
+                $status = $registration->status instanceof ApplicationStatus
+                    ? $registration->status->label()
+                    : (string) $registration->status;
+
+                return [
+                    'id' => (string) $registration->getKey(),
+                    'name' => $registration->name,
+                    'email' => $registration->email,
+                    'phone' => filled($registration->phone) ? (string) $registration->phone : '—',
+                    'status' => $status,
+                ];
             })
+            ->values()
             ->all();
     }
 
