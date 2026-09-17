@@ -69,6 +69,7 @@ class ActivityShowcaseTest extends TestCase
             ->assertSee('activity-cover-img', false)
             ->assertSee('activity-gallery', false)
             ->assertSee('activity-gallery-tile', false)
+            ->assertSee('activity-gallery-frame', false)
             ->assertSee('activities/detay-afis.jpg', false)
             ->assertDontSee('media-frame-blur', false)
             ->assertDontSee('aspect-[16/9]', false)

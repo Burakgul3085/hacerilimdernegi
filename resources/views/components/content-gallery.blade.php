@@ -15,19 +15,29 @@
     <div {{ $attributes->class(['post-gallery', 'activity-gallery' => $framed]) }} x-data="{ lightbox: null }" @keydown.escape.window="lightbox = null">
         @foreach ($items as $index => $item)
             @if (($item['kind'] ?? 'image') === 'video')
-                <div @class(['post-gallery-item post-gallery-item-video', 'activity-gallery-tile' => $framed])>
-                    <video src="{{ $item['url'] }}" controls playsinline preload="metadata"></video>
-                </div>
+                @if ($framed)
+                    <div class="activity-gallery-tile activity-gallery-tile-video">
+                        <div class="activity-gallery-frame">
+                            <video src="{{ $item['url'] }}" controls playsinline preload="metadata"></video>
+                        </div>
+                    </div>
+                @else
+                    <div class="post-gallery-item post-gallery-item-video">
+                        <video src="{{ $item['url'] }}" controls playsinline preload="metadata"></video>
+                    </div>
+                @endif
             @elseif (($item['kind'] ?? 'image') === 'audio')
                 <div class="post-gallery-item post-gallery-item-audio">
                     <audio src="{{ $item['url'] }}" controls preload="metadata"></audio>
                 </div>
             @elseif ($framed)
                 <button type="button"
-                        class="post-gallery-item activity-gallery-tile group"
+                        class="activity-gallery-tile group"
                         data-src="{{ $item['url'] }}"
                         x-on:click="lightbox = $el.dataset.src">
-                    <img src="{{ $item['url'] }}" alt="{{ $alt }} görseli {{ $index + 1 }}" loading="lazy" decoding="async">
+                    <span class="activity-gallery-frame">
+                        <img src="{{ $item['url'] }}" alt="{{ $alt }} görseli {{ $index + 1 }}" loading="lazy" decoding="async">
+                    </span>
                 </button>
             @else
                 <button type="button"
