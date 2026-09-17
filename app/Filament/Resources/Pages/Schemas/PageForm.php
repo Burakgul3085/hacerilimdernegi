@@ -55,9 +55,9 @@ class PageForm
                     ->label('Yönetim kadrosu')
                     ->addActionLabel('Kişi ekle')
                     ->itemLabel(fn (array $state): ?string => filled($state['name'] ?? null)
-                        ? trim(($state['title'] ?? '').' — '.($state['name'] ?? ''), ' —')
+                        ? trim(($state['name'] ?? '').(filled($state['title'] ?? null) ? ' — '.$state['title'] : ''), ' —')
                         : null)
-                    ->helperText('Kademeye göre sitede yukarıdan aşağı sıralanır. Aynı kademede sürükleyerek sırayı değiştirin.')
+                    ->helperText('Yönetici üstte, yönetim kadrosu altta görünür. Aynı gruptaki sırayı sürükleyerek değiştirin.')
                     ->defaultItems(0)
                     ->collapsed()
                     ->reorderableWithDragAndDrop()
@@ -68,13 +68,13 @@ class PageForm
                         TextInput::make('name')->label('Ad soyad')->required()->maxLength(120),
                         TextInput::make('title')
                             ->label('Görev')
-                            ->required()
                             ->maxLength(80)
-                            ->placeholder('Başkan, Başkan yardımcısı, Sayman, Üye…'),
+                            ->placeholder('Yönetici')
+                            ->helperText('Yalnız yöneticide doldurun. Kadrodaki kişilerde boş bırakın.'),
                         Select::make('tier')
-                            ->label('Kademe')
+                            ->label('Grup')
                             ->options(BoardTier::formOptions())
-                            ->default(BoardTier::Member->value)
+                            ->default(BoardTier::Team->value)
                             ->required(),
                         FileUpload::make('photo')
                             ->label('Fotoğraf')
@@ -84,9 +84,11 @@ class PageForm
                             ->acceptedFileTypes(UploadRules::IMAGE_MIMES)
                             ->maxSize(UploadRules::maxImageKb()),
                         Textarea::make('bio')
-                            ->label('Kısa not')
+                            ->label('Meslek / kurum')
                             ->rows(2)
                             ->maxLength(240)
+                            ->placeholder('Psikolog - Sağlık Bakanlığı')
+                            ->helperText('Kartın altında görünür. Örn. Sınıf Öğretmeni - MEB')
                             ->columnSpanFull(),
                     ]),
                 TextInput::make('president_name')

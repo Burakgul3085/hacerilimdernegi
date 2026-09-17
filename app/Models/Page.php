@@ -133,7 +133,7 @@ class Page extends Model
                 continue;
             }
 
-            $tier = BoardTier::tryFrom((int) ($member['tier'] ?? 0)) ?? BoardTier::Member;
+            $tier = BoardTier::fromStored((int) ($member['tier'] ?? 0));
             $bio = trim((string) ($member['bio'] ?? ''));
             $photo = $member['photo'] ?? null;
 
@@ -141,9 +141,15 @@ class Page extends Model
                 $photo = $photo[0] ?? null;
             }
 
+            $title = trim((string) ($member['title'] ?? ''));
+
+            if ($title === '') {
+                $title = $tier->roleLabel();
+            }
+
             $members[] = [
                 'name' => $name,
-                'title' => trim((string) ($member['title'] ?? '')) ?: $tier->roleLabel(),
+                'title' => $title,
                 'tier' => $tier->value,
                 'photo' => is_string($photo) && filled($photo) ? $photo : null,
                 'bio' => $bio !== '' ? $bio : null,

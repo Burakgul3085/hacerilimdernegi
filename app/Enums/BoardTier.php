@@ -4,38 +4,41 @@ namespace App\Enums;
 
 enum BoardTier: int
 {
-    case President = 1;
-    case VicePresident = 2;
-    case Officer = 3;
-    case Member = 4;
+    case Leader = 1;
+    case Team = 2;
 
     public function label(): string
     {
         return match ($this) {
-            self::President => 'Başkanlık',
-            self::VicePresident => 'Başkan yardımcıları',
-            self::Officer => 'Yönetim kurulu',
-            self::Member => 'Üyeler',
+            self::Leader => 'Yönetici',
+            self::Team => 'Yönetim kadrosu',
         };
     }
 
     public function roleLabel(): string
     {
         return match ($this) {
-            self::President => 'Başkan',
-            self::VicePresident => 'Başkan yardımcısı',
-            self::Officer => 'Yönetim kurulu',
-            self::Member => 'Üye',
+            self::Leader => 'Yönetici',
+            self::Team => '',
         };
     }
 
     public function formLabel(): string
     {
         return match ($this) {
-            self::President => '1 · Başkan',
-            self::VicePresident => '2 · Başkan yardımcıları',
-            self::Officer => '3 · Sayman, sekreter ve diğer görevler',
-            self::Member => '4 · Üyeler',
+            self::Leader => 'Yönetici',
+            self::Team => 'Yönetim kadrosu',
+        };
+    }
+
+    /**
+     * Eski başkan / yardımcı / sayman / üye kademelerini yeni iki gruba taşır.
+     */
+    public static function fromStored(int $value): self
+    {
+        return match ($value) {
+            self::Leader->value => self::Leader,
+            default => self::Team,
         };
     }
 

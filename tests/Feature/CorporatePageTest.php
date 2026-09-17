@@ -95,42 +95,35 @@ class CorporatePageTest extends TestCase
             ->assertDontSee('page-aside-photo', false);
     }
 
-    public function test_board_page_renders_members_in_hierarchy(): void
+    public function test_board_page_renders_leader_and_team_with_profession_lines(): void
     {
         Page::query()->where('slug', 'yonetim-kadrosu')->update([
             'board_members' => [
                 [
-                    'name' => 'Ali Üye',
-                    'title' => 'Üye',
-                    'tier' => 4,
-                    'bio' => 'Yönetim kurulu üyesi.',
+                    'name' => 'Tuğba Gün',
+                    'title' => '',
+                    'tier' => BoardTier::Team->value,
+                    'bio' => 'Sınıf Öğretmeni - MEB',
                     'photo' => null,
                 ],
                 [
-                    'name' => 'Ayşe Yılmaz',
-                    'title' => 'Başkan',
-                    'tier' => 1,
-                    'bio' => 'Dernek başkanı.',
-                    'photo' => 'pages/board/ayse.jpg',
+                    'name' => 'Zeliha Şule Yılmaz',
+                    'title' => 'Yönetici',
+                    'tier' => BoardTier::Leader->value,
+                    'bio' => 'Psikolog - Sağlık Bakanlığı',
+                    'photo' => 'pages/board/zeliha.jpg',
                 ],
                 [
-                    'name' => 'Mehmet Demir',
-                    'title' => 'Başkan yardımcısı',
-                    'tier' => 2,
-                    'bio' => null,
-                    'photo' => null,
-                ],
-                [
-                    'name' => 'Fatma Kaya',
-                    'title' => 'Sayman',
-                    'tier' => 3,
-                    'bio' => null,
+                    'name' => 'Zeynep Ak',
+                    'title' => '',
+                    'tier' => BoardTier::Team->value,
+                    'bio' => 'Din Kültürü ve Ahlak Bilgisi Öğretmeni - MEB',
                     'photo' => null,
                 ],
                 [
                     'name' => '',
                     'title' => 'Görünmemeli',
-                    'tier' => 1,
+                    'tier' => BoardTier::Leader->value,
                 ],
             ],
         ]);
@@ -138,24 +131,53 @@ class CorporatePageTest extends TestCase
         $this->get('/yonetim-kadrosu')
             ->assertSee('Yönetim kadrosu')
             ->assertSeeInOrder([
-                'Başkanlık',
-                'Ayşe Yılmaz',
-                'Başkan yardımcıları',
-                'Mehmet Demir',
-                'Yönetim kurulu',
-                'Sayman',
-                'Fatma Kaya',
-                'Üyeler',
-                'Ali Üye',
+                'Yönetici',
+                'Zeliha Şule Yılmaz',
+                'Psikolog - Sağlık Bakanlığı',
+                'Yönetim kadrosu',
+                'Tuğba Gün',
+                'Sınıf Öğretmeni - MEB',
+                'Zeynep Ak',
             ])
-            ->assertSee('/storage/pages/board/ayse.jpg', false)
+            ->assertSee('/storage/pages/board/zeliha.jpg', false)
             ->assertSee('board-photo-fit', false)
             ->assertDontSee('board-photo-fill', false)
             ->assertDontSee('object-cover', false)
             ->assertSee('board-directory', false)
             ->assertDontSee('Görünmemeli')
+            ->assertDontSee('Başkanlık')
+            ->assertDontSee('Başkan yardımcıları')
             ->assertDontSee('yönetim panelinden eklenecektir')
             ->assertDontSee('page-aside-photo', false);
+    }
+
+    public function test_board_page_maps_legacy_officer_tiers_into_the_team_group(): void
+    {
+        Page::query()->where('slug', 'yonetim-kadrosu')->update([
+            'board_members' => [
+                [
+                    'name' => 'Eski Üye',
+                    'title' => '',
+                    'tier' => 4,
+                    'bio' => 'İlahiyatçı',
+                ],
+                [
+                    'name' => 'Eski Sayman',
+                    'title' => '',
+                    'tier' => 3,
+                    'bio' => 'Kur’ân Kursu Öğreticisi - DİB',
+                ],
+            ],
+        ]);
+
+        $this->get('/yonetim-kadrosu')
+            ->assertSeeInOrder([
+                'Yönetim kadrosu',
+                'Eski Üye',
+                'Eski Sayman',
+            ])
+            ->assertDontSee('Üyeler')
+            ->assertDontSee('Yönetim kurulu');
     }
 
     public function test_board_page_escapes_member_text(): void
@@ -164,8 +186,8 @@ class CorporatePageTest extends TestCase
             'board_members' => [
                 [
                     'name' => "<script>alert('xss')</script>",
-                    'title' => '<b>Başkan</b>',
-                    'tier' => 1,
+                    'title' => '<b>Yönetici</b>',
+                    'tier' => BoardTier::Leader->value,
                     'bio' => '<img src=x onerror=alert(1)>',
                 ],
             ],
@@ -183,8 +205,8 @@ class CorporatePageTest extends TestCase
         Page::query()->where('slug', 'yonetim-kadrosu')->update([
             'board_members' => [[
                 'name' => 'Ayşe Yılmaz',
-                'title' => 'Başkan',
-                'tier' => BoardTier::President->value,
+                'title' => 'Yönetici',
+                'tier' => BoardTier::Leader->value,
                 'photo' => ['pages/board/ayse.jpg'],
             ]],
         ]);
@@ -203,17 +225,17 @@ class CorporatePageTest extends TestCase
             ->assertFormFieldIsVisible('board_members')
             ->fillForm([
                 'board_members' => [[
-                    'name' => 'Ayşe Yılmaz',
-                    'title' => 'Başkan',
-                    'tier' => BoardTier::President->value,
-                    'bio' => 'Dernek başkanı.',
+                    'name' => 'Zeliha Şule Yılmaz',
+                    'title' => 'Yönetici',
+                    'tier' => BoardTier::Leader->value,
+                    'bio' => 'Psikolog - Sağlık Bakanlığı',
                 ]],
             ])
             ->call('save')
             ->assertHasNoFormErrors();
 
-        $this->assertSame('Ayşe Yılmaz', $page->refresh()->boardMembers()[0]['name'] ?? null);
-        $this->assertSame(BoardTier::President->value, $page->boardMembers()[0]['tier'] ?? null);
+        $this->assertSame('Zeliha Şule Yılmaz', $page->refresh()->boardMembers()[0]['name'] ?? null);
+        $this->assertSame(BoardTier::Leader->value, $page->boardMembers()[0]['tier'] ?? null);
     }
 
     public function test_board_member_fields_are_hidden_on_other_pages(): void

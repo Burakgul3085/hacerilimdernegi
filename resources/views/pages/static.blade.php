@@ -65,8 +65,8 @@
         <div class="flex flex-col">
             @foreach ($boardTiers as $tierValue => $members)
                 @php
-                    $tier = \App\Enums\BoardTier::tryFrom((int) $tierValue);
-                    $featured = $tier === \App\Enums\BoardTier::President;
+                    $tier = \App\Enums\BoardTier::fromStored((int) $tierValue);
+                    $featured = $tier === \App\Enums\BoardTier::Leader;
                 @endphp
 
                 @if (! $loop->first)
@@ -74,21 +74,14 @@
                 @endif
 
                 <div>
-                    @if ($tier)
-                        <p class="eyebrow text-center">{{ $tier->label() }}</p>
-                    @endif
+                    <p class="eyebrow text-center">{{ $tier->label() }}</p>
 
                     <div @class([
                         'mt-7 flex flex-wrap justify-center gap-6',
                     ])>
                         @foreach ($members as $index => $member)
                             @php
-                                $cardWidth = match ($tier) {
-                                    \App\Enums\BoardTier::President => 'w-full max-w-sm',
-                                    \App\Enums\BoardTier::VicePresident => 'w-full max-w-[20rem]',
-                                    \App\Enums\BoardTier::Officer => 'w-full max-w-[18rem]',
-                                    default => 'w-full max-w-[16.5rem]',
-                                };
+                                $cardWidth = $featured ? 'w-full max-w-sm' : 'w-full max-w-[16.5rem]';
                             @endphp
                             <x-board-member
                                 class="reveal {{ $cardWidth }}"
