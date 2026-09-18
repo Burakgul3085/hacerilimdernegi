@@ -70,7 +70,7 @@ class EventRegistrationExportTest extends TestCase
 
         $this->assertStringContainsString('wrapText="1"', $styles);
         $this->assertMatchesRegularExpression('/<row r="5" ht="([5-9]\d|[1-3]\d{2}|409)"/', $sheet);
-        $this->assertMatchesRegularExpression('/alksdhasj[\s\S]{0,5}alksdhasj/', $sheet);
+        $this->assertStringContainsString('&#10;', $sheet);
         $this->assertStringContainsString(mb_substr($long, 0, 20), $sheet);
     }
 

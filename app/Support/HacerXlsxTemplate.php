@@ -191,7 +191,8 @@ class HacerXlsxTemplate
             return $value;
         }
 
-        $charsPerLine = max(10, (int) floor($columnWidth * 0.95));
+        // Sütun genişliğinden biraz daha sıkı kır — Excel taşmasını engeller.
+        $charsPerLine = max(12, min(36, (int) floor($columnWidth * 0.85)));
         $parts = [];
 
         foreach (explode("\n", $value) as $line) {
@@ -201,13 +202,20 @@ class HacerXlsxTemplate
                 continue;
             }
 
+            // Önce boşluksuz uzun parçaları kır, sonra satırı sabit genişlikte dilimle.
             $broken = preg_replace_callback(
                 '/\S{'.($charsPerLine + 1).',}/u',
                 fn (array $match): string => implode("\n", mb_str_split($match[0], $charsPerLine)),
                 $line,
             );
 
-            $parts[] = is_string($broken) ? $broken : $line;
+            $line = is_string($broken) ? $broken : $line;
+
+            if (mb_strlen(str_replace("\n", '', $line)) > $charsPerLine && ! str_contains($line, "\n")) {
+                $line = implode("\n", mb_str_split($line, $charsPerLine));
+            }
+
+            $parts[] = $line;
         }
 
         return implode("\n", $parts);

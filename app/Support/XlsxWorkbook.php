@@ -348,7 +348,9 @@ class XlsxWorkbook
     private function xml(string $value): string
     {
         $value = preg_replace('/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}]/u', '', $value) ?? $value;
+        $escaped = htmlspecialchars($value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
 
-        return htmlspecialchars($value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        // Excel inlineStr: ham LF çoğu zaman yok sayılır; &#10; ile satır kırılır.
+        return str_replace(["\r\n", "\r", "\n"], '&#10;', $escaped);
     }
 }
