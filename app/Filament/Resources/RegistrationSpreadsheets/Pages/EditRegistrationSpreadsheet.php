@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\RegistrationSpreadsheets\Pages;
 
+use App\Actions\ExportRegistrationSpreadsheetCsv;
 use App\Actions\SaveRegistrationSpreadsheet;
 use App\Enums\ApplicationStatus;
 use App\Filament\Resources\RegistrationSpreadsheets\RegistrationSpreadsheetResource;
 use App\Models\RegistrationSpreadsheet;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -37,6 +39,13 @@ class EditRegistrationSpreadsheet extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('csv')
+                ->label('Google E-tablo (CSV)')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->action(function (ExportRegistrationSpreadsheetCsv $export) {
+                    return $export->download($this->getRecord(), $this->grid);
+                }),
             DeleteAction::make(),
         ];
     }

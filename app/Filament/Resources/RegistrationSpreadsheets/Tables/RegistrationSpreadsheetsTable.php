@@ -2,7 +2,10 @@
 
 namespace App\Filament\Resources\RegistrationSpreadsheets\Tables;
 
+use App\Actions\ExportRegistrationSpreadsheetCsv;
 use App\Filament\Resources\RegistrationSpreadsheets\RegistrationSpreadsheetResource;
+use App\Models\RegistrationSpreadsheet;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -41,6 +44,13 @@ class RegistrationSpreadsheetsTable
             ->recordUrl(fn ($record): string => RegistrationSpreadsheetResource::getUrl('edit', ['record' => $record]))
             ->recordActions([
                 EditAction::make()->label('Aç'),
+                Action::make('csv')
+                    ->label('CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->action(function (RegistrationSpreadsheet $record, ExportRegistrationSpreadsheetCsv $export) {
+                        return $export->download($record);
+                    }),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

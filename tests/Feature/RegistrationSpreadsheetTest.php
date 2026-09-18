@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Actions\CreateRegistrationSpreadsheet;
+use App\Actions\ExportRegistrationSpreadsheetCsv;
 use App\Actions\SaveRegistrationSpreadsheet;
 use App\Enums\ApplicationStatus;
 use App\Enums\UserRole;
@@ -99,6 +100,33 @@ class RegistrationSpreadsheetTest extends TestCase
         Livewire::test(EditRegistrationSpreadsheet::class, ['record' => $spreadsheet->getKey()])
             ->assertSuccessful()
             ->assertSet('data.title', $spreadsheet->title);
+    }
+
+    public function test_csv_export_includes_headers_and_status_labels(): void
+    {
+        $editor = User::factory()->create(['role' => UserRole::Editor]);
+        $activity = $this->activity();
+        $registration = $this->registration($activity, 'Ayşe Yılmaz', 'ayse@example.com');
+
+        $this->actingAs($editor);
+
+        $spreadsheet = app(CreateRegistrationSpreadsheet::class)->handle(
+            user: $editor,
+            activity: $activity,
+            registrationIds: [$registration->id],
+            columnKeys: ['name', 'email', 'status'],
+        );
+
+        $response = app(ExportRegistrationSpreadsheetCsv::class)->download($spreadsheet);
+        ob_start();
+        $response->sendContent();
+        $csv = (string) ob_get_clean();
+
+        $this->assertStringStartsWith("\xEF\xBB\xBF", $csv);
+        $this->assertStringContainsString('Ad soyad', $csv);
+        $this->assertStringContainsString('Ayşe Yılmaz', $csv);
+        $this->assertStringContainsString('Beklemede', $csv);
+        $this->assertStringNotContainsString(';pending', $csv);
     }
 
     public function test_guests_are_redirected_from_spreadsheet_pages(): void
