@@ -167,9 +167,9 @@ class XlsxWorkbook
             .'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             .'<fonts count="5">'
             .'<font><sz val="11"/><color rgb="FF2C2825"/><name val="Calibri"/><family val="2"/></font>'
-            .'<font><b/><sz val="12"/><color rgb="FF2C2825"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><b/><sz val="13"/><color rgb="FF2C2825"/><name val="Calibri"/><family val="2"/></font>'
             .'<font><sz val="10"/><color rgb="FF6B6560"/><name val="Calibri"/><family val="2"/></font>'
-            .'<font><b/><sz val="10"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><b/><sz val="11"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
             .'<font><sz val="9"/><color rgb="FF6B6560"/><name val="Calibri"/><family val="2"/></font>'
             .'</fonts>'
             .'<fills count="6">'
@@ -230,16 +230,31 @@ class XlsxWorkbook
         $headers = array_values($rows[0] ?? []);
         $rowMarkup = '';
 
-        $identityParts = HacerXlsxTemplate::identityCells($context, $summary);
+        $columnWidths = [];
+
+        for ($columnIndex = 0; $columnIndex < $columnCount; $columnIndex++) {
+            $columnWidths[$columnIndex] = HacerXlsxTemplate::columnWidthForContent(
+                (string) ($headers[$columnIndex] ?? ''),
+                $rows,
+                $columnIndex,
+            );
+        }
+
+        // Marka metni A1'de; okunaklı olsun diye ilk sütuna alt sınır.
+        $columnWidths[0] = max($columnWidths[0] ?? 14.0, 36.0);
+
+        $brandText = HacerXlsxTemplate::brandBlockText($context, $summary);
+        $brandLineCount = max(1, substr_count($brandText, "\n") + 1);
+        $brandHeight = min(72, max(36, $brandLineCount * 16 + 8));
         $identityCells = '';
 
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $part = $identityParts[$columnIndex - 1] ?? '';
+            $part = $columnIndex === 1 ? $brandText : '';
             $style = $columnIndex === 1 ? '1' : '2';
             $identityCells .= $this->inlineCell($this->columnLetter($columnIndex).'1', $part, $style);
         }
 
-        $rowMarkup .= '<row r="1" ht="26" customHeight="1">'.$identityCells.'</row>';
+        $rowMarkup .= '<row r="1" ht="'.$brandHeight.'" customHeight="1">'.$identityCells.'</row>';
 
         $accentCells = '';
 
@@ -247,7 +262,7 @@ class XlsxWorkbook
             $accentCells .= $this->inlineCell($this->columnLetter($columnIndex).'2', '', '3');
         }
 
-        $rowMarkup .= '<row r="2" ht="4" customHeight="1">'.$accentCells.'</row>';
+        $rowMarkup .= '<row r="2" ht="5" customHeight="1">'.$accentCells.'</row>';
 
         foreach ($rows as $rowIndex => $row) {
             $rowNumber = $headerRowNumber + $rowIndex;
@@ -255,12 +270,11 @@ class XlsxWorkbook
             $isAlt = ! $isHeader && ($rowIndex % 2 === 0);
             $style = $isHeader ? '4' : ($isAlt ? '5' : '0');
             $cells = '';
-
-            $longest = 0;
+            $normalizedRow = [];
 
             for ($columnIndex = 0; $columnIndex < $columnCount; $columnIndex++) {
                 $value = (string) ($row[$columnIndex] ?? '');
-                $longest = max($longest, mb_strlen($value));
+                $normalizedRow[] = $value;
                 $cells .= $this->inlineCell(
                     $this->columnLetter($columnIndex + 1).$rowNumber,
                     $value,
@@ -268,10 +282,7 @@ class XlsxWorkbook
                 );
             }
 
-            $rowHeight = $isHeader
-                ? 26
-                : min(96, max(22, (int) ceil($longest / 42) * 16));
-
+            $rowHeight = HacerXlsxTemplate::rowHeightForContent($normalizedRow, $columnWidths, $isHeader);
             $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.$rowHeight.'" customHeight="1">'.$cells.'</row>';
         }
 
@@ -285,7 +296,7 @@ class XlsxWorkbook
             $spacerCells .= $this->inlineCell($this->columnLetter($columnIndex).$spacerRow, '', '2');
         }
 
-        $rowMarkup .= '<row r="'.$spacerRow.'" ht="8" customHeight="1">'.$spacerCells.'</row>';
+        $rowMarkup .= '<row r="'.$spacerRow.'" ht="10" customHeight="1">'.$spacerCells.'</row>';
 
         $footerCells = '';
         $footerParts = $this->footerParts($columnCount);
@@ -298,18 +309,12 @@ class XlsxWorkbook
             );
         }
 
-        $rowMarkup .= '<row r="'.$footerRow.'" ht="22" customHeight="1">'.$footerCells.'</row>';
+        $rowMarkup .= '<row r="'.$footerRow.'" ht="24" customHeight="1">'.$footerCells.'</row>';
 
         $cols = '';
 
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $header = (string) ($headers[$columnIndex - 1] ?? '');
-            $width = HacerXlsxTemplate::columnWidthForContent($header, $rows, $columnIndex - 1);
-
-            if (isset($identityParts[$columnIndex - 1])) {
-                $width = max($width, min(36.0, mb_strlen($identityParts[$columnIndex - 1]) * 1.05 + 2));
-            }
-
+            $width = $columnWidths[$columnIndex - 1] ?? 16.0;
             $cols .= '<col min="'.$columnIndex.'" max="'.$columnIndex.'" width="'.number_format($width, 2, '.', '').'" customWidth="1"/>';
         }
 
@@ -318,7 +323,7 @@ class XlsxWorkbook
             .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             .'<dimension ref="A1:'.$lastColumn.$footerRow.'"/>'
             .'<sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews>'
-            .'<sheetFormatPr defaultRowHeight="20"/>'
+            .'<sheetFormatPr defaultRowHeight="22" defaultColWidth="14"/>'
             .'<cols>'.$cols.'</cols>'
             .'<sheetData>'.$rowMarkup.'</sheetData>'
             .'<autoFilter ref="A'.$headerRowNumber.':'.$lastColumn.$lastDataRow.'"/>'

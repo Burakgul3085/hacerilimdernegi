@@ -107,8 +107,17 @@ class ExportRegistrationSpreadsheetCsv
 
     private function filename(RegistrationSpreadsheet $spreadsheet): string
     {
-        $base = preg_replace('/[^\pL\pN]+/u', '-', $spreadsheet->title) ?: 'e-tablo';
+        $label = $spreadsheet->activity?->slug
+            ?? $spreadsheet->activity?->title
+            ?? match ($spreadsheet->source) {
+                'unassigned' => 'diger-basvurular',
+                'all' => 'tum-basvurular',
+                default => (string) str($spreadsheet->title)->before('·')->trim(),
+            };
+
+        $base = preg_replace('/[^\pL\pN]+/u', '-', $label) ?: 'e-tablo';
         $base = trim((string) $base, '-');
+        $base = mb_substr($base, 0, 48);
 
         return 'Hacer-'.$base.'-'.now()->format('Y-m-d').'.xlsx';
     }
