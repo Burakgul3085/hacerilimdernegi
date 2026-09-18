@@ -195,19 +195,19 @@ class XlsxWorkbook
             .'</borders>'
             .'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
             .'<cellXfs count="7">'
-            // 0 body — wrap ile taşma yok, yazdırma gibi
+            // 0 body — wrap ile taşma yok
             .'<xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
-            // 1 brand title — wrap kapalı; boş komşu hücrelere taşarak unvan bandı
+            // 1 brand title — wrap kapalı; yalnızca A1 yazılır → bant boyunca taşar, unvan kırılmaz
             .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
-            // 2 brand meta
+            // 2 brand meta — aynı mantık
             .'<xf numFmtId="49" fontId="2" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
             // 3 gold accent
             .'<xf numFmtId="49" fontId="0" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFill="1" applyAlignment="1"><alignment vertical="center"/></xf>'
-            // 4 table header — yazdırma: sol hizalı
+            // 4 table header
             .'<xf numFmtId="49" fontId="3" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
             // 5 zebra
             .'<xf numFmtId="49" fontId="0" fillId="2" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
-            // 6 footer
+            // 6 footer — yalnızca A yazılır → dipnot taşarak okunur
             .'<xf numFmtId="49" fontId="4" fillId="2" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
             .'</cellXfs>'
             .'</styleSheet>';
@@ -240,34 +240,19 @@ class XlsxWorkbook
             );
         }
 
-        // Satır 1: kurum unvanı (wrap yok → bant boyunca okunur)
-        $titleCells = '';
+        // Unvan + meta: yalnızca A sütununda tam metin (wrap).
+        // Boş B/C… hücreleri YAZILMAZ → Excel taşırmayı kesmez; unvan tam okunur.
+        // Bant zemini için ilk 4 sütuna dolgu hücreleri (metinsiz) ayrı satırda değil —
+        // unvan satırında A dolu, komşular yok → taşma ile bant boyunca görünür.
+        $rowMarkup .= '<row r="1" ht="30" customHeight="1">'
+            .$this->inlineCell('A1', HacerXlsxTemplate::ORGANIZATION, '1')
+            .'</row>';
 
-        for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $titleCells .= $this->inlineCell(
-                $this->columnLetter($columnIndex).'1',
-                $columnIndex === 1 ? HacerXlsxTemplate::ORGANIZATION : '',
-                '1',
-            );
-        }
+        $rowMarkup .= '<row r="2" ht="22" customHeight="1">'
+            .$this->inlineCell('A2', HacerXlsxTemplate::metaLine($context, $summary), '2')
+            .'</row>';
 
-        $rowMarkup .= '<row r="1" ht="28" customHeight="1">'.$titleCells.'</row>';
-
-        // Satır 2: meta (faaliyet · belge · özet)
-        $metaCells = '';
-        $meta = HacerXlsxTemplate::metaLine($context, $summary);
-
-        for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $metaCells .= $this->inlineCell(
-                $this->columnLetter($columnIndex).'2',
-                $columnIndex === 1 ? $meta : '',
-                '2',
-            );
-        }
-
-        $rowMarkup .= '<row r="2" ht="20" customHeight="1">'.$metaCells.'</row>';
-
-        // Satır 3: altın çizgi
+        // Satır 3: altın çizgi (tüm sütunlar)
         $accentCells = '';
 
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
@@ -282,16 +267,23 @@ class XlsxWorkbook
             $isAlt = ! $isHeader && ($rowIndex % 2 === 0);
             $style = $isHeader ? '4' : ($isAlt ? '5' : '0');
             $cells = '';
+            $longest = 0;
 
             for ($columnIndex = 0; $columnIndex < $columnCount; $columnIndex++) {
+                $value = (string) ($row[$columnIndex] ?? '');
+                // Boş hücreye görünmez boşluk: yan hücreye metin taşmasını keser
+                $cellValue = $value === '' ? ' ' : $value;
+                $longest = max($longest, mb_strlen(trim($value)));
                 $cells .= $this->inlineCell(
                     $this->columnLetter($columnIndex + 1).$rowNumber,
-                    (string) ($row[$columnIndex] ?? ''),
+                    $cellValue,
                     $style,
                 );
             }
 
-            $rowHeight = $isHeader ? 24 : 22;
+            $rowHeight = $isHeader
+                ? 24
+                : ($longest > 40 ? 44 : ($longest > 22 ? 32 : 22));
             $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.$rowHeight.'" customHeight="1">'.$cells.'</row>';
         }
 
@@ -299,25 +291,11 @@ class XlsxWorkbook
         $spacerRow = $lastDataRow + 1;
         $footerRow = $lastDataRow + 2;
 
-        $spacerCells = '';
+        $rowMarkup .= '<row r="'.$spacerRow.'" ht="8" customHeight="1"></row>';
 
-        for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $spacerCells .= $this->inlineCell($this->columnLetter($columnIndex).$spacerRow, '', '2');
-        }
-
-        $rowMarkup .= '<row r="'.$spacerRow.'" ht="8" customHeight="1">'.$spacerCells.'</row>';
-
-        $footerCells = '';
-
-        for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $footerCells .= $this->inlineCell(
-                $this->columnLetter($columnIndex).$footerRow,
-                $columnIndex === 1 ? HacerXlsxTemplate::footerNote() : '',
-                '6',
-            );
-        }
-
-        $rowMarkup .= '<row r="'.$footerRow.'" ht="20" customHeight="1">'.$footerCells.'</row>';
+        $rowMarkup .= '<row r="'.$footerRow.'" ht="22" customHeight="1">'
+            .$this->inlineCell($this->columnLetter(1).$footerRow, HacerXlsxTemplate::footerNote(), '6')
+            .'</row>';
 
         $cols = '';
 
@@ -342,13 +320,22 @@ class XlsxWorkbook
      */
     private function clipRows(array $rows): array
     {
-        return array_map(
-            fn (array $row): array => array_map(
+        $out = [];
+
+        foreach ($rows as $index => $row) {
+            if ($index === 0) {
+                $out[] = array_map(fn (mixed $cell): string => (string) $cell, $row);
+
+                continue;
+            }
+
+            $out[] = array_map(
                 fn (mixed $cell): string => HacerXlsxTemplate::clipCell((string) $cell),
                 $row,
-            ),
-            $rows,
-        );
+            );
+        }
+
+        return $out;
     }
 
     private function inlineCell(string $reference, string $value, string $style): string

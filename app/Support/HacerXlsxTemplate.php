@@ -37,8 +37,8 @@ class HacerXlsxTemplate
      */
     public const BRAND_ROWS = 3;
 
-    /** Excel’de taşmayı önlemek için uzun hücre tavanı */
-    public const CELL_MAX_CHARS = 160;
+    /** Uzun serbest metin: hücrede kalsın, yandaki sütuna taşmasın */
+    public const CELL_MAX_CHARS = 72;
 
     public static function generatedAtLabel(): string
     {
@@ -110,9 +110,9 @@ class HacerXlsxTemplate
             str_contains($normalized, 'faaliyet') => 24.0,
             str_contains($normalized, 'telefon') => 16.0,
             str_contains($normalized, 'tarih') => 18.0,
-            str_contains($normalized, 'eski not'), str_contains($normalized, 'kendinden') => 28.0,
-            str_contains($normalized, 'not') => 26.0,
-            str_contains($normalized, 'adres') => 24.0,
+            str_contains($normalized, 'eski not'), str_contains($normalized, 'kendinden') => 30.0,
+            str_contains($normalized, 'not') => 28.0,
+            str_contains($normalized, 'adres') => 26.0,
             str_contains($normalized, 'başvuru no') => 12.0,
             $normalized === 'no', $normalized === 'sayfa' => 10.0,
             str_contains($normalized, 'durum') => 14.0,
