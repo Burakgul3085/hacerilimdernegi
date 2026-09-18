@@ -68,10 +68,12 @@ class EventRegistrationExportTest extends TestCase
         $zip->close();
         @unlink($path);
 
-        $this->assertStringContainsString('wrapText="1"', $styles);
+        $this->assertStringContainsString('wrapText="true"', $styles);
         $this->assertMatchesRegularExpression('/<row r="5" ht="([5-9]\d|[1-3]\d{2}|409)"/', $sheet);
         $this->assertStringContainsString('&#10;', $sheet);
         $this->assertStringContainsString(mb_substr($long, 0, 20), $sheet);
+        $this->assertStringContainsString('Ayşe', $sheet);
+        $this->assertStringNotContainsString('Ay&#10;', $sheet);
     }
 
     public function test_workbook_xml_parts_are_well_formed_for_excel(): void

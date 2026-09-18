@@ -162,8 +162,7 @@ class HacerXlsxTemplate
                 continue;
             }
 
-            $colWidth = max(8.0, (float) ($columnWidths[$index] ?? 16.0));
-            $charsPerLine = max(10, (int) floor($colWidth * 0.95));
+            $charsPerLine = self::charsPerLine((float) ($columnWidths[$index] ?? 16.0));
             $explicitLines = substr_count($text, "\n") + 1;
             $longestLine = 0;
 
@@ -171,53 +170,101 @@ class HacerXlsxTemplate
                 $longestLine = max($longestLine, mb_strlen($line));
             }
 
-            $softLines = max(1, (int) ceil($longestLine / $charsPerLine));
-            $maxLines = max($maxLines, max($explicitLines, $softLines));
+            $wrappedLines = max(1, (int) ceil($longestLine / $charsPerLine));
+            $maxLines = max($maxLines, max($explicitLines, $wrappedLines));
         }
 
-        // Excel satır yüksekliği üst sınırı ~409
-        return (float) min(409, max(22, $maxLines * 13 + 6));
+        return (float) min(409, max(22, $maxLines * 15 + 6));
     }
 
     /**
-     * Excel wrapText boşluksuz metinde kırılmaz; uzun koşuları satır sonlarıyla böler
-     * (yazdırma sayfasındaki word-break davranışı).
+     * Excel wrapText boşluksuz metinde kırılmaz. Yazdırma gibi görünsün diye
+     * kelime sınırında sarar; tek parça uzun koşuları sabit genişlikte böler.
      */
     public static function prepareCellTextForWrap(string $value, float $columnWidth): string
     {
         $value = str_replace(["\r\n", "\r"], "\n", $value);
 
         if (trim($value) === '') {
-            return $value;
+            return '';
         }
 
-        // Sütun genişliğinden biraz daha sıkı kır — Excel taşmasını engeller.
-        $charsPerLine = max(12, min(36, (int) floor($columnWidth * 0.85)));
-        $parts = [];
+        $charsPerLine = self::charsPerLine($columnWidth);
+        $lines = [];
 
-        foreach (explode("\n", $value) as $line) {
-            if (mb_strlen($line) <= $charsPerLine) {
-                $parts[] = $line;
+        foreach (explode("\n", $value) as $paragraph) {
+            if ($paragraph === '') {
+                $lines[] = '';
 
                 continue;
             }
 
-            // Önce boşluksuz uzun parçaları kır, sonra satırı sabit genişlikte dilimle.
-            $broken = preg_replace_callback(
-                '/\S{'.($charsPerLine + 1).',}/u',
-                fn (array $match): string => implode("\n", mb_str_split($match[0], $charsPerLine)),
-                $line,
-            );
-
-            $line = is_string($broken) ? $broken : $line;
-
-            if (mb_strlen(str_replace("\n", '', $line)) > $charsPerLine && ! str_contains($line, "\n")) {
-                $line = implode("\n", mb_str_split($line, $charsPerLine));
+            foreach (self::wrapParagraph($paragraph, $charsPerLine) as $line) {
+                $lines[] = $line;
             }
-
-            $parts[] = $line;
         }
 
-        return implode("\n", $parts);
+        return implode("\n", $lines);
+    }
+
+    public static function charsPerLine(float $columnWidth): int
+    {
+        return max(12, min(48, (int) floor(max(12.0, $columnWidth) * 0.92)));
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function wrapParagraph(string $paragraph, int $charsPerLine): array
+    {
+        if (mb_strlen($paragraph) <= $charsPerLine) {
+            return [$paragraph];
+        }
+
+        $words = preg_split('/\s+/u', $paragraph, -1, PREG_SPLIT_NO_EMPTY);
+
+        if ($words === false || $words === []) {
+            return self::chunkUnbroken($paragraph, $charsPerLine);
+        }
+
+        $lines = [];
+        $current = '';
+
+        foreach ($words as $word) {
+            foreach (self::chunkUnbroken($word, $charsPerLine) as $chunk) {
+                if ($current === '') {
+                    $current = $chunk;
+
+                    continue;
+                }
+
+                if (mb_strlen($current) + 1 + mb_strlen($chunk) <= $charsPerLine) {
+                    $current .= ' '.$chunk;
+
+                    continue;
+                }
+
+                $lines[] = $current;
+                $current = $chunk;
+            }
+        }
+
+        if ($current !== '') {
+            $lines[] = $current;
+        }
+
+        return $lines === [] ? [$paragraph] : $lines;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function chunkUnbroken(string $value, int $charsPerLine): array
+    {
+        if (mb_strlen($value) <= $charsPerLine) {
+            return [$value];
+        }
+
+        return mb_str_split($value, $charsPerLine);
     }
 }
