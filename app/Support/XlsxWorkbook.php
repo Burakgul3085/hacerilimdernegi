@@ -7,9 +7,8 @@ use ZipArchive;
 
 /**
  * Hâcer kurumsal Excel şablonuyla çok sayfalı xlsx üretir.
- * Dosya indirme sonrası saklanmaz.
- *
- * Birleşik hücre yok. Marka metni sütunlara yayılır; yalnızca tablo başlığı dondurulur.
+ * Yazdırma görünümüyle aynı dil: marka bandı, kompakt tablo, taşmayan hücreler.
+ * Birleşik hücre / dondurulmuş bölme yok (Excel bozulmasın diye).
  */
 class XlsxWorkbook
 {
@@ -166,10 +165,10 @@ class XlsxWorkbook
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             .'<fonts count="5">'
-            .'<font><sz val="11"/><color rgb="FF2C2825"/><name val="Calibri"/><family val="2"/></font>'
-            .'<font><b/><sz val="13"/><color rgb="FF2C2825"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><sz val="10"/><color rgb="FF2C2825"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><b/><sz val="14"/><color rgb="FF2C2825"/><name val="Calibri"/><family val="2"/></font>'
             .'<font><sz val="10"/><color rgb="FF6B6560"/><name val="Calibri"/><family val="2"/></font>'
-            .'<font><b/><sz val="11"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><b/><sz val="10"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
             .'<font><sz val="9"/><color rgb="FF6B6560"/><name val="Calibri"/><family val="2"/></font>'
             .'</fonts>'
             .'<fills count="6">'
@@ -196,20 +195,20 @@ class XlsxWorkbook
             .'</borders>'
             .'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
             .'<cellXfs count="7">'
-            // 0 body
-            .'<xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1" indent="1"/></xf>'
-            // 1 identity band (kurum / bağlam — tek satır, kaydırma yok)
-            .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1" indent="1"/></xf>'
-            // 2 identity band muted
-            .'<xf numFmtId="49" fontId="2" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1" indent="1"/></xf>'
-            // 3 gold accent line
+            // 0 body — wrap ile taşma yok, yazdırma gibi
+            .'<xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
+            // 1 brand title — wrap kapalı; boş komşu hücrelere taşarak unvan bandı
+            .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
+            // 2 brand meta
+            .'<xf numFmtId="49" fontId="2" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
+            // 3 gold accent
             .'<xf numFmtId="49" fontId="0" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFill="1" applyAlignment="1"><alignment vertical="center"/></xf>'
-            // 4 table header
-            .'<xf numFmtId="49" fontId="3" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+            // 4 table header — yazdırma: sol hizalı
+            .'<xf numFmtId="49" fontId="3" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
             // 5 zebra
-            .'<xf numFmtId="49" fontId="0" fillId="2" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1" indent="1"/></xf>'
+            .'<xf numFmtId="49" fontId="0" fillId="2" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
             // 6 footer
-            .'<xf numFmtId="49" fontId="4" fillId="2" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1" indent="1"/></xf>'
+            .'<xf numFmtId="49" fontId="4" fillId="2" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
             .'</cellXfs>'
             .'</styleSheet>';
     }
@@ -223,6 +222,7 @@ class XlsxWorkbook
             $rows = [['']];
         }
 
+        $rows = $this->clipRows($rows);
         $columnCount = max(1, max(array_map(count(...), $rows)));
         $lastColumn = $this->columnLetter($columnCount);
         $brandRows = HacerXlsxTemplate::BRAND_ROWS;
@@ -240,29 +240,41 @@ class XlsxWorkbook
             );
         }
 
-        // Marka metni A1'de; okunaklı olsun diye ilk sütuna alt sınır.
-        $columnWidths[0] = max($columnWidths[0] ?? 14.0, 36.0);
-
-        $brandText = HacerXlsxTemplate::brandBlockText($context, $summary);
-        $brandLineCount = max(1, substr_count($brandText, "\n") + 1);
-        $brandHeight = min(72, max(36, $brandLineCount * 16 + 8));
-        $identityCells = '';
+        // Satır 1: kurum unvanı (wrap yok → bant boyunca okunur)
+        $titleCells = '';
 
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $part = $columnIndex === 1 ? $brandText : '';
-            $style = $columnIndex === 1 ? '1' : '2';
-            $identityCells .= $this->inlineCell($this->columnLetter($columnIndex).'1', $part, $style);
+            $titleCells .= $this->inlineCell(
+                $this->columnLetter($columnIndex).'1',
+                $columnIndex === 1 ? HacerXlsxTemplate::ORGANIZATION : '',
+                '1',
+            );
         }
 
-        $rowMarkup .= '<row r="1" ht="'.$brandHeight.'" customHeight="1">'.$identityCells.'</row>';
+        $rowMarkup .= '<row r="1" ht="28" customHeight="1">'.$titleCells.'</row>';
 
+        // Satır 2: meta (faaliyet · belge · özet)
+        $metaCells = '';
+        $meta = HacerXlsxTemplate::metaLine($context, $summary);
+
+        for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
+            $metaCells .= $this->inlineCell(
+                $this->columnLetter($columnIndex).'2',
+                $columnIndex === 1 ? $meta : '',
+                '2',
+            );
+        }
+
+        $rowMarkup .= '<row r="2" ht="20" customHeight="1">'.$metaCells.'</row>';
+
+        // Satır 3: altın çizgi
         $accentCells = '';
 
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $accentCells .= $this->inlineCell($this->columnLetter($columnIndex).'2', '', '3');
+            $accentCells .= $this->inlineCell($this->columnLetter($columnIndex).'3', '', '3');
         }
 
-        $rowMarkup .= '<row r="2" ht="5" customHeight="1">'.$accentCells.'</row>';
+        $rowMarkup .= '<row r="3" ht="4" customHeight="1">'.$accentCells.'</row>';
 
         foreach ($rows as $rowIndex => $row) {
             $rowNumber = $headerRowNumber + $rowIndex;
@@ -270,19 +282,16 @@ class XlsxWorkbook
             $isAlt = ! $isHeader && ($rowIndex % 2 === 0);
             $style = $isHeader ? '4' : ($isAlt ? '5' : '0');
             $cells = '';
-            $normalizedRow = [];
 
             for ($columnIndex = 0; $columnIndex < $columnCount; $columnIndex++) {
-                $value = (string) ($row[$columnIndex] ?? '');
-                $normalizedRow[] = $value;
                 $cells .= $this->inlineCell(
                     $this->columnLetter($columnIndex + 1).$rowNumber,
-                    $value,
+                    (string) ($row[$columnIndex] ?? ''),
                     $style,
                 );
             }
 
-            $rowHeight = HacerXlsxTemplate::rowHeightForContent($normalizedRow, $columnWidths, $isHeader);
+            $rowHeight = $isHeader ? 24 : 22;
             $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.$rowHeight.'" customHeight="1">'.$cells.'</row>';
         }
 
@@ -296,68 +305,50 @@ class XlsxWorkbook
             $spacerCells .= $this->inlineCell($this->columnLetter($columnIndex).$spacerRow, '', '2');
         }
 
-        $rowMarkup .= '<row r="'.$spacerRow.'" ht="10" customHeight="1">'.$spacerCells.'</row>';
+        $rowMarkup .= '<row r="'.$spacerRow.'" ht="8" customHeight="1">'.$spacerCells.'</row>';
 
         $footerCells = '';
-        $footerParts = $this->footerParts($columnCount);
 
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
             $footerCells .= $this->inlineCell(
                 $this->columnLetter($columnIndex).$footerRow,
-                $footerParts[$columnIndex - 1] ?? '',
+                $columnIndex === 1 ? HacerXlsxTemplate::footerNote() : '',
                 '6',
             );
         }
 
-        $rowMarkup .= '<row r="'.$footerRow.'" ht="24" customHeight="1">'.$footerCells.'</row>';
+        $rowMarkup .= '<row r="'.$footerRow.'" ht="20" customHeight="1">'.$footerCells.'</row>';
 
         $cols = '';
 
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $width = $columnWidths[$columnIndex - 1] ?? 16.0;
+            $width = $columnWidths[$columnIndex - 1] ?? 14.0;
             $cols .= '<col min="'.$columnIndex.'" max="'.$columnIndex.'" width="'.number_format($width, 2, '.', '').'" customWidth="1"/>';
         }
 
-        // Donmuş bölme yok: kaydırınca marka + tablo başlığı üst üste yapışıp çift sayfa hissi vermez.
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             .'<dimension ref="A1:'.$lastColumn.$footerRow.'"/>'
             .'<sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews>'
-            .'<sheetFormatPr defaultRowHeight="22" defaultColWidth="14"/>'
+            .'<sheetFormatPr defaultRowHeight="22" defaultColWidth="12"/>'
             .'<cols>'.$cols.'</cols>'
             .'<sheetData>'.$rowMarkup.'</sheetData>'
-            .'<autoFilter ref="A'.$headerRowNumber.':'.$lastColumn.$lastDataRow.'"/>'
             .'</worksheet>';
     }
 
     /**
-     * Dipnotu sütunlara böler; tek hücrede kaydırma/sıkışma olmaz.
-     *
-     * @return list<string>
+     * @param  list<list<string>>  $rows
+     * @return list<list<string>>
      */
-    private function footerParts(int $columnCount): array
+    private function clipRows(array $rows): array
     {
-        $note = HacerXlsxTemplate::footerNote();
-        $parts = preg_split('/\s*·\s*/u', $note) ?: [$note];
-        $parts = array_values(array_filter(array_map('trim', $parts)));
-
-        if ($columnCount <= 1) {
-            return [$note];
-        }
-
-        $out = array_fill(0, $columnCount, '');
-
-        foreach ($parts as $index => $part) {
-            if ($index >= $columnCount) {
-                $out[$columnCount - 1] = trim($out[$columnCount - 1].' '.$part);
-
-                continue;
-            }
-
-            $out[$index] = $part;
-        }
-
-        return $out;
+        return array_map(
+            fn (array $row): array => array_map(
+                fn (mixed $cell): string => HacerXlsxTemplate::clipCell((string) $cell),
+                $row,
+            ),
+            $rows,
+        );
     }
 
     private function inlineCell(string $reference, string $value, string $style): string
