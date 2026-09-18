@@ -35,7 +35,9 @@ class EventRegistrationExportTest extends TestCase
 
         $this->assertStringContainsString('Hâcer İlim ve Kültür Topluluğu', $sheet);
         $this->assertStringContainsString('Program başvuru dökümü', $sheet);
-        $this->assertStringContainsString('panel kayıtlarının anlık görüntüsüdür', $sheet);
+        $this->assertStringContainsString('Anlık görüntü', $sheet);
+        $this->assertStringContainsString('showGridLines="0"', $sheet);
+        $this->assertStringContainsString('width="48', $sheet);
         $this->assertStringContainsString('Ayşe', $sheet);
     }
 
