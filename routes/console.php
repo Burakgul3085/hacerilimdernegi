@@ -9,3 +9,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('backup:database')->weeklyOn(0, '03:15');
+
+Schedule::command('calendar:send-reminders')
+    ->everyMinute()
+    ->withoutOverlapping(5);

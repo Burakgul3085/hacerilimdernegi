@@ -42,6 +42,17 @@ class AdminNavigationTest extends TestCase
         $this->assertNotContains('Sayfalar', $contentLabels);
     }
 
+    public function test_takvimim_appears_in_management_navigation(): void
+    {
+        $this->actingAs($this->editor());
+
+        Filament::setCurrentPanel('admin');
+
+        $labels = $this->navigationLabelsInGroup('Yönetim');
+
+        $this->assertContains('Takvimim', $labels);
+    }
+
     /**
      * @return list<string>
      */

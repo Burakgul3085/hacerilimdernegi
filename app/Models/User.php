@@ -11,6 +11,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -63,5 +64,10 @@ class User extends Authenticatable implements FilamentUser, HasEmailAuthenticati
     public function toggleEmailAuthentication(bool $condition): void
     {
         // Bilinçli olarak boş: e-posta kodu paneli geneli için her zaman açıktır.
+    }
+
+    public function calendarEntries(): HasMany
+    {
+        return $this->hasMany(AdminCalendarEntry::class);
     }
 }
