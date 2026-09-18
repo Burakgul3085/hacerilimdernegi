@@ -4,10 +4,11 @@ namespace App\Actions;
 
 use App\Enums\ApplicationStatus;
 use App\Models\RegistrationSpreadsheet;
+use App\Support\HacerCsvTemplate;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * E-tabloyu Google E-tablolar / Excel ile açılabilen CSV olarak indirir.
+ * E-tabloyu ortak Hâcer CSV şablonuyla indirir (Google E-tablolar / Excel).
  */
 class ExportRegistrationSpreadsheetCsv
 {
@@ -16,44 +17,44 @@ class ExportRegistrationSpreadsheetCsv
      */
     public function download(RegistrationSpreadsheet $spreadsheet, ?array $gridRows = null): StreamedResponse
     {
-        $spreadsheet->loadMissing('rows');
+        $spreadsheet->loadMissing(['rows', 'activity']);
 
         $headers = array_values($spreadsheet->headers);
         $keys = array_values($spreadsheet->column_keys);
-        $rows = $gridRows ?? $spreadsheet->rows
+        $sourceRows = $gridRows ?? $spreadsheet->rows
             ->map(fn ($row): array => ['cells' => $row->cells ?? []])
             ->all();
 
-        $filename = $this->filename($spreadsheet);
+        $dataRows = [];
 
-        return response()->streamDownload(function () use ($headers, $keys, $rows): void {
-            $handle = fopen('php://output', 'w');
+        foreach ($sourceRows as $row) {
+            $cells = is_array($row['cells'] ?? null) ? $row['cells'] : [];
+            $line = [];
 
-            if ($handle === false) {
-                return;
+            foreach ($keys as $index => $key) {
+                $header = $headers[$index] ?? null;
+                $line[] = HacerCsvTemplate::formatCell(
+                    $key,
+                    is_string($header) ? $header : null,
+                    $this->rawCellValue($key, $cells[$key] ?? ''),
+                );
             }
 
-            fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, $headers, ';');
+            $dataRows[] = $line;
+        }
 
-            foreach ($rows as $row) {
-                $cells = is_array($row['cells'] ?? null) ? $row['cells'] : [];
-                $line = [];
+        $summary = count($dataRows).' satır';
 
-                foreach ($keys as $key) {
-                    $line[] = $this->cellValue($key, $cells[$key] ?? '');
-                }
-
-                fputcsv($handle, $line, ';');
-            }
-
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-        ]);
+        return HacerCsvTemplate::download(
+            $this->filename($spreadsheet),
+            $headers,
+            $dataRows,
+            $spreadsheet->title,
+            $summary,
+        );
     }
 
-    private function cellValue(string $key, mixed $value): string
+    private function rawCellValue(string $key, mixed $value): string
     {
         $text = trim((string) $value);
 

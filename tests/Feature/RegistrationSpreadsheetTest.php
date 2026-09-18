@@ -123,9 +123,11 @@ class RegistrationSpreadsheetTest extends TestCase
         $csv = (string) ob_get_clean();
 
         $this->assertStringStartsWith("\xEF\xBB\xBF", $csv);
+        $this->assertStringContainsString('Hâcer İlim ve Kültür Topluluğu', $csv);
         $this->assertStringContainsString('Ad soyad', $csv);
         $this->assertStringContainsString('Ayşe Yılmaz', $csv);
         $this->assertStringContainsString('Beklemede', $csv);
+        $this->assertStringContainsString('1 satır', $csv);
         $this->assertStringNotContainsString(';pending', $csv);
     }
 
