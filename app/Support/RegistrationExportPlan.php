@@ -88,7 +88,7 @@ class RegistrationExportPlan
             $currentKeys[] = $field['key'];
             $columns[] = [
                 'key' => 'q:'.$field['key'],
-                'header' => $field['label'],
+                'header' => self::columnHeader($field['label'], $field['key']),
             ];
         }
 
@@ -105,7 +105,7 @@ class RegistrationExportPlan
 
             $columns[] = [
                 'key' => 'q:'.$key,
-                'header' => trim((string) ($archived['label'] ?? $key)).' (eski)',
+                'header' => self::columnHeader(trim((string) ($archived['label'] ?? '')), $key).' (eski)',
             ];
         }
 
@@ -304,6 +304,13 @@ class RegistrationExportPlan
         $used[mb_strtolower($name)] = true;
 
         return $name;
+    }
+
+    private static function columnHeader(string $label, string $key): string
+    {
+        $label = trim($label);
+
+        return $label !== '' ? $label : $key;
     }
 
     private static function answer(EventRegistration $registration, string $key): string

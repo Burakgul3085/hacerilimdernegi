@@ -9,7 +9,8 @@ use ZipArchive;
  * Hâcer kurumsal Excel şablonuyla çok sayfalı xlsx üretir.
  * Dosya indirme sonrası saklanmaz.
  *
- * Birleşik hücre kullanılmaz; sütun genişlikleri ve satır yükseklikleri metni okunaklı tutar.
+ * Marka ve dipnot satırlarında yalnızca sol hücre yazılır, satır birleştirilir.
+ * Birleştirilmiş aralığa ek hücre yazılmaz (Excel onarım hatasını önler).
  */
 class XlsxWorkbook
 {
@@ -197,21 +198,13 @@ class XlsxWorkbook
             .'</borders>'
             .'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
             .'<cellXfs count="8">'
-            // 0 body
-            .'<xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
-            // 1 brand title (tek satır, kesilmesin)
+            .'<xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" indent="1" wrapText="1"/></xf>'
             .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" indent="1"/></xf>'
-            // 2 brand context (krem)
             .'<xf numFmtId="49" fontId="2" fillId="3" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" indent="1"/></xf>'
-            // 3 brand meta (krem, soluk)
             .'<xf numFmtId="49" fontId="3" fillId="3" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" indent="1"/></xf>'
-            // 4 altın ayırıcı çizgi
             .'<xf numFmtId="49" fontId="0" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFill="1" applyAlignment="1"><alignment vertical="center"/></xf>'
-            // 5 tablo başlığı
             .'<xf numFmtId="49" fontId="4" fillId="2" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
-            // 6 zebra
-            .'<xf numFmtId="49" fontId="0" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>'
-            // 7 footer
+            .'<xf numFmtId="49" fontId="0" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" indent="1" wrapText="1"/></xf>'
             .'<xf numFmtId="49" fontId="5" fillId="3" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" indent="1"/></xf>'
             .'</cellXfs>'
             .'</styleSheet>';
@@ -233,22 +226,30 @@ class XlsxWorkbook
         $dataStart = $headerRowNumber + 1;
         $headers = array_values($rows[0] ?? []);
         $rowMarkup = '';
+        $mergeRefs = [];
 
         $brandLines = [
-            1 => ['text' => HacerXlsxTemplate::ORGANIZATION, 'style' => '1', 'height' => 30],
-            2 => ['text' => filled($context) ? (string) $context : ' ', 'style' => '2', 'height' => 22],
-            3 => ['text' => HacerXlsxTemplate::documentLine(), 'style' => '3', 'height' => 18],
-            4 => ['text' => filled($summary) ? (string) $summary : ' ', 'style' => '3', 'height' => 18],
-            5 => ['text' => '', 'style' => '3', 'height' => 8],
-            6 => ['text' => '', 'style' => '4', 'height' => 4],
+            1 => ['text' => HacerXlsxTemplate::ORGANIZATION, 'style' => '1', 'height' => 28, 'merge' => true],
+            2 => ['text' => filled($context) ? (string) $context : ' ', 'style' => '2', 'height' => 20, 'merge' => true],
+            3 => ['text' => HacerXlsxTemplate::documentLine(), 'style' => '3', 'height' => 18, 'merge' => true],
+            4 => ['text' => filled($summary) ? (string) $summary : ' ', 'style' => '3', 'height' => 18, 'merge' => true],
+            5 => ['text' => '', 'style' => '4', 'height' => 3, 'merge' => false],
         ];
 
         foreach ($brandLines as $rowNumber => $meta) {
+            if ($meta['merge']) {
+                $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.$meta['height'].'" customHeight="1">'
+                    .$this->inlineCell('A'.$rowNumber, $meta['text'], $meta['style'])
+                    .'</row>';
+                $mergeRefs[] = 'A'.$rowNumber.':'.$lastColumn.$rowNumber;
+
+                continue;
+            }
+
             $cells = '';
 
             for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-                $value = $columnIndex === 1 ? $meta['text'] : '';
-                $cells .= $this->inlineCell($this->columnLetter($columnIndex).$rowNumber, $value, $meta['style']);
+                $cells .= $this->inlineCell($this->columnLetter($columnIndex).$rowNumber, '', $meta['style']);
             }
 
             $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.$meta['height'].'" customHeight="1">'.$cells.'</row>';
@@ -273,8 +274,8 @@ class XlsxWorkbook
         }
 
         $lastDataRow = $headerRowNumber + count($rows) - 1;
-        $footerRow = $lastDataRow + 2;
         $spacerRow = $lastDataRow + 1;
+        $footerRow = $lastDataRow + 2;
 
         $spacerCells = '';
 
@@ -282,28 +283,24 @@ class XlsxWorkbook
             $spacerCells .= $this->inlineCell($this->columnLetter($columnIndex).$spacerRow, '', '3');
         }
 
-        $rowMarkup .= '<row r="'.$spacerRow.'" ht="10" customHeight="1">'.$spacerCells.'</row>';
-
-        $footerCells = '';
-
-        for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $value = $columnIndex === 1 ? HacerXlsxTemplate::footerNote() : '';
-            $footerCells .= $this->inlineCell($this->columnLetter($columnIndex).$footerRow, $value, '7');
-        }
-
-        $rowMarkup .= '<row r="'.$footerRow.'" ht="24" customHeight="1">'.$footerCells.'</row>';
+        $rowMarkup .= '<row r="'.$spacerRow.'" ht="8" customHeight="1">'.$spacerCells.'</row>';
+        $rowMarkup .= '<row r="'.$footerRow.'" ht="22" customHeight="1">'
+            .$this->inlineCell('A'.$footerRow, HacerXlsxTemplate::footerNote(), '7')
+            .'</row>';
+        $mergeRefs[] = 'A'.$footerRow.':'.$lastColumn.$footerRow;
 
         $cols = '';
 
         for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
             $header = (string) ($headers[$columnIndex - 1] ?? '');
             $width = HacerXlsxTemplate::columnWidthForContent($header, $rows, $columnIndex - 1);
-
-            if ($columnIndex === 1) {
-                $width = max($width, HacerXlsxTemplate::MIN_BRAND_COLUMN_WIDTH);
-            }
-
             $cols .= '<col min="'.$columnIndex.'" max="'.$columnIndex.'" width="'.number_format($width, 2, '.', '').'" customWidth="1"/>';
+        }
+
+        $mergeMarkup = '';
+
+        foreach ($mergeRefs as $ref) {
+            $mergeMarkup .= '<mergeCell ref="'.$ref.'"/>';
         }
 
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
@@ -313,6 +310,7 @@ class XlsxWorkbook
             .'<sheetFormatPr defaultRowHeight="20"/>'
             .'<cols>'.$cols.'</cols>'
             .'<sheetData>'.$rowMarkup.'</sheetData>'
+            .'<mergeCells count="'.count($mergeRefs).'">'.$mergeMarkup.'</mergeCells>'
             .'<autoFilter ref="A'.$headerRowNumber.':'.$lastColumn.$lastDataRow.'"/>'
             .'</worksheet>';
     }

@@ -36,10 +36,7 @@ class HacerXlsxTemplate
     public const COLOR_MUTED = 'FF6B6560';
 
     /** Marka satırları (veri başlığı bundan sonra) */
-    public const BRAND_ROWS = 6;
-
-    /** Kurum adının tek satırda kalması için minimum A sütunu */
-    public const MIN_BRAND_COLUMN_WIDTH = 48.0;
+    public const BRAND_ROWS = 5;
 
     public static function generatedAtLabel(): string
     {
@@ -61,14 +58,14 @@ class HacerXlsxTemplate
         $normalized = mb_strtolower(trim($header));
 
         return match (true) {
-            str_contains($normalized, 'e-posta'), str_contains($normalized, 'email') => 32.0,
-            str_contains($normalized, 'ad soyad'), str_contains($normalized, 'faaliyet') => 26.0,
+            str_contains($normalized, 'e-posta'), str_contains($normalized, 'email') => 34.0,
+            str_contains($normalized, 'ad soyad'), str_contains($normalized, 'faaliyet') => 22.0,
             str_contains($normalized, 'telefon') => 18.0,
             str_contains($normalized, 'tarih') => 18.0,
             str_contains($normalized, 'başvuru no'), $normalized === 'no', $normalized === 'sayfa' => 12.0,
             str_contains($normalized, 'durum'), str_contains($normalized, 'kaynak'), str_contains($normalized, 'yanıt'), str_contains($normalized, 'kvkk') => 14.0,
             str_contains($normalized, 'bekleyen'), str_contains($normalized, 'başvuru') => 12.0,
-            default => max(14.0, min(34.0, mb_strlen($header) * 1.4 + 4)),
+            default => max(12.0, min(28.0, mb_strlen($header) * 1.35 + 3)),
         };
     }
 
@@ -79,15 +76,19 @@ class HacerXlsxTemplate
     {
         $width = self::columnWidth($header);
 
-        foreach ($rows as $row) {
+        foreach ($rows as $rowIndex => $row) {
             $value = (string) ($row[$columnIndex] ?? '');
             $length = mb_strlen($value);
 
-            if ($length > 0) {
-                $width = max($width, min(42.0, $length * 1.05 + 2));
+            if ($length === 0) {
+                continue;
             }
+
+            // Başlık satırı dar kalsın; veri satırları içeriğe göre açılsın.
+            $factor = $rowIndex === 0 ? 1.2 : 1.05;
+            $width = max($width, min(40.0, $length * $factor + 2.5));
         }
 
-        return $width;
+        return round($width, 2);
     }
 }
