@@ -113,6 +113,23 @@ class AdminCalendarTest extends TestCase
         Notification::assertSentToTimes($user, AdminCalendarReminder::class, 1);
     }
 
+    public function test_at_start_reminder_uses_event_start_time(): void
+    {
+        $user = User::factory()->create(['role' => UserRole::Editor]);
+        $startsAt = now()->addMinutes(10);
+
+        $entry = app(SaveAdminCalendarEntry::class)->handle($user, [
+            'title' => 'Hemen önce',
+            'starts_at' => $startsAt->toDateTimeString(),
+            'ends_at' => $startsAt->copy()->addHour()->toDateTimeString(),
+            'reminder_enabled' => true,
+            'reminder_offset' => CalendarReminderOffset::AtStart->value,
+        ]);
+
+        $this->assertSame(CalendarReminderStatus::Pending, $entry->reminder_status);
+        $this->assertTrue($entry->remind_at?->equalTo($startsAt));
+    }
+
     public function test_calendar_reminder_command_runs(): void
     {
         Notification::fake();

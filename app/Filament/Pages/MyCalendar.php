@@ -103,7 +103,7 @@ class MyCalendar extends Page
                             ->visible(fn ($get): bool => ! (bool) $get('all_day')),
                         Toggle::make('reminder_enabled')
                             ->label('E-posta hatırlatması')
-                            ->helperText('Zamanı gelince kayıtlı e-postanıza mail gider.')
+                            ->helperText('Seçtiğiniz hatırlatma zamanında kayıtlı e-postanıza mail gider. “15 dk / 1 saat önce” için etkinliği o kadar önceden kaydedin.')
                             ->live()
                             ->columnSpanFull(),
                         Select::make('reminder_offset')
@@ -111,6 +111,7 @@ class MyCalendar extends Page
                             ->options(collect(CalendarReminderOffset::cases())->mapWithKeys(
                                 fn (CalendarReminderOffset $offset): array => [$offset->value => $offset->label()],
                             ))
+                            ->default(CalendarReminderOffset::AtStart->value)
                             ->visible(fn ($get): bool => (bool) $get('reminder_enabled'))
                             ->required(fn ($get): bool => (bool) $get('reminder_enabled'))
                             ->live(),
@@ -341,7 +342,7 @@ class MyCalendar extends Page
             'ends_at' => $start->copy()->addHour(),
             'all_day' => false,
             'reminder_enabled' => false,
-            'reminder_offset' => CalendarReminderOffset::Hour1->value,
+            'reminder_offset' => CalendarReminderOffset::AtStart->value,
             'remind_at' => null,
         ];
     }
