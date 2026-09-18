@@ -92,11 +92,13 @@ class MyCalendar extends Page
                             ->required()
                             ->seconds(false)
                             ->native(false)
+                            ->timezone('Europe/Istanbul')
                             ->displayFormat('d.m.Y H:i'),
                         DateTimePicker::make('ends_at')
                             ->label('Bitiş')
                             ->seconds(false)
                             ->native(false)
+                            ->timezone('Europe/Istanbul')
                             ->displayFormat('d.m.Y H:i')
                             ->visible(fn ($get): bool => ! (bool) $get('all_day')),
                         Toggle::make('reminder_enabled')
@@ -116,6 +118,7 @@ class MyCalendar extends Page
                             ->label('Özel hatırlatma zamanı')
                             ->seconds(false)
                             ->native(false)
+                            ->timezone('Europe/Istanbul')
                             ->displayFormat('d.m.Y H:i')
                             ->visible(fn ($get): bool => (bool) $get('reminder_enabled')
                                 && $get('reminder_offset') === CalendarReminderOffset::Custom->value)
