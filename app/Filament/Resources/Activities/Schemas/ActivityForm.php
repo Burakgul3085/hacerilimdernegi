@@ -36,7 +36,13 @@ class ActivityForm
                             ))
                             ->required()
                             ->default(ActivityStatus::Ongoing->value),
-                        TextInput::make('sort_order')->label('Sıra')->numeric()->default(0),
+                        TextInput::make('sort_order')
+                            ->label('Sıra')
+                            ->numeric()
+                            ->integer()
+                            ->minValue(0)
+                            ->default(0)
+                            ->helperText('0 veya daha büyük bir sayı girin (negatif olamaz).'),
                         Textarea::make('excerpt')
                             ->label('Kısa özet')
                             ->rows(3)
