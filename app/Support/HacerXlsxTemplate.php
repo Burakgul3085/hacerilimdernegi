@@ -156,18 +156,60 @@ class HacerXlsxTemplate
         $maxLines = 1;
 
         foreach ($row as $index => $value) {
-            $text = trim((string) $value);
-            $length = mb_strlen($text);
+            $text = (string) $value;
 
-            if ($length === 0) {
+            if (trim($text) === '') {
                 continue;
             }
 
             $colWidth = max(8.0, (float) ($columnWidths[$index] ?? 16.0));
-            $charsPerLine = max(8, (int) floor($colWidth * 1.05));
-            $maxLines = max($maxLines, (int) ceil($length / $charsPerLine));
+            $charsPerLine = max(10, (int) floor($colWidth * 0.95));
+            $explicitLines = substr_count($text, "\n") + 1;
+            $longestLine = 0;
+
+            foreach (explode("\n", $text) as $line) {
+                $longestLine = max($longestLine, mb_strlen($line));
+            }
+
+            $softLines = max(1, (int) ceil($longestLine / $charsPerLine));
+            $maxLines = max($maxLines, max($explicitLines, $softLines));
         }
 
-        return (float) min(160, max(22, $maxLines * 14 + 8));
+        // Excel satır yüksekliği üst sınırı ~409
+        return (float) min(409, max(22, $maxLines * 13 + 6));
+    }
+
+    /**
+     * Excel wrapText boşluksuz metinde kırılmaz; uzun koşuları satır sonlarıyla böler
+     * (yazdırma sayfasındaki word-break davranışı).
+     */
+    public static function prepareCellTextForWrap(string $value, float $columnWidth): string
+    {
+        $value = str_replace(["\r\n", "\r"], "\n", $value);
+
+        if (trim($value) === '') {
+            return $value;
+        }
+
+        $charsPerLine = max(10, (int) floor($columnWidth * 0.95));
+        $parts = [];
+
+        foreach (explode("\n", $value) as $line) {
+            if (mb_strlen($line) <= $charsPerLine) {
+                $parts[] = $line;
+
+                continue;
+            }
+
+            $broken = preg_replace_callback(
+                '/\S{'.($charsPerLine + 1).',}/u',
+                fn (array $match): string => implode("\n", mb_str_split($match[0], $charsPerLine)),
+                $line,
+            );
+
+            $parts[] = is_string($broken) ? $broken : $line;
+        }
+
+        return implode("\n", $parts);
     }
 }

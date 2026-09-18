@@ -44,6 +44,36 @@ class EventRegistrationExportTest extends TestCase
         $this->assertStringContainsString('Ayşe', $sheet);
     }
 
+    public function test_workbook_soft_wraps_long_unbroken_text_like_print(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $long = str_repeat('alksdhasjk', 20);
+        $activity = $this->activity('Deneme', 'deneme-wrap', [
+            ['key' => 'kendinden', 'label' => 'Kendinden bahset', 'type' => 'textarea'],
+        ]);
+        $this->registration($activity, 'Ayşe', 'ayse@example.com', null, [
+            ['key' => 'kendinden', 'label' => 'Kendinden bahset', 'value' => $long],
+        ]);
+
+        $workbook = app(ExportEventRegistrations::class)->handle($activity);
+        $sheet = $this->sheet($workbook['contents'], 'Deneme');
+
+        $path = tempnam(sys_get_temp_dir(), 'xlsx');
+        $this->assertNotFalse($path);
+        file_put_contents($path, $workbook['contents']);
+        $zip = new ZipArchive;
+        $this->assertTrue($zip->open($path) === true);
+        $styles = (string) $zip->getFromName('xl/styles.xml');
+        $zip->close();
+        @unlink($path);
+
+        $this->assertStringContainsString('wrapText="1"', $styles);
+        $this->assertMatchesRegularExpression('/<row r="5" ht="([5-9]\d|[1-3]\d{2}|409)"/', $sheet);
+        $this->assertMatchesRegularExpression('/alksdhasj[\s\S]{0,5}alksdhasj/', $sheet);
+        $this->assertStringContainsString(mb_substr($long, 0, 20), $sheet);
+    }
+
     public function test_workbook_xml_parts_are_well_formed_for_excel(): void
     {
         $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));

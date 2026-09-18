@@ -267,7 +267,13 @@ class XlsxWorkbook
             $normalized = [];
 
             for ($columnIndex = 0; $columnIndex < $columnCount; $columnIndex++) {
-                $value = (string) ($row[$columnIndex] ?? '');
+                $raw = (string) ($row[$columnIndex] ?? '');
+                $value = $isHeader
+                    ? $raw
+                    : HacerXlsxTemplate::prepareCellTextForWrap(
+                        $raw,
+                        (float) ($columnWidths[$columnIndex] ?? 16.0),
+                    );
                 $normalized[] = $value;
                 $cells .= $this->inlineCell(
                     $this->columnLetter($columnIndex + 1).$rowNumber,
