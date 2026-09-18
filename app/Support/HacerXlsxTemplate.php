@@ -133,14 +133,13 @@ class HacerXlsxTemplate
             }
 
             if ($isLongText) {
-                // Uzun metin sütunu: wrap ile büyür; genişlik sabitçe rahat
-                $width = max($width, 36.0);
+                $width = max($width, 40.0);
             } else {
                 $width = max($width, min(28.0, $length * 1.05 + 2.5));
             }
         }
 
-        return round(min($isLongText ? 48.0 : 32.0, max(9.0, $width)), 2);
+        return round(min($isLongText ? 52.0 : 32.0, max(9.0, $width)), 2);
     }
 
     /**
@@ -162,24 +161,20 @@ class HacerXlsxTemplate
                 continue;
             }
 
-            $charsPerLine = self::charsPerLine((float) ($columnWidths[$index] ?? 16.0));
-            $explicitLines = substr_count($text, "\n") + 1;
-            $longestLine = 0;
-
-            foreach (explode("\n", $text) as $line) {
-                $longestLine = max($longestLine, mb_strlen($line));
-            }
-
-            $wrappedLines = max(1, (int) ceil($longestLine / $charsPerLine));
-            $maxLines = max($maxLines, max($explicitLines, $wrappedLines));
+            $maxLines = max(
+                $maxLines,
+                self::estimateWrappedLineCount($text, (float) ($columnWidths[$index] ?? 16.0)),
+            );
         }
 
-        return (float) min(409, max(22, $maxLines * 15 + 6));
+        // Calibri 10 varsayılan satır ≈ 12.75 pt; ekstra boşluk bırakma.
+        return (float) min(409, max(18, round($maxLines * 12.75 + 1, 2)));
     }
 
     /**
-     * Excel wrapText boşluksuz metinde kırılmaz. Yazdırma gibi görünsün diye
-     * kelime sınırında sarar; tek parça uzun koşuları sabit genişlikte böler.
+     * Excel wrapText kelimeli metni kendi kaydırır. Boşluksuz uzun koşulara
+     * sıfır genişlik boşluğu (ZWSP) eklenir; Excel bunu kaydırma noktası sayar.
+     * Sert &#10; kullanılmaz — aksi halde satır yüksekliği şişer, metin üstte kalır.
      */
     public static function prepareCellTextForWrap(string $value, float $columnWidth): string
     {
@@ -190,26 +185,49 @@ class HacerXlsxTemplate
         }
 
         $charsPerLine = self::charsPerLine($columnWidth);
-        $lines = [];
+        $zwsp = "\u{200B}";
+        $pattern = '/\S{'.($charsPerLine + 1).',}/u';
 
-        foreach (explode("\n", $value) as $paragraph) {
-            if ($paragraph === '') {
-                $lines[] = '';
+        $broken = preg_replace_callback(
+            $pattern,
+            fn (array $match): string => implode($zwsp, mb_str_split($match[0], $charsPerLine)),
+            $value,
+        );
 
-                continue;
-            }
-
-            foreach (self::wrapParagraph($paragraph, $charsPerLine) as $line) {
-                $lines[] = $line;
-            }
-        }
-
-        return implode("\n", $lines);
+        return is_string($broken) ? $broken : $value;
     }
 
     public static function charsPerLine(float $columnWidth): int
     {
-        return max(12, min(48, (int) floor(max(12.0, $columnWidth) * 0.92)));
+        // Excel sütun genişliği ≈ karakter; fazla parçalamamak için neredeyse 1:1.
+        return max(10, (int) floor(max(10.0, $columnWidth)));
+    }
+
+    public static function estimateWrappedLineCount(string $text, float $columnWidth): int
+    {
+        $charsPerLine = self::charsPerLine($columnWidth);
+        $total = 0;
+
+        foreach (explode("\n", $text) as $paragraph) {
+            if ($paragraph === '') {
+                $total++;
+
+                continue;
+            }
+
+            // ZWSP soft-wrap noktalarını satır sınırı gibi say.
+            $paragraph = str_replace("\u{200B}", "\n", $paragraph);
+
+            foreach (explode("\n", $paragraph) as $segment) {
+                if ($segment === '') {
+                    continue;
+                }
+
+                $total += count(self::wrapParagraph($segment, $charsPerLine));
+            }
+        }
+
+        return max(1, $total);
     }
 
     /**
