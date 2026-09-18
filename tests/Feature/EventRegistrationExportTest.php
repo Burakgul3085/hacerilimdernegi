@@ -39,6 +39,7 @@ class EventRegistrationExportTest extends TestCase
         $this->assertStringContainsString('indirme saklanmaz', $sheet);
         $this->assertStringContainsString('showGridLines="0"', $sheet);
         $this->assertStringNotContainsString('<mergeCells', $sheet);
+        $this->assertStringNotContainsString('state="frozen"', $sheet);
         $this->assertStringContainsString('Ayşe', $sheet);
     }
 
@@ -79,8 +80,13 @@ class EventRegistrationExportTest extends TestCase
             $this->assertNotFalse(simplexml_load_string($xml), $part.' parse failed');
         }
 
+        $styles = (string) $zip->getFromName('xl/styles.xml');
+        $this->assertStringNotContainsString('FF161513', $styles);
+        $this->assertStringContainsString('FF7A6B55', $styles);
+
         $sheet = (string) $zip->getFromName('xl/worksheets/sheet2.xml');
         $this->assertStringNotContainsString('<mergeCells', $sheet);
+        $this->assertStringNotContainsString('state="frozen"', $sheet);
         $this->assertStringContainsString('<dimension ref="A1:', $sheet);
         $this->assertStringContainsString('Ayşe', $sheet);
         $this->assertStringContainsString('Gaziantep', $sheet);
