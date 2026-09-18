@@ -49,7 +49,8 @@ class EventRegistrationPrintTest extends TestCase
             ->assertDontSee('0532', false)
             ->assertSee('window.print()', false)
             ->assertSee('size: A4 landscape', false)
-            ->assertSee('print-color-adjust: exact', false);
+            ->assertSee('print-color-adjust: exact', false)
+            ->assertSee('history.back()', false);
 
         $this->assertSame(1, AuditLog::query()->where('action', 'printed')->count());
     }

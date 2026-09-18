@@ -350,7 +350,7 @@
         <p>Yazdırma önizlemesi · Varsayılan: yatay A4 · Panel kayıtları değişmez</p>
         <div class="toolbar-actions">
             <button type="button" class="btn btn-primary" onclick="window.print()">Yazdır</button>
-            <button type="button" class="btn btn-secondary" onclick="window.close()">Kapat</button>
+            <button type="button" class="btn btn-secondary" id="print-close">Kapat</button>
         </div>
     </div>
 
@@ -413,6 +413,16 @@
     </main>
 
     <script>
+        document.getElementById('print-close')?.addEventListener('click', function () {
+            if (window.history.length > 1) {
+                window.history.back();
+
+                return;
+            }
+
+            window.location.href = @js(url('/yonetim/event-registrations'));
+        });
+
         window.addEventListener('load', function () {
             window.setTimeout(function () {
                 window.print();
