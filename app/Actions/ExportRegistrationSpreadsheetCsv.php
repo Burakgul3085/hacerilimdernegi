@@ -12,16 +12,18 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * E-tabloyu kurumsal Hâcer Excel şablonuyla indirir (Excel / Google E-tablolar).
- * CSV stil taşımaz; taşma ve tarih bozulmasını önlemek için xlsx kullanılır.
  */
 class ExportRegistrationSpreadsheetCsv
 {
     public function __construct(private XlsxWorkbook $workbook) {}
 
     /**
-     * @param  list<array{id?: int|string, cells: array<string, string>}>|null  $gridRows  null ise kayıtlı satırlar
+     * Excel ve yazdırma için ortak tablo planı.
+     *
+     * @param  list<array{id?: int|string, cells: array<string, string>}>|null  $gridRows
+     * @return array{filename: string, label: string, row_count: int, sheets: list<array{name: string, context: string, summary: string, rows: list<list<string>>}>}
      */
-    public function download(RegistrationSpreadsheet $spreadsheet, ?array $gridRows = null): StreamedResponse
+    public function plan(RegistrationSpreadsheet $spreadsheet, ?array $gridRows = null): array
     {
         $spreadsheet->loadMissing(['rows', 'activity']);
 
@@ -54,21 +56,35 @@ class ExportRegistrationSpreadsheetCsv
         $summary = $dataCount.' satır  ·  '.count($headers).' sütun';
         $usedNames = [];
         $sheetName = RegistrationExportPlan::sheetName($context, $usedNames);
-        $filename = $this->filename($spreadsheet);
 
-        $contents = $this->workbook->build(
-            HacerXlsxTemplate::ORGANIZATION.' — '.$filename,
-            [[
+        return [
+            'filename' => $this->filename($spreadsheet),
+            'label' => $spreadsheet->title,
+            'row_count' => $dataCount,
+            'sheets' => [[
                 'name' => $sheetName,
                 'context' => $context,
                 'summary' => $summary,
                 'rows' => $table,
             ]],
+        ];
+    }
+
+    /**
+     * @param  list<array{id?: int|string, cells: array<string, string>}>|null  $gridRows  null ise kayıtlı satırlar
+     */
+    public function download(RegistrationSpreadsheet $spreadsheet, ?array $gridRows = null): StreamedResponse
+    {
+        $plan = $this->plan($spreadsheet, $gridRows);
+
+        $contents = $this->workbook->build(
+            HacerXlsxTemplate::ORGANIZATION.' — '.$plan['filename'],
+            $plan['sheets'],
         );
 
         return response()->streamDownload(function () use ($contents): void {
             echo $contents;
-        }, $filename, [
+        }, $plan['filename'], [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\RegistrationSpreadsheets\Tables;
 
 use App\Actions\ExportRegistrationSpreadsheetCsv;
+use App\Actions\PrintRegistrationSpreadsheet;
 use App\Filament\Resources\RegistrationSpreadsheets\RegistrationSpreadsheetResource;
 use App\Models\RegistrationSpreadsheet;
 use Filament\Actions\Action;
@@ -12,6 +13,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class RegistrationSpreadsheetsTable
 {
@@ -44,6 +46,18 @@ class RegistrationSpreadsheetsTable
             ->recordUrl(fn ($record): string => RegistrationSpreadsheetResource::getUrl('edit', ['record' => $record]))
             ->recordActions([
                 EditAction::make()->label('Aç'),
+                Action::make('print')
+                    ->label('Yazdır')
+                    ->icon('heroicon-o-printer')
+                    ->color('gray')
+                    ->action(function (RegistrationSpreadsheet $record, PrintRegistrationSpreadsheet $print) {
+                        $token = $print->issueToken(
+                            spreadsheet: $record,
+                            userId: Auth::id(),
+                        );
+
+                        return redirect()->route('admin.registrations.print', ['token' => $token]);
+                    }),
                 Action::make('csv')
                     ->label('Excel')
                     ->icon('heroicon-o-arrow-down-tray')

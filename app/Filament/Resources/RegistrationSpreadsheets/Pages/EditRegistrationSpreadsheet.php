@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\RegistrationSpreadsheets\Pages;
 
 use App\Actions\ExportRegistrationSpreadsheetCsv;
+use App\Actions\PrintRegistrationSpreadsheet;
 use App\Actions\SaveRegistrationSpreadsheet;
 use App\Enums\ApplicationStatus;
 use App\Filament\Resources\RegistrationSpreadsheets\RegistrationSpreadsheetResource;
@@ -12,6 +13,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property-read RegistrationSpreadsheet $record
@@ -39,6 +41,19 @@ class EditRegistrationSpreadsheet extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('print')
+                ->label('Yazdır')
+                ->icon('heroicon-o-printer')
+                ->color('gray')
+                ->action(function (PrintRegistrationSpreadsheet $print) {
+                    $token = $print->issueToken(
+                        spreadsheet: $this->getRecord(),
+                        gridRows: $this->grid,
+                        userId: Auth::id(),
+                    );
+
+                    return redirect()->route('admin.registrations.print', ['token' => $token]);
+                }),
             Action::make('csv')
                 ->label('Kurumsal Excel')
                 ->icon('heroicon-o-arrow-down-tray')
