@@ -50,7 +50,7 @@ class HacerXlsxTemplate
 
     public static function footerNote(): string
     {
-        return 'Anlık görüntü · Asıl kayıtlar Hâcer yönetim panelinde tutulur; indirme sunucuda saklanmaz.';
+        return 'Anlık görüntü · Asıl kayıtlar Hâcer panelinde tutulur; indirme saklanmaz.';
     }
 
     public static function columnWidth(string $header): float

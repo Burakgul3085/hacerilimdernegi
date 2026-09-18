@@ -36,10 +36,9 @@ class EventRegistrationExportTest extends TestCase
         $this->assertStringContainsString('Hâcer İlim ve Kültür Topluluğu', $sheet);
         $this->assertStringContainsString('Program başvuru dökümü', $sheet);
         $this->assertStringContainsString('Anlık görüntü', $sheet);
-        $this->assertStringContainsString('indirme sunucuda saklanmaz', $sheet);
+        $this->assertStringContainsString('indirme saklanmaz', $sheet);
         $this->assertStringContainsString('showGridLines="0"', $sheet);
-        $this->assertStringContainsString('<mergeCells', $sheet);
-        $this->assertStringContainsString('mergeCell ref="A1:', $sheet);
+        $this->assertStringNotContainsString('<mergeCells', $sheet);
         $this->assertStringContainsString('Ayşe', $sheet);
     }
 
@@ -81,14 +80,12 @@ class EventRegistrationExportTest extends TestCase
         }
 
         $sheet = (string) $zip->getFromName('xl/worksheets/sheet2.xml');
-        $this->assertStringContainsString('<mergeCells', $sheet);
-        $this->assertMatchesRegularExpression('/<row r="1"[^>]*>\s*<c r="A1"/', $sheet);
-        $this->assertDoesNotMatchRegularExpression('/<row r="1"[^>]*>.*<c r="B1"/s', $sheet);
+        $this->assertStringNotContainsString('<mergeCells', $sheet);
         $this->assertStringContainsString('<dimension ref="A1:', $sheet);
         $this->assertStringContainsString('Ayşe', $sheet);
         $this->assertStringContainsString('Gaziantep', $sheet);
         $this->assertStringContainsString('Hâcer İlim ve Kültür Topluluğu', $sheet);
-        $this->assertStringContainsString('indirme sunucuda saklanmaz', $sheet);
+        $this->assertStringContainsString('indirme saklanmaz', $sheet);
 
         $zip->close();
         @unlink($path);
