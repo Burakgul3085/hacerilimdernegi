@@ -12,4 +12,5 @@ Schedule::command('backup:database')->weeklyOn(0, '03:15');
 
 Schedule::command('calendar:send-reminders')
     ->everyMinute()
-    ->withoutOverlapping(5);
+    ->withoutOverlapping(5)
+    ->appendOutputTo(storage_path('logs/calendar-reminders.log'));
