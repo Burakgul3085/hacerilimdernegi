@@ -42,7 +42,7 @@ class ActivityForm
                             ->integer()
                             ->minValue(0)
                             ->default(0)
-                            ->helperText('0 veya daha büyük bir sayı girin (negatif olamaz).'),
+                            ->helperText('Büyük sayı üstte görünür (ör. 33 üstte, 1 altta). Negatif olamaz.'),
                         Textarea::make('excerpt')
                             ->label('Kısa özet')
                             ->rows(3)

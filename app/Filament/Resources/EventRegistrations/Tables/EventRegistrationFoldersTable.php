@@ -17,7 +17,7 @@ class EventRegistrationFoldersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('sort_order')
+            ->defaultSort('sort_order', 'desc')
             ->striped()
             ->modelLabel('faaliyet')
             ->pluralModelLabel('faaliyet')

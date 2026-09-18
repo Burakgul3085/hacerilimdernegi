@@ -238,7 +238,7 @@ class ActivityShowcaseTest extends TestCase
         Activity::factory()->create([
             'title' => 'Ana sayfa faaliyet kartı',
             'slug' => 'ana-sayfa-faaliyet-karti',
-            'sort_order' => 1,
+            'sort_order' => 999,
         ]);
 
         $this->get('/')

@@ -15,7 +15,7 @@ class ActivitiesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('sort_order')
+            ->defaultSort('sort_order', 'desc')
             ->columns([
                 TextColumn::make('title')->label('Başlık')->searchable()->sortable(),
                 TextColumn::make('status')

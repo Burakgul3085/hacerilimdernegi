@@ -217,6 +217,6 @@ class Activity extends Model
 
     public function scopeOrdered(Builder $query): Builder
     {
-        return $query->orderBy('sort_order')->orderBy('title');
+        return $query->orderByDesc('sort_order')->orderBy('title');
     }
 }

@@ -47,4 +47,30 @@ class ActivitySortOrderTest extends TestCase
 
         $this->assertSame(0, $activity->fresh()->sort_order);
     }
+
+    public function test_public_activity_cards_list_highest_sort_order_first(): void
+    {
+        Activity::factory()->create([
+            'title' => 'Eski faaliyet',
+            'slug' => 'eski-faaliyet',
+            'sort_order' => 1,
+            'is_published' => true,
+        ]);
+        Activity::factory()->create([
+            'title' => 'Yeni faaliyet',
+            'slug' => 'yeni-faaliyet',
+            'sort_order' => 31,
+            'is_published' => true,
+        ]);
+        Activity::factory()->create([
+            'title' => 'Orta faaliyet',
+            'slug' => 'orta-faaliyet',
+            'sort_order' => 15,
+            'is_published' => true,
+        ]);
+
+        $this->get(route('activities.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['Yeni faaliyet', 'Orta faaliyet', 'Eski faaliyet']);
+    }
 }
