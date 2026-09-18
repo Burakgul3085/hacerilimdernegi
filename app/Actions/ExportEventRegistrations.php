@@ -32,6 +32,39 @@ class ExportEventRegistrations
         ?array $registrationIds = null,
         ?array $columnKeys = null,
     ): array {
+        $plan = $this->plan($activity, $status, $unassignedOnly, $registrationIds, $columnKeys);
+
+        AuditLog::record(
+            'exported',
+            $activity === null ? EventRegistration::class : Activity::class,
+            $activity?->getKey(),
+            $plan['label'],
+            ['rows' => $plan['row_count']],
+        );
+
+        return [
+            'filename' => $plan['filename'],
+            'contents' => $this->workbook->build(
+                HacerXlsxTemplate::ORGANIZATION.' — '.$plan['filename'],
+                $plan['sheets'],
+            ),
+        ];
+    }
+
+    /**
+     * Excel ve yazdırma için ortak tablo planı.
+     *
+     * @param  list<int|string>|null  $registrationIds
+     * @param  list<string>|null  $columnKeys
+     * @return array{filename: string, label: string, row_count: int, sheets: list<array{name: string, context?: string|null, summary?: string|null, rows: list<list<string>>}>}
+     */
+    public function plan(
+        ?Activity $activity = null,
+        ?ApplicationStatus $status = null,
+        bool $unassignedOnly = false,
+        ?array $registrationIds = null,
+        ?array $columnKeys = null,
+    ): array {
         $registrations = $this->registrations($activity, $status, $unassignedOnly, $registrationIds);
         $sheets = [];
         $usedNames = [];
@@ -84,24 +117,16 @@ class ExportEventRegistrations
             'rows' => $indexRows,
         ]);
 
+        $label = $activity?->title ?? ($unassignedOnly ? 'Diğer başvurular' : 'Tüm başvurular');
         $filename = $activity === null
             ? 'Hacer-basvurular-'.now()->format('Y-m-d').'.xlsx'
             : 'Hacer-'.$activity->slug.'-basvurular-'.now()->format('Y-m-d').'.xlsx';
 
-        AuditLog::record(
-            'exported',
-            $activity === null ? EventRegistration::class : Activity::class,
-            $activity?->getKey(),
-            $activity?->title ?? ($unassignedOnly ? 'Diğer başvurular' : 'Tüm başvurular'),
-            ['rows' => $registrations->flatten(1)->count()],
-        );
-
         return [
             'filename' => $filename,
-            'contents' => $this->workbook->build(
-                HacerXlsxTemplate::ORGANIZATION.' — '.$filename,
-                $sheets,
-            ),
+            'label' => $label,
+            'row_count' => $registrations->flatten(1)->count(),
+            'sheets' => $sheets,
         ];
     }
 

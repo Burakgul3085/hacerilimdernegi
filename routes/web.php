@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\Admin\RegistrationPrintController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FormController;
@@ -63,3 +64,9 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::redirect('/yasal/{type}', '/', 301)->whereIn('type', ['kvkk', 'gizlilik', 'cerezler']);
 Route::get('/sayfa/{slug}', [PageController::class, 'show'])->name('pages.show');
+
+Route::middleware('auth')->prefix('yonetim')->group(function () {
+    Route::get('/yazdir/basvurular/{token}', RegistrationPrintController::class)
+        ->whereUuid('token')
+        ->name('admin.registrations.print');
+});

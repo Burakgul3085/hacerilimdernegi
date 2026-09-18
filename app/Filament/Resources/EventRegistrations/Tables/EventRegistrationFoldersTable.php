@@ -5,6 +5,7 @@ namespace App\Filament\Resources\EventRegistrations\Tables;
 use App\Enums\ActivityStatus;
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
 use App\Filament\Resources\EventRegistrations\RegistrationExcelAction;
+use App\Filament\Resources\EventRegistrations\RegistrationPrintAction;
 use App\Models\Activity;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -55,6 +56,7 @@ class EventRegistrationFoldersTable
             ->recordUrl(fn (Activity $record): string => EventRegistrationResource::getUrl('applicants', ['activity' => $record]))
             ->recordActions([
                 RegistrationExcelAction::makeForFolderRow(),
+                RegistrationPrintAction::makeForFolderRow(),
                 Action::make('open')
                     ->label('Başvuruları aç')
                     ->icon('heroicon-o-users')
