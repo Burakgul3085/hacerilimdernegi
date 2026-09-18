@@ -6,6 +6,7 @@ use App\Enums\ApplicationStatus;
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
 use App\Filament\Resources\EventRegistrations\RegistrationExcelAction;
 use App\Filament\Resources\EventRegistrations\RegistrationPrintAction;
+use App\Filament\Resources\EventRegistrations\RegistrationSpreadsheetAction;
 use App\Models\Activity;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
@@ -82,6 +83,7 @@ class ListActivityRegistrations extends ListRecords
         return [
             RegistrationExcelAction::make('excelActivity', $this->activityRecord()),
             RegistrationPrintAction::make('printActivity', $this->activityRecord()),
+            RegistrationSpreadsheetAction::make('spreadsheetActivity', $this->activityRecord()),
             Action::make('back')
                 ->label('Tüm faaliyetler')
                 ->icon('heroicon-o-arrow-left')

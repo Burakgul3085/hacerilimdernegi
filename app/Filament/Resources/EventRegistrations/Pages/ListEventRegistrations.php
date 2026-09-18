@@ -6,6 +6,7 @@ use App\Enums\ApplicationStatus;
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
 use App\Filament\Resources\EventRegistrations\RegistrationExcelAction;
 use App\Filament\Resources\EventRegistrations\RegistrationPrintAction;
+use App\Filament\Resources\EventRegistrations\RegistrationSpreadsheetAction;
 use App\Filament\Resources\EventRegistrations\Tables\EventRegistrationFoldersTable;
 use App\Models\Activity;
 use App\Models\EventRegistration;
@@ -78,6 +79,7 @@ class ListEventRegistrations extends Page implements HasTable
         $actions = [
             RegistrationExcelAction::make(),
             RegistrationPrintAction::make(),
+            RegistrationSpreadsheetAction::make(),
         ];
 
         if ($unassignedCount === 0) {

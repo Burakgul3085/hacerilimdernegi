@@ -5,6 +5,7 @@ namespace App\Filament\Resources\EventRegistrations\Pages;
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
 use App\Filament\Resources\EventRegistrations\RegistrationExcelAction;
 use App\Filament\Resources\EventRegistrations\RegistrationPrintAction;
+use App\Filament\Resources\EventRegistrations\RegistrationSpreadsheetAction;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
@@ -41,6 +42,7 @@ class ListUnassignedEventRegistrations extends ListRecords
         return [
             RegistrationExcelAction::make('excelUnassigned', unassignedOnly: true),
             RegistrationPrintAction::make('printUnassigned', unassignedOnly: true),
+            RegistrationSpreadsheetAction::make('spreadsheetUnassigned', unassignedOnly: true),
             Action::make('back')
                 ->label('Tüm faaliyetler')
                 ->icon('heroicon-o-arrow-left')

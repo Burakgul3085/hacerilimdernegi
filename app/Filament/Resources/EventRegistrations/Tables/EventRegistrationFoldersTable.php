@@ -6,6 +6,7 @@ use App\Enums\ActivityStatus;
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
 use App\Filament\Resources\EventRegistrations\RegistrationExcelAction;
 use App\Filament\Resources\EventRegistrations\RegistrationPrintAction;
+use App\Filament\Resources\EventRegistrations\RegistrationSpreadsheetAction;
 use App\Models\Activity;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -57,6 +58,7 @@ class EventRegistrationFoldersTable
             ->recordActions([
                 RegistrationExcelAction::makeForFolderRow(),
                 RegistrationPrintAction::makeForFolderRow(),
+                RegistrationSpreadsheetAction::makeForFolderRow(),
                 Action::make('open')
                     ->label('Başvuruları aç')
                     ->icon('heroicon-o-users')
