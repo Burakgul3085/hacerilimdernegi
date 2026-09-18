@@ -6,9 +6,11 @@ use RuntimeException;
 use ZipArchive;
 
 /**
- * Hâcer kurumsal Excel şablonuyla çok sayfalı xlsx üretir.
- * Yazdırma görünümüyle aynı dil: marka bandı, kompakt tablo, taşmayan hücreler.
- * Birleşik hücre / dondurulmuş bölme yok (Excel bozulmasın diye).
+ * Hâcer kurumsal Excel şablonu — profesyonel rapor düzeni.
+ *
+ * Referans düzen: tam genişlik birleşik başlık satırları, kaydırmalı uzun metin,
+ * dinamik satır yüksekliği. Birleşik hücreler yalnızca marka/dipnot satırlarında;
+ * OOXML kurallarına uygun (yalnızca sol-üst hücrede değer).
  */
 class XlsxWorkbook
 {
@@ -164,19 +166,20 @@ class XlsxWorkbook
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-            .'<fonts count="5">'
+            .'<fonts count="6">'
             .'<font><sz val="10"/><color rgb="FF2C2825"/><name val="Calibri"/><family val="2"/></font>'
-            .'<font><b/><sz val="14"/><color rgb="FF2C2825"/><name val="Calibri"/><family val="2"/></font>'
-            .'<font><sz val="10"/><color rgb="FF6B6560"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><b/><sz val="16"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><b/><sz val="11"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
+            .'<font><sz val="10"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
             .'<font><b/><sz val="10"/><color rgb="FFFFFCF8"/><name val="Calibri"/><family val="2"/></font>'
             .'<font><sz val="9"/><color rgb="FF6B6560"/><name val="Calibri"/><family val="2"/></font>'
             .'</fonts>'
             .'<fills count="6">'
             .'<fill><patternFill patternType="none"/></fill>'
             .'<fill><patternFill patternType="gray125"/></fill>'
-            .'<fill><patternFill patternType="solid"><fgColor rgb="FFF3EEE4"/></patternFill></fill>'
             .'<fill><patternFill patternType="solid"><fgColor rgb="FF7A6B55"/></patternFill></fill>'
-            .'<fill><patternFill patternType="solid"><fgColor rgb="FFD4CBBE"/></patternFill></fill>'
+            .'<fill><patternFill patternType="solid"><fgColor rgb="FF8A7A62"/></patternFill></fill>'
+            .'<fill><patternFill patternType="solid"><fgColor rgb="FFF3EEE4"/></patternFill></fill>'
             .'<fill><patternFill patternType="solid"><fgColor rgb="FFFFFCF8"/></patternFill></fill>'
             .'</fills>'
             .'<borders count="3">'
@@ -188,27 +191,30 @@ class XlsxWorkbook
             .'<bottom style="thin"><color rgb="FFE6DFD3"/></bottom>'
             .'</border>'
             .'<border>'
-            .'<left/><right/>'
+            .'<left style="thin"><color rgb="FFD4CBBE"/></left>'
+            .'<right style="thin"><color rgb="FFD4CBBE"/></right>'
             .'<top style="thin"><color rgb="FFD4CBBE"/></top>'
-            .'<bottom/><diagonal/>'
+            .'<bottom style="thin"><color rgb="FFD4CBBE"/></bottom>'
             .'</border>'
             .'</borders>'
             .'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-            .'<cellXfs count="7">'
-            // 0 body — wrap ile taşma yok
-            .'<xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
-            // 1 brand title — wrap kapalı; yalnızca A1 yazılır → bant boyunca taşar, unvan kırılmaz
-            .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
-            // 2 brand meta — aynı mantık
-            .'<xf numFmtId="49" fontId="2" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
-            // 3 gold accent
-            .'<xf numFmtId="49" fontId="0" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFill="1" applyAlignment="1"><alignment vertical="center"/></xf>'
+            .'<cellXfs count="8">'
+            // 0 body
+            .'<xf numFmtId="49" fontId="0" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="top" wrapText="1"/></xf>'
+            // 1 brand org (birleşik, koyu, beyaz)
+            .'<xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+            // 2 brand document kind
+            .'<xf numFmtId="49" fontId="2" fillId="3" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+            // 3 brand meta
+            .'<xf numFmtId="49" fontId="3" fillId="3" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
             // 4 table header
-            .'<xf numFmtId="49" fontId="3" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
+            .'<xf numFmtId="49" fontId="4" fillId="2" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
             // 5 zebra
-            .'<xf numFmtId="49" fontId="0" fillId="2" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
-            // 6 footer — yalnızca A yazılır → dipnot taşarak okunur
-            .'<xf numFmtId="49" fontId="4" fillId="2" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
+            .'<xf numFmtId="49" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="top" wrapText="1"/></xf>'
+            // 6 footer
+            .'<xf numFmtId="49" fontId="5" fillId="4" borderId="2" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>'
+            // 7 unused / spacer band
+            .'<xf numFmtId="49" fontId="0" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFill="1" applyAlignment="1"><alignment vertical="center"/></xf>'
             .'</cellXfs>'
             .'</styleSheet>';
     }
@@ -222,7 +228,6 @@ class XlsxWorkbook
             $rows = [['']];
         }
 
-        $rows = $this->clipRows($rows);
         $columnCount = max(1, max(array_map(count(...), $rows)));
         $lastColumn = $this->columnLetter($columnCount);
         $brandRows = HacerXlsxTemplate::BRAND_ROWS;
@@ -240,26 +245,18 @@ class XlsxWorkbook
             );
         }
 
-        // Unvan + meta: yalnızca A sütununda tam metin (wrap).
-        // Boş B/C… hücreleri YAZILMAZ → Excel taşırmayı kesmez; unvan tam okunur.
-        // Bant zemini için ilk 4 sütuna dolgu hücreleri (metinsiz) ayrı satırda değil —
-        // unvan satırında A dolu, komşular yok → taşma ile bant boyunca görünür.
-        $rowMarkup .= '<row r="1" ht="30" customHeight="1">'
+        // Birleşik başlık: yalnızca A sütununa değer yazılır (OOXML).
+        $rowMarkup .= '<row r="1" ht="32" customHeight="1">'
             .$this->inlineCell('A1', HacerXlsxTemplate::ORGANIZATION, '1')
             .'</row>';
 
-        $rowMarkup .= '<row r="2" ht="22" customHeight="1">'
-            .$this->inlineCell('A2', HacerXlsxTemplate::metaLine($context, $summary), '2')
+        $rowMarkup .= '<row r="2" ht="24" customHeight="1">'
+            .$this->inlineCell('A2', HacerXlsxTemplate::DOCUMENT_KIND, '2')
             .'</row>';
 
-        // Satır 3: altın çizgi (tüm sütunlar)
-        $accentCells = '';
-
-        for ($columnIndex = 1; $columnIndex <= $columnCount; $columnIndex++) {
-            $accentCells .= $this->inlineCell($this->columnLetter($columnIndex).'3', '', '3');
-        }
-
-        $rowMarkup .= '<row r="3" ht="4" customHeight="1">'.$accentCells.'</row>';
+        $rowMarkup .= '<row r="3" ht="22" customHeight="1">'
+            .$this->inlineCell('A3', HacerXlsxTemplate::metaLine($context, $summary), '3')
+            .'</row>';
 
         foreach ($rows as $rowIndex => $row) {
             $rowNumber = $headerRowNumber + $rowIndex;
@@ -267,23 +264,19 @@ class XlsxWorkbook
             $isAlt = ! $isHeader && ($rowIndex % 2 === 0);
             $style = $isHeader ? '4' : ($isAlt ? '5' : '0');
             $cells = '';
-            $longest = 0;
+            $normalized = [];
 
             for ($columnIndex = 0; $columnIndex < $columnCount; $columnIndex++) {
                 $value = (string) ($row[$columnIndex] ?? '');
-                // Boş hücreye görünmez boşluk: yan hücreye metin taşmasını keser
-                $cellValue = $value === '' ? ' ' : $value;
-                $longest = max($longest, mb_strlen(trim($value)));
+                $normalized[] = $value;
                 $cells .= $this->inlineCell(
                     $this->columnLetter($columnIndex + 1).$rowNumber,
-                    $cellValue,
+                    $value,
                     $style,
                 );
             }
 
-            $rowHeight = $isHeader
-                ? 24
-                : ($longest > 40 ? 44 : ($longest > 22 ? 32 : 22));
+            $rowHeight = HacerXlsxTemplate::rowHeightForContent($normalized, $columnWidths, $isHeader);
             $rowMarkup .= '<row r="'.$rowNumber.'" ht="'.$rowHeight.'" customHeight="1">'.$cells.'</row>';
         }
 
@@ -294,7 +287,7 @@ class XlsxWorkbook
         $rowMarkup .= '<row r="'.$spacerRow.'" ht="8" customHeight="1"></row>';
 
         $rowMarkup .= '<row r="'.$footerRow.'" ht="22" customHeight="1">'
-            .$this->inlineCell($this->columnLetter(1).$footerRow, HacerXlsxTemplate::footerNote(), '6')
+            .$this->inlineCell('A'.$footerRow, HacerXlsxTemplate::footerNote(), '6')
             .'</row>';
 
         $cols = '';
@@ -304,6 +297,19 @@ class XlsxWorkbook
             $cols .= '<col min="'.$columnIndex.'" max="'.$columnIndex.'" width="'.number_format($width, 2, '.', '').'" customWidth="1"/>';
         }
 
+        $merges = [
+            'A1:'.$lastColumn.'1',
+            'A2:'.$lastColumn.'2',
+            'A3:'.$lastColumn.'3',
+            'A'.$footerRow.':'.$lastColumn.$footerRow,
+        ];
+
+        $mergeMarkup = '';
+
+        foreach ($merges as $ref) {
+            $mergeMarkup .= '<mergeCell ref="'.$ref.'"/>';
+        }
+
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             .'<dimension ref="A1:'.$lastColumn.$footerRow.'"/>'
@@ -311,31 +317,8 @@ class XlsxWorkbook
             .'<sheetFormatPr defaultRowHeight="22" defaultColWidth="12"/>'
             .'<cols>'.$cols.'</cols>'
             .'<sheetData>'.$rowMarkup.'</sheetData>'
+            .'<mergeCells count="'.count($merges).'">'.$mergeMarkup.'</mergeCells>'
             .'</worksheet>';
-    }
-
-    /**
-     * @param  list<list<string>>  $rows
-     * @return list<list<string>>
-     */
-    private function clipRows(array $rows): array
-    {
-        $out = [];
-
-        foreach ($rows as $index => $row) {
-            if ($index === 0) {
-                $out[] = array_map(fn (mixed $cell): string => (string) $cell, $row);
-
-                continue;
-            }
-
-            $out[] = array_map(
-                fn (mixed $cell): string => HacerXlsxTemplate::clipCell((string) $cell),
-                $row,
-            );
-        }
-
-        return $out;
     }
 
     private function inlineCell(string $reference, string $value, string $style): string

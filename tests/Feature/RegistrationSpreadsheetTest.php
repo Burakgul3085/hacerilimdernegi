@@ -142,7 +142,7 @@ class RegistrationSpreadsheetTest extends TestCase
         $this->assertStringContainsString($registration->created_at->timezone(config('app.timezone'))->format('d.m.Y'), $sheet);
         $this->assertStringNotContainsString('pending', $sheet);
         $this->assertStringNotContainsString('2021', $sheet);
-        // Unvan satırında yalnızca A1 olmalı; boş B1 unvanı "Hâcer İlim ve" diye keser.
+        $this->assertStringContainsString('<mergeCells', $sheet);
         $this->assertMatchesRegularExpression('/<row r="1"[^>]*>\s*<c r="A1"/', $sheet);
         $this->assertDoesNotMatchRegularExpression('/<row r="1"[^>]*>.*<c r="B1"/s', $sheet);
     }
