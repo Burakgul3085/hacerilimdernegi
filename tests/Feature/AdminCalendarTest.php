@@ -116,7 +116,7 @@ class AdminCalendarTest extends TestCase
     public function test_at_start_reminder_uses_event_start_time(): void
     {
         $user = User::factory()->create(['role' => UserRole::Editor]);
-        $startsAt = now()->addMinutes(10);
+        $startsAt = now()->addMinutes(10)->startOfMinute();
 
         $entry = app(SaveAdminCalendarEntry::class)->handle($user, [
             'title' => 'Hemen önce',
@@ -127,7 +127,10 @@ class AdminCalendarTest extends TestCase
         ]);
 
         $this->assertSame(CalendarReminderStatus::Pending, $entry->reminder_status);
-        $this->assertTrue($entry->remind_at?->equalTo($startsAt));
+        $this->assertSame(
+            $startsAt->format('Y-m-d H:i:s'),
+            $entry->remind_at?->timezone((string) config('app.timezone'))->format('Y-m-d H:i:s'),
+        );
     }
 
     public function test_calendar_reminder_command_runs(): void
