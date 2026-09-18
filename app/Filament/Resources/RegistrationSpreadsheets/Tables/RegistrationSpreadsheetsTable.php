@@ -45,7 +45,7 @@ class RegistrationSpreadsheetsTable
             ->recordActions([
                 EditAction::make()->label('Aç'),
                 Action::make('csv')
-                    ->label('CSV')
+                    ->label('Excel')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
                     ->action(function (RegistrationSpreadsheet $record, ExportRegistrationSpreadsheetCsv $export) {

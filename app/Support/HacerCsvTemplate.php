@@ -190,8 +190,28 @@ class HacerCsvTemplate
 
     public static function formatDateTime(string $value): string
     {
+        $value = trim($value);
+
+        // Zaten Türkçe gösterim — yeniden parse etme (Excel/CSV sapmaları olmasın).
+        if (preg_match('/^\d{2}\.\d{2}\.\d{4}( \d{2}:\d{2})?$/', $value) === 1) {
+            return $value;
+        }
+
+        $timezone = (string) config('app.timezone');
+
         try {
-            $date = Carbon::parse($value)->timezone((string) config('app.timezone'));
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1) {
+                return Carbon::createFromFormat('Y-m-d', $value, $timezone)->format('d.m.Y');
+            }
+
+            if (preg_match('/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/', $value) === 1) {
+                $normalized = str_replace('T', ' ', $value);
+                $format = substr_count($normalized, ':') === 2 ? 'Y-m-d H:i:s' : 'Y-m-d H:i';
+
+                return Carbon::createFromFormat($format, $normalized, $timezone)->format('d.m.Y H:i');
+            }
+
+            $date = Carbon::parse($value)->timezone($timezone);
         } catch (\Throwable) {
             return $value;
         }

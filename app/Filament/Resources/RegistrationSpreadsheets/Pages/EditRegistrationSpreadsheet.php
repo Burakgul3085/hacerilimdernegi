@@ -40,7 +40,7 @@ class EditRegistrationSpreadsheet extends EditRecord
     {
         return [
             Action::make('csv')
-                ->label('Google E-tablo (CSV)')
+                ->label('Kurumsal Excel')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('gray')
                 ->action(function (ExportRegistrationSpreadsheetCsv $export) {

@@ -53,4 +53,12 @@ class HacerCsvTemplateTest extends TestCase
 
         $this->assertSame('="18.09.2026 07:49"', $formatted);
     }
+
+    public function test_turkish_dates_are_not_reparsed(): void
+    {
+        $this->assertSame(
+            '18.09.2026 08:28',
+            HacerCsvTemplate::formatDateTime('18.09.2026 08:28'),
+        );
+    }
 }

@@ -85,7 +85,9 @@ class HacerXlsxTemplate
             str_contains($normalized, 'e-posta'), str_contains($normalized, 'email') => 34.0,
             str_contains($normalized, 'ad soyad'), str_contains($normalized, 'faaliyet') => 24.0,
             str_contains($normalized, 'telefon') => 18.0,
-            str_contains($normalized, 'tarih') => 18.0,
+            str_contains($normalized, 'tarih') => 20.0,
+            str_contains($normalized, 'eski not'), str_contains($normalized, 'kendinden'), str_contains($normalized, 'not') => 36.0,
+            str_contains($normalized, 'adres') => 28.0,
             str_contains($normalized, 'başvuru no'), $normalized === 'no', $normalized === 'sayfa' => 13.0,
             str_contains($normalized, 'durum'), str_contains($normalized, 'kaynak'), str_contains($normalized, 'yanıt'), str_contains($normalized, 'kvkk') => 14.0,
             str_contains($normalized, 'bekleyen'), str_contains($normalized, 'başvuru') => 12.0,
@@ -109,7 +111,13 @@ class HacerXlsxTemplate
             }
 
             $factor = $rowIndex === 0 ? 1.15 : 1.05;
-            $width = max($width, min(40.0, $length * $factor + 2.5));
+            $cap = str_contains(mb_strtolower($header), 'not')
+                || str_contains(mb_strtolower($header), 'kendinden')
+                || str_contains(mb_strtolower($header), 'adres')
+                ? 42.0
+                : 36.0;
+
+            $width = max($width, min($cap, $length * $factor + 2.5));
         }
 
         return round($width, 2);

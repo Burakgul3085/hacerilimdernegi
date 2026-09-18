@@ -13,9 +13,11 @@ use App\Models\Activity;
 use App\Models\EventRegistration;
 use App\Models\RegistrationSpreadsheet;
 use App\Models\User;
+use App\Support\HacerXlsxTemplate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
+use ZipArchive;
 
 class RegistrationSpreadsheetTest extends TestCase
 {
@@ -102,7 +104,7 @@ class RegistrationSpreadsheetTest extends TestCase
             ->assertSet('data.title', $spreadsheet->title);
     }
 
-    public function test_csv_export_includes_headers_and_status_labels(): void
+    public function test_csv_export_downloads_corporate_xlsx_with_status_labels_and_dates(): void
     {
         $editor = User::factory()->create(['role' => UserRole::Editor]);
         $activity = $this->activity();
@@ -114,21 +116,32 @@ class RegistrationSpreadsheetTest extends TestCase
             user: $editor,
             activity: $activity,
             registrationIds: [$registration->id],
-            columnKeys: ['name', 'email', 'status'],
+            columnKeys: ['name', 'email', 'status', 'submitted_at'],
         );
 
         $response = app(ExportRegistrationSpreadsheetCsv::class)->download($spreadsheet);
         ob_start();
         $response->sendContent();
-        $csv = (string) ob_get_clean();
+        $binary = (string) ob_get_clean();
 
-        $this->assertStringStartsWith("\xEF\xBB\xBF", $csv);
-        $this->assertStringContainsString('Hâcer İlim ve Kültür Topluluğu', $csv);
-        $this->assertStringContainsString('Ad soyad', $csv);
-        $this->assertStringContainsString('Ayşe Yılmaz', $csv);
-        $this->assertStringContainsString('Beklemede', $csv);
-        $this->assertStringContainsString('1 satır', $csv);
-        $this->assertStringNotContainsString(';pending', $csv);
+        $this->assertStringStartsWith('PK', $binary);
+
+        $path = tempnam(sys_get_temp_dir(), 'xlsx');
+        $this->assertNotFalse($path);
+        file_put_contents($path, $binary);
+
+        $zip = new ZipArchive;
+        $this->assertTrue($zip->open($path) === true);
+        $sheet = (string) $zip->getFromName('xl/worksheets/sheet1.xml');
+        $zip->close();
+        @unlink($path);
+
+        $this->assertStringContainsString(HacerXlsxTemplate::ORGANIZATION, $sheet);
+        $this->assertStringContainsString('Ayşe Yılmaz', $sheet);
+        $this->assertStringContainsString('Beklemede', $sheet);
+        $this->assertStringContainsString($registration->created_at->timezone(config('app.timezone'))->format('d.m.Y'), $sheet);
+        $this->assertStringNotContainsString('pending', $sheet);
+        $this->assertStringNotContainsString('2021', $sheet);
     }
 
     public function test_guests_are_redirected_from_spreadsheet_pages(): void
