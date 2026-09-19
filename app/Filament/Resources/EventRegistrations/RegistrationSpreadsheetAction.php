@@ -156,6 +156,8 @@ class RegistrationSpreadsheetAction
             ->success()
             ->send();
 
-        return redirect()->to(RegistrationSpreadsheetResource::getUrl('edit', ['record' => $spreadsheet]));
+        return redirect()->to(
+            RegistrationSpreadsheetResource::getUrl('edit', ['record' => $spreadsheet->getKey()]),
+        );
     }
 }

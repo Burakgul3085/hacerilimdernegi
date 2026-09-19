@@ -12,6 +12,9 @@ use App\Models\User;
 use App\Support\RegistrationExportPlan;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Seçilen başvuruları kalıcı bir e-tablo çalışma alanına aktarır.
@@ -30,7 +33,21 @@ class CreateRegistrationSpreadsheet
         ?array $registrationIds = null,
         ?array $columnKeys = null,
     ): RegistrationSpreadsheet {
+        if (! Schema::hasTable('registration_spreadsheets') || ! Schema::hasTable('registration_spreadsheet_rows')) {
+            throw ValidationException::withMessages([
+                'registration_ids' => 'E-tablo veritabanı tabloları eksik. Sunucuda `php artisan migrate --force` çalıştırın.',
+            ]);
+        }
+
+        $registrationIds = $this->normalizeIds($registrationIds);
+        $columnKeys = $this->normalizeKeys($columnKeys);
         $registrations = $this->registrations($activity, $status, $unassignedOnly, $registrationIds);
+
+        if ($registrationIds !== null && $registrations->isEmpty()) {
+            throw ValidationException::withMessages([
+                'registration_ids' => 'En az bir başvuran seçin.',
+            ]);
+        }
 
         return DB::transaction(function () use ($user, $activity, $unassignedOnly, $columnKeys, $registrations): RegistrationSpreadsheet {
             $columns = $this->columns($activity, $unassignedOnly, $columnKeys, $registrations);
@@ -69,7 +86,7 @@ class CreateRegistrationSpreadsheet
     }
 
     /**
-     * @param  list<int|string>|null  $registrationIds
+     * @param  list<int>|null  $registrationIds
      * @return Collection<int, EventRegistration>
      */
     private function registrations(
@@ -84,9 +101,7 @@ class CreateRegistrationSpreadsheet
             ->when($unassignedOnly, fn ($query) => $query->unassigned())
             ->when($status !== null, fn ($query) => $query->where('status', $status))
             ->when($registrationIds !== null, function ($query) use ($registrationIds) {
-                $ids = array_values(array_filter(array_map('intval', $registrationIds)));
-
-                return $query->whereIn('id', $ids === [] ? [0] : $ids);
+                return $query->whereIn('id', $registrationIds === [] ? [0] : $registrationIds);
             })
             ->orderByDesc('created_at')
             ->orderByDesc('id')
@@ -141,6 +156,41 @@ class CreateRegistrationSpreadsheet
         $base = $activity?->title
             ?? ($unassignedOnly ? 'Diğer başvurular' : 'Tüm başvurular');
 
-        return $base.' · '.$rowCount.' satır · '.now()->format('d.m.Y H:i');
+        $title = $base.' · '.$rowCount.' satır · '.now()->format('d.m.Y H:i');
+
+        return Str::limit($title, 180, '');
+    }
+
+    /**
+     * @param  list<int|string>|null  $registrationIds
+     * @return list<int>|null
+     */
+    private function normalizeIds(?array $registrationIds): ?array
+    {
+        if ($registrationIds === null) {
+            return null;
+        }
+
+        return array_values(array_filter(array_map('intval', $registrationIds)));
+    }
+
+    /**
+     * @param  list<string>|array<string, mixed>|null  $columnKeys
+     * @return list<string>|null
+     */
+    private function normalizeKeys(?array $columnKeys): ?array
+    {
+        if ($columnKeys === null) {
+            return null;
+        }
+
+        $keys = array_is_list($columnKeys)
+            ? $columnKeys
+            : array_keys(array_filter($columnKeys));
+
+        return array_values(array_filter(array_map(
+            static fn (mixed $key): string => trim((string) $key),
+            $keys,
+        )));
     }
 }
