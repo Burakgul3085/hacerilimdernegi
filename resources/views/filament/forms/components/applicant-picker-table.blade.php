@@ -1,37 +1,28 @@
 @php
     /** @var list<array{id: string, name: string, email: string, phone: string, status: string}> $applicants */
-    $ids = array_column($applicants, 'id');
 @endphp
 
 <div
     x-data="{
-        ids: {{ \Illuminate\Support\Js::from($ids) }},
-        statePath: {{ \Illuminate\Support\Js::from($statePath) }},
+        ids: {{ $idsJs }},
+        statePath: {{ $statePathJs }},
         get selected() {
-            return $wire.get(this.statePath) || []
-        },
-        set selected(value) {
-            $wire.set(this.statePath, value)
+            const value = $wire.get(this.statePath)
+
+            return Array.isArray(value) ? value.map(String) : []
         },
         get allSelected() {
-            return this.ids.length > 0 && this.ids.every((id) => this.selected.map(String).includes(String(id)))
+            return this.ids.length > 0 && this.ids.every((id) => this.selected.includes(String(id)))
         },
         toggleAll() {
-            this.selected = this.allSelected ? [] : [...this.ids]
-        },
-        toggleOne(id) {
-            const current = this.selected.map(String)
-            const value = String(id)
-            this.selected = current.includes(value)
-                ? current.filter((item) => item !== value)
-                : [...current, value]
-        },
-        isChecked(id) {
-            return this.selected.map(String).includes(String(id))
+            $wire.set(this.statePath, this.allSelected ? [] : [...this.ids], false)
         },
     }"
-    style="overflow:hidden;border:1px solid #e6dfd3;border-radius:12px;background:#fffcf8;"
-    wire:ignore.self
+    @class([
+        'fi-fo-applicant-picker',
+        'fi-invalid' => $hasError,
+    ])
+    style="overflow:hidden;border:1px solid {{ $hasError ? '#b42318' : '#e6dfd3' }};border-radius:12px;background:#fffcf8;"
 >
     <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:#fbf6ec;border-bottom:1px solid #e6dfd3;">
         <div style="font-size:14px;font-weight:600;color:#161513;">
@@ -87,11 +78,10 @@
                         <td style="padding:10px 12px;vertical-align:middle;">
                             <input
                                 type="checkbox"
-                                class="fi-checkbox-input"
+                                class="fi-checkbox-input {{ $hasError ? 'fi-invalid' : 'fi-valid' }}"
                                 value="{{ $applicant['id'] }}"
                                 @disabled($isDisabled)
-                                x-bind:checked="isChecked(@js($applicant['id']))"
-                                x-on:change="toggleOne(@js($applicant['id']))"
+                                {{ $wireModel }}="{{ $statePath }}"
                             />
                         </td>
                         <td style="padding:10px 12px;vertical-align:middle;font-weight:600;color:#161513;word-break:break-word;">

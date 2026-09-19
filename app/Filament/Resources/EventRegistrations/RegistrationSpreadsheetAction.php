@@ -13,6 +13,9 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use Livewire\Component;
+use Throwable;
 
 class RegistrationSpreadsheetAction
 {
@@ -45,11 +48,12 @@ class RegistrationSpreadsheetAction
                 'E-tabloya yalnızca işaretli satırlar aktarılır.',
                 'E-tablo alanları',
             ))
-            ->action(function (array $data, Activity $record, CreateRegistrationSpreadsheet $create) {
+            ->action(function (array $data, Activity $record, CreateRegistrationSpreadsheet $create, Component $livewire) {
                 /** @var User $user */
                 $user = Auth::user();
 
-                return self::openCreated($create->handle(
+                self::openCreated($livewire, self::createSpreadsheet(
+                    $create,
                     user: $user,
                     activity: $record,
                     registrationIds: $data['registration_ids'] ?? [],
@@ -76,11 +80,12 @@ class RegistrationSpreadsheetAction
                 'E-tabloya yalnızca işaretli satırlar aktarılır.',
                 'E-tablo alanları',
             ))
-            ->action(function (array $data, CreateRegistrationSpreadsheet $create) use ($activityId) {
+            ->action(function (array $data, CreateRegistrationSpreadsheet $create, Component $livewire) use ($activityId) {
                 /** @var User $user */
                 $user = Auth::user();
 
-                return self::openCreated($create->handle(
+                self::openCreated($livewire, self::createSpreadsheet(
+                    $create,
                     user: $user,
                     activity: Activity::query()->findOrFail($activityId),
                     registrationIds: $data['registration_ids'] ?? [],
@@ -104,11 +109,12 @@ class RegistrationSpreadsheetAction
                 'E-tabloya yalnızca işaretli satırlar aktarılır.',
                 'E-tablo alanları',
             ))
-            ->action(function (array $data, CreateRegistrationSpreadsheet $create) {
+            ->action(function (array $data, CreateRegistrationSpreadsheet $create, Component $livewire) {
                 /** @var User $user */
                 $user = Auth::user();
 
-                return self::openCreated($create->handle(
+                self::openCreated($livewire, self::createSpreadsheet(
+                    $create,
                     user: $user,
                     unassignedOnly: true,
                     registrationIds: $data['registration_ids'] ?? [],
@@ -134,21 +140,65 @@ class RegistrationSpreadsheetAction
                         fn (ApplicationStatus $status): array => [$status->value => $status->label()],
                     )),
             ])
-            ->action(function (array $data, CreateRegistrationSpreadsheet $create) {
+            ->action(function (array $data, CreateRegistrationSpreadsheet $create, Component $livewire) {
                 /** @var User $user */
                 $user = Auth::user();
                 $status = filled($data['status'] ?? null)
                     ? ApplicationStatus::from($data['status'])
                     : null;
 
-                return self::openCreated($create->handle(
+                self::openCreated($livewire, self::createSpreadsheet(
+                    $create,
                     user: $user,
                     status: $status,
                 ));
             });
     }
 
-    private static function openCreated(RegistrationSpreadsheet $spreadsheet): mixed
+    /**
+     * @param  list<int|string>|null  $registrationIds
+     * @param  list<string>|null  $columnKeys
+     */
+    private static function createSpreadsheet(
+        CreateRegistrationSpreadsheet $create,
+        User $user,
+        ?Activity $activity = null,
+        ?ApplicationStatus $status = null,
+        bool $unassignedOnly = false,
+        ?array $registrationIds = null,
+        ?array $columnKeys = null,
+    ): RegistrationSpreadsheet {
+        try {
+            return $create->handle(
+                user: $user,
+                activity: $activity,
+                status: $status,
+                unassignedOnly: $unassignedOnly,
+                registrationIds: $registrationIds,
+                columnKeys: $columnKeys,
+            );
+        } catch (ValidationException $exception) {
+            Notification::make()
+                ->title('E-tablo oluşturulamadı')
+                ->body(collect($exception->errors())->flatten()->first() ?: 'Seçimleri kontrol edin.')
+                ->danger()
+                ->send();
+
+            throw $exception;
+        } catch (Throwable $exception) {
+            report($exception);
+
+            Notification::make()
+                ->title('E-tablo oluşturulamadı')
+                ->body('Beklenmeyen bir hata oluştu. Sayfayı yenileyip tekrar deneyin.')
+                ->danger()
+                ->send();
+
+            throw $exception;
+        }
+    }
+
+    private static function openCreated(Component $livewire, RegistrationSpreadsheet $spreadsheet): void
     {
         Notification::make()
             ->title('E-tablo oluşturuldu')
@@ -156,8 +206,9 @@ class RegistrationSpreadsheetAction
             ->success()
             ->send();
 
-        return redirect()->to(
+        $livewire->redirect(
             RegistrationSpreadsheetResource::getUrl('edit', ['record' => $spreadsheet->getKey()]),
+            navigate: false,
         );
     }
 }

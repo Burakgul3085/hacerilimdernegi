@@ -6,6 +6,7 @@ use Closure;
 use Filament\Forms\Components\Concerns\CanLimitItemsLength;
 use Filament\Forms\Components\Field;
 use Filament\Support\Components\Contracts\HasEmbeddedView;
+use Illuminate\Support\Js;
 
 /**
  * Başvuran seçimini kurumsal tablo görünümünde sunar.
@@ -49,10 +50,18 @@ class ApplicantPickerTable extends Field implements HasEmbeddedView
 
     public function toEmbeddedHtml(): string
     {
+        $applicants = $this->getApplicants();
+        $ids = array_values(array_map('strval', array_column($applicants, 'id')));
+        $statePath = $this->getStatePath();
+
         return view('filament.forms.components.applicant-picker-table', [
-            'applicants' => $this->getApplicants(),
-            'statePath' => $this->getStatePath(),
+            'applicants' => $applicants,
+            'idsJs' => Js::from($ids),
+            'statePath' => $statePath,
+            'statePathJs' => Js::from($statePath),
+            'wireModel' => $this->applyStateBindingModifiers('wire:model'),
             'isDisabled' => $this->isDisabled(),
+            'hasError' => $this->hasErrorForPath($statePath),
         ])->render();
     }
 }
