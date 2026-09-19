@@ -55,6 +55,9 @@
                         </div>
                         <div class="hc-cal__agenda-body">
                             <h3>{{ $entry['title'] }}</h3>
+                            @if (filled($entry['assignment_badge'] ?? null))
+                                <p class="hc-cal__assign">{{ $entry['assignment_badge'] }}@if (filled($entry['assignment_status_label'] ?? null)) · {{ $entry['assignment_status_label'] }}@endif</p>
+                            @endif
                             @if (filled($entry['description']))
                                 <p>{{ \Illuminate\Support\Str::limit($entry['description'], 120) }}</p>
                             @endif
@@ -108,9 +111,9 @@
                                 @foreach (array_slice($day['entries'], 0, $viewMode === 'week' ? 8 : 3) as $entry)
                                     <button
                                         type="button"
-                                        class="hc-cal__chip"
+                                        @class(['hc-cal__chip', 'is-assigned' => $entry['is_assigned'] ?? false])
                                         wire:click="openEdit({{ $entry['id'] }})"
-                                        title="{{ $entry['title'] }}"
+                                        title="{{ $entry['title'] }}{{ filled($entry['assignment_badge'] ?? null) ? ' · '.$entry['assignment_badge'] : '' }}"
                                     >
                                         <span class="hc-cal__chip-time">{{ $entry['time_label'] }}</span>
                                         <span class="hc-cal__chip-title">{{ $entry['title'] }}</span>
@@ -397,6 +400,18 @@
 
         .hc-cal__chip:hover {
             background: #ebe4d8;
+        }
+
+        .hc-cal__chip.is-assigned {
+            background: #ebe6dc;
+            box-shadow: inset 3px 0 0 var(--hc-header);
+        }
+
+        .hc-cal__assign {
+            margin: 0.15rem 0 0 !important;
+            color: var(--hc-header) !important;
+            font-size: 0.8rem !important;
+            font-weight: 600;
         }
 
         .hc-cal__chip-time {

@@ -4,13 +4,16 @@ namespace Tests\Feature;
 
 use App\Actions\SaveAdminCalendarEntry;
 use App\Actions\SendDueAdminCalendarReminders;
+use App\Enums\CalendarAssignmentStatus;
 use App\Enums\CalendarReminderOffset;
 use App\Enums\CalendarReminderStatus;
 use App\Enums\UserRole;
 use App\Filament\Pages\MyCalendar;
 use App\Models\AdminCalendarEntry;
 use App\Models\User;
+use App\Notifications\AdminCalendarAssignmentUpdated;
 use App\Notifications\AdminCalendarReminder;
+use App\Notifications\AdminCalendarTaskAssigned;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
@@ -161,7 +164,132 @@ class AdminCalendarTest extends TestCase
 
         $this->assertDatabaseHas('admin_calendar_entries', [
             'user_id' => $user->id,
+            'created_by' => $user->id,
             'title' => 'Panel notu',
         ]);
+    }
+
+    public function test_super_admin_can_assign_task_to_another_super_admin(): void
+    {
+        Notification::fake();
+
+        $assigner = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        $assignee = User::factory()->create([
+            'role' => UserRole::SuperAdmin,
+            'email' => 'assignee@hacer.test',
+        ]);
+
+        $startsAt = now()->addDays(2)->setTime(11, 0);
+
+        $entry = app(SaveAdminCalendarEntry::class)->handle($assigner, [
+            'title' => 'Ortak görev',
+            'description' => 'Lütfen takip et',
+            'starts_at' => $startsAt->toDateTimeString(),
+            'ends_at' => $startsAt->copy()->addHour()->toDateTimeString(),
+            'assigned_to_id' => $assignee->id,
+            'assignment_status' => CalendarAssignmentStatus::InProgress->value,
+            'reminder_enabled' => false,
+        ]);
+
+        $this->assertTrue($entry->isAssigned());
+        $this->assertSame($assignee->id, $entry->user_id);
+        $this->assertSame($assigner->id, $entry->created_by);
+        $this->assertSame(CalendarAssignmentStatus::InProgress, $entry->assignment_status);
+        $this->assertTrue($entry->isVisibleTo($assigner));
+        $this->assertTrue($entry->isVisibleTo($assignee));
+        $this->assertTrue($assignee->can('update', $entry));
+        $this->assertTrue($assigner->can('delete', $entry));
+        $this->assertFalse($assignee->can('delete', $entry));
+
+        Notification::assertSentTo($assignee, AdminCalendarTaskAssigned::class);
+        Notification::assertNotSentTo($assigner, AdminCalendarTaskAssigned::class);
+    }
+
+    public function test_non_super_admin_cannot_assign_tasks(): void
+    {
+        $editor = User::factory()->create(['role' => UserRole::Editor]);
+        $target = User::factory()->create(['role' => UserRole::SuperAdmin]);
+
+        $this->expectException(ValidationException::class);
+
+        app(SaveAdminCalendarEntry::class)->handle($editor, [
+            'title' => 'Yetkisiz atama',
+            'starts_at' => now()->addDay()->toDateTimeString(),
+            'assigned_to_id' => $target->id,
+            'reminder_enabled' => false,
+        ]);
+    }
+
+    public function test_cannot_assign_to_non_super_admin(): void
+    {
+        $assigner = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        $editor = User::factory()->create(['role' => UserRole::Editor]);
+
+        $this->expectException(ValidationException::class);
+
+        app(SaveAdminCalendarEntry::class)->handle($assigner, [
+            'title' => 'Yanlış rol',
+            'starts_at' => now()->addDay()->toDateTimeString(),
+            'assigned_to_id' => $editor->id,
+            'reminder_enabled' => false,
+        ]);
+    }
+
+    public function test_assignee_status_update_notifies_assigner(): void
+    {
+        Notification::fake();
+
+        $assigner = User::factory()->create([
+            'role' => UserRole::SuperAdmin,
+            'email' => 'assigner@hacer.test',
+        ]);
+        $assignee = User::factory()->create(['role' => UserRole::SuperAdmin]);
+
+        $entry = AdminCalendarEntry::factory()
+            ->assignedTo($assignee, $assigner)
+            ->create([
+                'title' => 'Durum güncelle',
+                'starts_at' => now()->addDays(3),
+                'ends_at' => now()->addDays(3)->addHour(),
+            ]);
+
+        app(SaveAdminCalendarEntry::class)->handle($assignee, [
+            'title' => $entry->title,
+            'description' => $entry->description,
+            'starts_at' => $entry->starts_at->toDateTimeString(),
+            'ends_at' => $entry->ends_at->toDateTimeString(),
+            'all_day' => false,
+            'assignment_status' => CalendarAssignmentStatus::Completed->value,
+            'reminder_enabled' => false,
+        ], $entry);
+
+        $entry->refresh();
+        $this->assertSame(CalendarAssignmentStatus::Completed, $entry->assignment_status);
+        Notification::assertSentTo($assigner, AdminCalendarAssignmentUpdated::class);
+        Notification::assertNotSentTo($assignee, AdminCalendarAssignmentUpdated::class);
+    }
+
+    public function test_assigned_entry_appears_for_both_super_admins_in_calendar(): void
+    {
+        $assigner = User::factory()->create(['role' => UserRole::SuperAdmin, 'name' => 'Ayşe']);
+        $assignee = User::factory()->create(['role' => UserRole::SuperAdmin, 'name' => 'Kadir']);
+
+        AdminCalendarEntry::factory()
+            ->assignedTo($assignee, $assigner)
+            ->create([
+                'title' => 'İki tarafta görünsün',
+                'starts_at' => now()->addDay()->setTime(9, 0),
+                'ends_at' => now()->addDay()->setTime(10, 0),
+            ]);
+
+        $this->actingAs($assigner);
+        Livewire::test(MyCalendar::class)
+            ->assertSee('İki tarafta görünsün')
+            ->assertSee('Atandı: Kadir');
+
+        $this->actingAs($assignee);
+        Livewire::test(MyCalendar::class)
+            ->assertSee('İki tarafta görünsün')
+            ->assertSee('Atayan: Ayşe');
     }
 }

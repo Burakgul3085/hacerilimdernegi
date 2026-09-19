@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\CalendarAssignmentStatus;
 use App\Enums\CalendarReminderOffset;
 use App\Enums\CalendarReminderStatus;
 use App\Models\AdminCalendarEntry;
@@ -26,6 +27,9 @@ class AdminCalendarEntryFactory extends Factory
 
         return [
             'user_id' => User::factory(),
+            'created_by' => null,
+            'assigned_at' => null,
+            'assignment_status' => null,
             'title' => fake()->sentence(3),
             'description' => fake()->optional()->paragraph(),
             'starts_at' => $startsAt,
@@ -38,6 +42,29 @@ class AdminCalendarEntryFactory extends Factory
             'reminder_sent_at' => null,
             'reminder_error' => null,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterMaking(function (AdminCalendarEntry $entry): void {
+            if ($entry->created_by === null && $entry->user_id !== null) {
+                $entry->created_by = $entry->user_id;
+            }
+        })->afterCreating(function (AdminCalendarEntry $entry): void {
+            if ($entry->created_by === null) {
+                $entry->forceFill(['created_by' => $entry->user_id])->saveQuietly();
+            }
+        });
+    }
+
+    public function assignedTo(User $assignee, User $assigner): static
+    {
+        return $this->state(fn (): array => [
+            'user_id' => $assignee->id,
+            'created_by' => $assigner->id,
+            'assigned_at' => now(),
+            'assignment_status' => CalendarAssignmentStatus::InProgress,
+        ]);
     }
 
     public function withReminder(CalendarReminderOffset $offset = CalendarReminderOffset::Hour1): static

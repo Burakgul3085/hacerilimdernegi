@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Actions\SaveAdminCalendarEntry;
+use App\Enums\CalendarAssignmentStatus;
 use App\Enums\CalendarReminderOffset;
 use App\Enums\CalendarReminderStatus;
 use App\Enums\UserRole;
@@ -47,6 +48,10 @@ class MyCalendar extends Page
 
     public ?int $editingId = null;
 
+    public bool $canChangeAssignee = true;
+
+    public bool $showAssignmentStatus = false;
+
     /**
      * @var array<string, mixed>|null
      */
@@ -68,6 +73,9 @@ class MyCalendar extends Page
 
     public function form(Schema $schema): Schema
     {
+        $actor = auth()->user();
+        $isSuperAdmin = $actor instanceof User && $actor->isSuperAdmin();
+
         return $schema
             ->statePath('data')
             ->components([
@@ -82,6 +90,22 @@ class MyCalendar extends Page
                             ->label('Açıklama / not')
                             ->rows(4)
                             ->maxLength(5000)
+                            ->columnSpanFull(),
+                        Select::make('assigned_to_id')
+                            ->label('Kime ata?')
+                            ->helperText('Boş bırakırsanız not yalnızca sizin takviminizde kalır.')
+                            ->placeholder('Kişisel not (kimseye atama)')
+                            ->searchable()
+                            ->options(fn (): array => $this->superAdminOptions())
+                            ->visible(fn (): bool => $isSuperAdmin && $this->canChangeAssignee)
+                            ->columnSpanFull(),
+                        Select::make('assignment_status')
+                            ->label('Görev durumu')
+                            ->options(collect(CalendarAssignmentStatus::cases())->mapWithKeys(
+                                fn (CalendarAssignmentStatus $status): array => [$status->value => $status->label()],
+                            ))
+                            ->visible(fn (): bool => $this->showAssignmentStatus)
+                            ->required(fn (): bool => $this->showAssignmentStatus)
                             ->columnSpanFull(),
                         Toggle::make('all_day')
                             ->label('Tüm gün')
@@ -103,7 +127,7 @@ class MyCalendar extends Page
                             ->visible(fn ($get): bool => ! (bool) $get('all_day')),
                         Toggle::make('reminder_enabled')
                             ->label('E-posta hatırlatması')
-                            ->helperText('Seçtiğiniz hatırlatma zamanında kayıtlı e-postanıza mail gider. “15 dk / 1 saat önce” için etkinliği o kadar önceden kaydedin.')
+                            ->helperText('Atanan görevde hatırlatma, görevin sahibinin e-postasına gider.')
                             ->live()
                             ->columnSpanFull(),
                         Select::make('reminder_offset')
@@ -160,6 +184,8 @@ class MyCalendar extends Page
         $this->authorize('create', AdminCalendarEntry::class);
 
         $this->editingId = null;
+        $this->canChangeAssignee = auth()->user()?->isSuperAdmin() ?? false;
+        $this->showAssignmentStatus = false;
         $start = $startsAt
             ? Carbon::parse($startsAt)->timezone((string) config('app.timezone'))
             : now()->timezone((string) config('app.timezone'))->addHour()->startOfHour();
@@ -174,10 +200,16 @@ class MyCalendar extends Page
 
     public function openEdit(int $entryId): void
     {
-        $entry = AdminCalendarEntry::query()->findOrFail($entryId);
+        $entry = AdminCalendarEntry::query()->with(['user', 'creator'])->findOrFail($entryId);
         $this->authorize('update', $entry);
 
+        $actor = auth()->user();
         $this->editingId = $entry->id;
+        $this->canChangeAssignee = $actor instanceof User
+            && $actor->isSuperAdmin()
+            && ($entry->isCreatedBy($actor) || ! $entry->isAssigned());
+        $this->showAssignmentStatus = $entry->isAssigned();
+
         $this->form->fill([
             'title' => $entry->title,
             'description' => $entry->description,
@@ -187,6 +219,8 @@ class MyCalendar extends Page
             'reminder_enabled' => $entry->reminder_enabled,
             'reminder_offset' => $entry->reminder_offset?->value,
             'remind_at' => $entry->remind_at,
+            'assigned_to_id' => $entry->isAssigned() ? $entry->user_id : null,
+            'assignment_status' => $entry->assignment_status?->value ?? CalendarAssignmentStatus::InProgress->value,
         ]);
         $this->formOpen = true;
     }
@@ -195,6 +229,8 @@ class MyCalendar extends Page
     {
         $this->formOpen = false;
         $this->editingId = null;
+        $this->canChangeAssignee = auth()->user()?->isSuperAdmin() ?? false;
+        $this->showAssignmentStatus = false;
         $this->form->fill($this->defaultFormState());
     }
 
@@ -246,7 +282,8 @@ class MyCalendar extends Page
     {
         $timezone = (string) config('app.timezone');
         $focus = Carbon::parse($this->focusDate)->timezone($timezone)->startOfDay();
-        $userId = (int) auth()->id();
+        /** @var User $user */
+        $user = auth()->user();
 
         [$rangeStart, $rangeEnd, $label, $rangeLabel] = match ($this->viewMode) {
             'week' => $this->weekBounds($focus),
@@ -260,7 +297,8 @@ class MyCalendar extends Page
         };
 
         $entries = AdminCalendarEntry::query()
-            ->where('user_id', $userId)
+            ->with(['user', 'creator'])
+            ->visibleTo($user)
             ->where('starts_at', '<=', $rangeEnd)
             ->where(function ($query) use ($rangeStart): void {
                 $query->where('ends_at', '>=', $rangeStart)
@@ -297,7 +335,7 @@ class MyCalendar extends Page
             ->filter(fn (AdminCalendarEntry $entry): bool => $entry->starts_at->gte(now()->timezone($timezone)->startOfDay())
                 || $entry->starts_at->betweenIncluded($rangeStart, $rangeEnd))
             ->values()
-            ->map(fn (AdminCalendarEntry $entry): array => $this->entryPayload($entry))
+            ->map(fn (AdminCalendarEntry $entry): array => $this->entryPayload($entry, $user))
             ->all();
 
         $todayStart = now()->timezone($timezone)->startOfDay();
@@ -305,16 +343,16 @@ class MyCalendar extends Page
 
         $stats = [
             'today' => AdminCalendarEntry::query()
-                ->where('user_id', $userId)
+                ->visibleTo($user)
                 ->whereBetween('starts_at', [$todayStart, $todayEnd])
                 ->count(),
             'upcoming' => AdminCalendarEntry::query()
-                ->where('user_id', $userId)
+                ->visibleTo($user)
                 ->where('starts_at', '>', $todayEnd)
                 ->where('starts_at', '<=', $todayEnd->copy()->addDays(7))
                 ->count(),
             'pending' => AdminCalendarEntry::query()
-                ->where('user_id', $userId)
+                ->visibleTo($user)
                 ->where('reminder_status', CalendarReminderStatus::Pending)
                 ->count(),
         ];
@@ -326,6 +364,21 @@ class MyCalendar extends Page
             'agenda' => $agenda,
             'stats' => $stats,
         ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function superAdminOptions(): array
+    {
+        $actorId = (int) auth()->id();
+
+        return User::query()
+            ->where('role', UserRole::SuperAdmin)
+            ->where('id', '!=', $actorId)
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
     }
 
     /**
@@ -344,6 +397,8 @@ class MyCalendar extends Page
             'reminder_enabled' => false,
             'reminder_offset' => CalendarReminderOffset::AtStart->value,
             'remind_at' => null,
+            'assigned_to_id' => null,
+            'assignment_status' => CalendarAssignmentStatus::InProgress->value,
         ];
     }
 
@@ -385,23 +440,35 @@ class MyCalendar extends Page
      */
     private function dayPayload(CarbonInterface $day, Collection $entries, ?int $focusMonth): array
     {
+        /** @var User $user */
+        $user = auth()->user();
+
         return [
             'date' => $day->toDateString(),
             'day' => $day->day,
             'weekday' => $day->translatedFormat('D'),
             'is_today' => $day->isToday(),
             'is_outside' => $focusMonth !== null && $day->month !== $focusMonth,
-            'entries' => $entries->map(fn (AdminCalendarEntry $entry): array => $this->entryPayload($entry))->values()->all(),
+            'entries' => $entries->map(fn (AdminCalendarEntry $entry): array => $this->entryPayload($entry, $user))->values()->all(),
         ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function entryPayload(AdminCalendarEntry $entry): array
+    private function entryPayload(AdminCalendarEntry $entry, User $viewer): array
     {
         $timezone = (string) config('app.timezone');
         $starts = $entry->starts_at->timezone($timezone);
+        $assignmentBadge = null;
+
+        if ($entry->isAssigned()) {
+            if ($entry->isCreatedBy($viewer)) {
+                $assignmentBadge = 'Atandı: '.($entry->user?->name ?? 'Süper yönetici');
+            } elseif ($entry->isOwnedBy($viewer)) {
+                $assignmentBadge = 'Atayan: '.($entry->creator?->name ?? 'Süper yönetici');
+            }
+        }
 
         return [
             'id' => $entry->id,
@@ -415,6 +482,9 @@ class MyCalendar extends Page
             'reminder_status' => $entry->reminder_status->value,
             'reminder_label' => $entry->reminder_status->label(),
             'has_reminder' => $entry->reminder_enabled,
+            'assignment_badge' => $assignmentBadge,
+            'assignment_status_label' => $entry->assignment_status?->label(),
+            'is_assigned' => $entry->isAssigned(),
         ];
     }
 }

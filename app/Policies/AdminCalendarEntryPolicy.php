@@ -15,7 +15,7 @@ class AdminCalendarEntryPolicy
 
     public function view(User $user, AdminCalendarEntry $adminCalendarEntry): bool
     {
-        return $adminCalendarEntry->isOwnedBy($user);
+        return $adminCalendarEntry->isVisibleTo($user);
     }
 
     public function create(User $user): bool
@@ -25,11 +25,15 @@ class AdminCalendarEntryPolicy
 
     public function update(User $user, AdminCalendarEntry $adminCalendarEntry): bool
     {
-        return $adminCalendarEntry->isOwnedBy($user);
+        return $adminCalendarEntry->isVisibleTo($user);
     }
 
     public function delete(User $user, AdminCalendarEntry $adminCalendarEntry): bool
     {
+        if ($adminCalendarEntry->isAssigned()) {
+            return $adminCalendarEntry->isCreatedBy($user);
+        }
+
         return $adminCalendarEntry->isOwnedBy($user);
     }
 

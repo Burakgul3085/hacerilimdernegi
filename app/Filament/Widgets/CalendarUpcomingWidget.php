@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Enums\CalendarReminderStatus;
 use App\Filament\Pages\MyCalendar;
 use App\Models\AdminCalendarEntry;
+use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -16,9 +17,9 @@ class CalendarUpcomingWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $userId = auth()->id();
+        $user = auth()->user();
 
-        if ($userId === null) {
+        if (! $user instanceof User) {
             return [];
         }
 
@@ -28,23 +29,23 @@ class CalendarUpcomingWidget extends StatsOverviewWidget
         $weekEnd = $todayEnd->copy()->addDays(7);
 
         $today = AdminCalendarEntry::query()
-            ->where('user_id', $userId)
+            ->visibleTo($user)
             ->whereBetween('starts_at', [$todayStart, $todayEnd])
             ->count();
 
         $upcoming = AdminCalendarEntry::query()
-            ->where('user_id', $userId)
+            ->visibleTo($user)
             ->where('starts_at', '>', $todayEnd)
             ->where('starts_at', '<=', $weekEnd)
             ->count();
 
         $pending = AdminCalendarEntry::query()
-            ->where('user_id', $userId)
+            ->visibleTo($user)
             ->where('reminder_status', CalendarReminderStatus::Pending)
             ->count();
 
         $next = AdminCalendarEntry::query()
-            ->where('user_id', $userId)
+            ->visibleTo($user)
             ->where('starts_at', '>=', now())
             ->orderBy('starts_at')
             ->value('title');
