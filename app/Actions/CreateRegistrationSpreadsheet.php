@@ -35,7 +35,7 @@ class CreateRegistrationSpreadsheet
     ): RegistrationSpreadsheet {
         if (! Schema::hasTable('registration_spreadsheets') || ! Schema::hasTable('registration_spreadsheet_rows')) {
             throw ValidationException::withMessages([
-                'registration_ids' => 'E-tablo veritabanı tabloları eksik. Sunucuda `php artisan migrate --force` çalıştırın.',
+                'registration_ids' => 'E-tablo tabloları hâlâ yok. Sunucuda sırayla: git pull && php artisan migrate --force',
             ]);
         }
 
