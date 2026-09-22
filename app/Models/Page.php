@@ -202,10 +202,19 @@ class Page extends Model
 
     private static function initialsFromName(string $name): string
     {
-        return collect(preg_split('/\s+/u', $name) ?: [])
+        $parts = collect(preg_split('/\s+/u', $name) ?: [])
             ->filter()
-            ->take(2)
-            ->map(fn (string $word): string => mb_strtoupper(mb_substr($word, 0, 1)))
-            ->implode('');
+            ->values();
+
+        if ($parts->isEmpty()) {
+            return '';
+        }
+
+        if ($parts->count() === 1) {
+            return mb_strtoupper(mb_substr((string) $parts->first(), 0, 1));
+        }
+
+        return mb_strtoupper(mb_substr((string) $parts->first(), 0, 1))
+            .mb_strtoupper(mb_substr((string) $parts->last(), 0, 1));
     }
 }

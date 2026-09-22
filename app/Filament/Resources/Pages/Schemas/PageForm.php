@@ -78,6 +78,7 @@ class PageForm
                             ->required(),
                         FileUpload::make('photo')
                             ->label('Fotoğraf')
+                            ->helperText('İsteğe bağlı. Yoksa kartta adın baş harfleri görünür. Yüklenen fotoğraf kırpılmaz.')
                             ->image()
                             ->disk('public')
                             ->directory('pages/board')

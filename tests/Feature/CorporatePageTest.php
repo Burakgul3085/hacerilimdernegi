@@ -142,17 +142,38 @@ class CorporatePageTest extends TestCase
             ])
             ->assertSee('/storage/pages/board/zeliha.jpg', false)
             ->assertSee('board-photo-fit', false)
-            ->assertSee('board-hijab-placeholder.png', false)
-            ->assertSee('board-photo-placeholder', false)
+            ->assertSee('board-initials', false)
+            ->assertSee('>TG<', false)
+            ->assertSee('>ZA<', false)
+            ->assertDontSee('board-hijab-placeholder.png', false)
+            ->assertDontSee('board-photo-placeholder', false)
             ->assertDontSee('board-photo-fill', false)
             ->assertDontSee('object-cover', false)
             ->assertSee('board-directory', false)
             ->assertDontSee('Görünmemeli')
             ->assertDontSee('Başkanlık')
             ->assertDontSee('Başkan yardımcıları')
-            ->assertDontSee('>TG<', false)
             ->assertDontSee('yönetim panelinden eklenecektir')
             ->assertDontSee('page-aside-photo', false);
+    }
+
+    public function test_board_page_shows_first_and_last_initials_without_a_photo(): void
+    {
+        Page::query()->where('slug', 'yonetim-kadrosu')->update([
+            'board_members' => [[
+                'name' => 'Zeliha Şule Yılmaz',
+                'title' => '',
+                'tier' => BoardTier::Team->value,
+                'bio' => 'Psikolog',
+                'photo' => null,
+            ]],
+        ]);
+
+        $this->get('/yonetim-kadrosu')
+            ->assertSee('board-initials', false)
+            ->assertSee('>ZY<', false)
+            ->assertDontSee('board-hijab-placeholder.png', false)
+            ->assertDontSee('>ZŞ<', false);
     }
 
     public function test_board_page_maps_legacy_officer_tiers_into_the_team_group(): void
