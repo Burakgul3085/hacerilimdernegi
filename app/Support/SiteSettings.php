@@ -119,6 +119,12 @@ class SiteSettings
             'contact_intro' => 'Bizimle iletişime geçebilirsiniz.',
             'live_intro' => 'Ânlık paylaşımlar, duyurular ve daha fazlası...',
 
+            'activity_join_title' => 'Katılım',
+            'activity_join_open_text' => 'Bu hatta katılmak için formu doldurun. Yönetim size e-posta ile döner.',
+            'activity_join_button_label' => 'Katılmak için tıkla',
+            'activity_join_closed_text' => 'Bu hat için kayıt şu an kapalı.',
+            'activity_join_completed_text' => 'Bu hat tamamlandı.',
+
             'membership_card_title' => 'Birlikte daha güçlüyüz',
             'membership_card_text' => 'İlim, kültür ve kardeşlik çalışmalarında sen de yerini al.',
 

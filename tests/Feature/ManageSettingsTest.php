@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\UserRole;
 use App\Filament\Pages\ManageSettings;
+use App\Models\Activity;
 use App\Models\User;
 use App\Support\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -113,6 +114,32 @@ class ManageSettingsTest extends TestCase
             ->assertOk()
             ->assertSee('Panelden yazılan başlık')
             ->assertSee('Panel menüsü');
+    }
+
+    public function test_activity_join_card_copy_comes_from_settings(): void
+    {
+        $activity = Activity::factory()->create([
+            'title' => 'Panelden metinli hat',
+            'slug' => 'panelden-metinli-hat',
+        ]);
+
+        $this->actingAs($this->superAdmin());
+
+        Livewire::test(ManageSettings::class)
+            ->set('data.activity_join_title', 'Başvuru')
+            ->set('data.activity_join_open_text', 'Panelden yazılan katılım açıklaması.')
+            ->set('data.activity_join_button_label', 'Forma git')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        auth()->logout();
+
+        $this->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertSee('Başvuru')
+            ->assertSee('Panelden yazılan katılım açıklaması.')
+            ->assertSee('Forma git')
+            ->assertDontSee('Bu hatta katılmak için formu doldurun');
     }
 
     public function test_saving_nested_navigation_items_keeps_the_children(): void

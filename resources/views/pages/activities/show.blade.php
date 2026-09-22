@@ -60,18 +60,18 @@
             @endforeach
 
             <div class="card p-6">
-                <p class="eyebrow">Katılım</p>
+                <p class="eyebrow">{{ $settings['activity_join_title'] ?: 'Katılım' }}</p>
                 <p class="mt-3 text-[15px] leading-relaxed text-muted">
                     @if ($activity->acceptsRegistrations())
-                        Bu hatta katılmak için formu doldurun. Yönetim size e-posta ile döner.
+                        {{ $settings['activity_join_open_text'] ?: 'Bu hatta katılmak için formu doldurun. Yönetim size e-posta ile döner.' }}
                     @elseif ($activity->status === \App\Enums\ActivityStatus::Completed)
-                        Bu hat tamamlandı.
+                        {{ $settings['activity_join_completed_text'] ?: 'Bu hat tamamlandı.' }}
                     @else
-                        Bu hat için kayıt şu an kapalı.
+                        {{ $settings['activity_join_closed_text'] ?: 'Bu hat için kayıt şu an kapalı.' }}
                     @endif
                 </p>
                 @if ($activity->acceptsRegistrations())
-                    <a href="#kayit" class="btn btn-solid btn-sm mt-6 w-full">Katılmak için tıkla</a>
+                    <a href="#kayit" class="btn btn-solid btn-sm mt-6 w-full">{{ $settings['activity_join_button_label'] ?: 'Katılmak için tıkla' }}</a>
                 @endif
             </div>
         </aside>

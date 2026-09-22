@@ -316,6 +316,17 @@ class ManageSettings extends Page
                         Hidden::make('events_intro'),
                     ]),
 
+                Section::make('Faaliyet katılım kartı')
+                    ->description('Faaliyet detay sayfasındaki yan “Katılım” kutusu.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('activity_join_title')->label('Başlık')->maxLength(40),
+                        TextInput::make('activity_join_button_label')->label('Buton yazısı')->maxLength(40),
+                        Textarea::make('activity_join_open_text')->label('Kayıt açık metni')->rows(2)->columnSpanFull(),
+                        Textarea::make('activity_join_closed_text')->label('Kayıt kapalı metni')->rows(2),
+                        Textarea::make('activity_join_completed_text')->label('Tamamlandı metni')->rows(2),
+                    ]),
+
                 Section::make('Üyelik kartı')
                     ->columns(2)
                     ->schema([
