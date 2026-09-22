@@ -14,6 +14,12 @@
 
 {{-- Hero --}}
 <section class="hero-cinematic relative overflow-x-clip overflow-y-hidden border-b border-line bg-cream">
+    {{-- Mobil: giriş görseli ilk ekranda full-bleed arka plan --}}
+    <div class="hero-visual hero-visual-mobile lg:hidden" aria-hidden="true">
+        <img src="{{ $heroImage }}" alt="" class="hero-parallax">
+        <div class="hero-visual-mobile-fade"></div>
+    </div>
+
     <div class="hero-visual absolute inset-y-0 right-0 hidden w-[42%] overflow-hidden lg:block xl:w-[46%]">
         <img src="{{ $heroImage }}" alt="" aria-hidden="true" data-parallax="0.16"
              class="hero-parallax h-full w-full max-w-full object-cover object-top">
@@ -70,22 +76,17 @@
         </div>
     </div>
 
-    <div class="hero-visual hero-visual-mobile lg:hidden">
-        <img src="{{ $heroImage }}" alt="" aria-hidden="true" class="hero-parallax" data-parallax="0.1">
-        <div class="hero-visual-mobile-fade" aria-hidden="true"></div>
-
-        @if ($featuredActivity)
-            <a href="{{ route('activities.show', $featuredActivity) }}" class="hero-enter hero-visual-mobile-card" style="--enter-delay: 0.72s">
-                <p class="tag">{{ $featuredActivity->status->label() }}</p>
-                <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $featuredActivity->title }}</p>
-                @if (filled($featuredActivity->sessionHeadline()))
-                    <p class="activity-session-line mt-3">{{ $featuredActivity->sessionHeadline() }}</p>
-                @elseif (filled($featuredActivity->excerpt))
-                    <p class="mt-3 line-clamp-2 text-[13px] leading-relaxed text-muted">{{ $featuredActivity->excerpt }}</p>
-                @endif
-            </a>
-        @endif
-    </div>
+    @if ($featuredActivity)
+        <a href="{{ route('activities.show', $featuredActivity) }}" class="hero-enter hero-visual-mobile-card lg:hidden" style="--enter-delay: 0.72s">
+            <p class="tag">{{ $featuredActivity->status->label() }}</p>
+            <p class="mt-2 font-display text-xl leading-snug text-forest">{{ $featuredActivity->title }}</p>
+            @if (filled($featuredActivity->sessionHeadline()))
+                <p class="activity-session-line mt-3">{{ $featuredActivity->sessionHeadline() }}</p>
+            @elseif (filled($featuredActivity->excerpt))
+                <p class="mt-3 line-clamp-2 text-[13px] leading-relaxed text-muted">{{ $featuredActivity->excerpt }}</p>
+            @endif
+        </a>
+    @endif
 </section>
 
 {{-- Değerler --}}

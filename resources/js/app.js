@@ -83,6 +83,7 @@ function startParallax() {
         return;
     }
 
+    const desktopParallax = window.matchMedia('(min-width: 1024px)');
     const nodes = [...document.querySelectorAll('[data-parallax]')];
 
     if (nodes.length === 0) {
@@ -91,8 +92,21 @@ function startParallax() {
 
     let ticking = false;
 
+    const clearTransforms = () => {
+        nodes.forEach((node) => {
+            node.style.transform = '';
+        });
+    };
+
     const update = () => {
         ticking = false;
+
+        if (! desktopParallax.matches) {
+            clearTransforms();
+
+            return;
+        }
+
         const viewportHeight = window.innerHeight;
 
         nodes.forEach((node) => {
@@ -115,6 +129,7 @@ function startParallax() {
         }
     }, { passive: true });
 
+    desktopParallax.addEventListener('change', update);
     update();
 }
 

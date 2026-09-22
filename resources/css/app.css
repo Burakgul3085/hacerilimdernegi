@@ -1558,37 +1558,52 @@ body.overflow-hidden .site-float {
     }
 }
 
+@media (max-width: 1023px) {
+    .hero-cinematic {
+        min-height: min(100svh, 54rem);
+    }
+
+    .hero-copy {
+        padding-bottom: 7.5rem;
+    }
+}
+
 .hero-visual-mobile {
-    position: relative;
-    width: 100%;
-    max-width: 100%;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
     overflow: hidden;
+    pointer-events: none;
 }
 
 .hero-visual-mobile img {
     display: block;
     width: 100%;
-    max-width: 100%;
-    height: min(22.5rem, 58vh);
+    height: 100%;
+    max-width: none;
     object-fit: cover;
-    object-position: center 22%;
+    object-position: center top;
+    transform: none;
 }
 
 .hero-visual-mobile-fade {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(
-        to bottom,
-        var(--color-cream) 0%,
-        rgb(251 246 236 / 0.28) 26%,
-        transparent 52%,
-        rgb(251 246 236 / 0.18) 100%
-    );
+    background:
+        linear-gradient(
+            to bottom,
+            rgb(251 246 236 / 0.94) 0%,
+            rgb(251 246 236 / 0.82) 32%,
+            rgb(251 246 236 / 0.42) 58%,
+            rgb(251 246 236 / 0.28) 78%,
+            rgb(251 246 236 / 0.55) 100%
+        );
 }
 
 .hero-visual-mobile-card {
     position: absolute;
+    z-index: 20;
     inset-inline: 1.25rem;
     bottom: 1.25rem;
     display: block;
@@ -1605,10 +1620,6 @@ body.overflow-hidden .site-float {
 }
 
 @media (min-width: 640px) {
-    .hero-visual-mobile img {
-        height: min(28rem, 62vh);
-    }
-
     .hero-visual-mobile-card {
         inset-inline: 2rem;
         bottom: 1.75rem;
@@ -1616,10 +1627,6 @@ body.overflow-hidden .site-float {
 }
 
 @media (min-width: 768px) {
-    .hero-visual-mobile img {
-        height: min(34rem, 66vh);
-    }
-
     .hero-visual-mobile-card {
         inset-inline: 2.5rem;
         bottom: 2rem;
@@ -1844,6 +1851,11 @@ html.js .reveal.is-visible .media-zoom {
     html.js .hero-cinematic .hero-parallax {
         transform: scale(1.12);
         will-change: transform;
+    }
+
+    html.js .hero-cinematic .hero-visual-mobile .hero-parallax {
+        transform: none;
+        will-change: auto;
     }
 }
 

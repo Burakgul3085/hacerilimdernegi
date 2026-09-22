@@ -209,6 +209,26 @@ class FrontendContentTest extends TestCase
             ->assertDontSee('data-scroll-progress', false);
     }
 
+    public function test_home_page_renders_uploaded_hero_image_on_mobile_and_desktop_layers(): void
+    {
+        SiteSettings::put('hero_image', 'hero/test-hero.jpg');
+
+        $html = $this->get('/')
+            ->assertOk()
+            ->assertSee('hero-visual-mobile', false)
+            ->assertSee('hero/test-hero.jpg', false)
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/hero-visual-mobile[^>]*>\s*<img[^>]+hero\/test-hero\.jpg/s',
+            $html,
+        );
+        $this->assertMatchesRegularExpression(
+            '/hero-visual absolute[^>]*>\s*<img[^>]+hero\/test-hero\.jpg/s',
+            $html,
+        );
+    }
+
     public function test_inner_pages_reserve_space_under_the_fixed_header(): void
     {
         $this->get('/hakkimizda')
