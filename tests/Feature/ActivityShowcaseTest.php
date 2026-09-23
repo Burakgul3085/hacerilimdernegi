@@ -241,12 +241,16 @@ class ActivityShowcaseTest extends TestCase
             'sort_order' => 999,
         ]);
 
-        $this->get('/')
+        $html = $this->get('/')
             ->assertOk()
             ->assertSee('Ana sayfa faaliyet kartı')
             ->assertSee('Tüm faaliyetler')
             ->assertSee(route('activities.index', absolute: false), false)
-            ->assertDontSee('Yaklaşan programlar');
+            ->assertDontSee('Yaklaşan programlar')
+            ->getContent();
+
+        $this->assertSame(1, substr_count($html, 'hero-visual-mobile-card'));
+        $this->assertStringContainsString('hero-visual-mobile-card lg:hidden', $html);
     }
 
     public function test_search_finds_published_activities(): void

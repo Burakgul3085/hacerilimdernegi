@@ -1635,6 +1635,12 @@ body.overflow-hidden .site-float {
     }
 }
 
+@media (min-width: 1024px) {
+    .hero-visual-mobile-card {
+        display: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .site-topbar {
         transition: none;
