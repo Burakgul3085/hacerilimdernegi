@@ -48,6 +48,7 @@ class PostCommentTest extends TestCase
             ->assertSee('name="website"', false)
             ->assertSee(route('posts.comments.store', $post), false)
             ->assertSee('href="#yorumlar"', false)
+            ->assertSee('post-rail', false)
             ->assertDontSee('Bu yazı hakkında yazın');
     }
 
@@ -284,6 +285,25 @@ class PostCommentTest extends TestCase
             ->assertOk()
             ->assertSee('Panelden onaylanacak yorum')
             ->assertSee('Ayşe Yılmaz');
+    }
+
+    public function test_admin_can_delete_a_comment_from_the_post(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => UserRole::Editor]));
+
+        $post = $this->makePost(['slug' => 'silinecek-yorum']);
+        $comment = $this->makeComment($post, ['body' => 'Silinecek yorum']);
+
+        Livewire::test(CommentsRelationManager::class, [
+            'ownerRecord' => $post,
+            'pageClass' => EditPost::class,
+        ])
+            ->assertOk()
+            ->assertActionVisible(TestAction::make('delete')->table($comment))
+            ->assertSee('Sil')
+            ->callAction(TestAction::make('delete')->table($comment));
+
+        $this->assertDatabaseMissing('post_comments', ['id' => $comment->id]);
     }
 
     /**

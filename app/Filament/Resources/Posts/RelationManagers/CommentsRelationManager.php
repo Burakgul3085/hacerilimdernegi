@@ -138,6 +138,13 @@ class CommentsRelationManager extends RelationManager
                         $record->update(['status' => PostCommentStatus::Approved]);
                         $this->notifyApproval($record);
                     }),
+                DeleteAction::make()
+                    ->label('Sil')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Yorumu sil')
+                    ->modalDescription('Yorum kalıcı olarak silinir ve siteden kalkar.'),
                 Action::make('reject')
                     ->label('Reddet')
                     ->icon('heroicon-o-x-mark')
@@ -158,7 +165,6 @@ class CommentsRelationManager extends RelationManager
                     ->after(function (PostComment $record): void {
                         $this->notifyApproval($record);
                     }),
-                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

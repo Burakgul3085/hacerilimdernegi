@@ -170,7 +170,26 @@
             @endif
         </div>
 
-        <aside class="reveal space-y-4 lg:sticky lg:top-32 lg:self-start">
+        <aside
+            class="post-rail space-y-4 lg:sticky lg:self-start"
+            x-data="{
+                offset: 128,
+                previous: 0,
+                track() {
+                    if (! window.matchMedia('(min-width: 1024px)').matches) {
+                        return;
+                    }
+
+                    const y = window.scrollY;
+                    const delta = y - this.previous;
+                    this.previous = y;
+                    const min = Math.min(128, window.innerHeight - this.$el.offsetHeight - 24);
+                    this.offset = Math.max(min, Math.min(128, this.offset - delta));
+                },
+            }"
+            x-init="previous = window.scrollY"
+            @scroll.window.passive="track()"
+            :style="window.matchMedia('(min-width: 1024px)').matches ? `top:${offset}px` : null">
             <div class="card p-6">
                 <p class="eyebrow">{{ $post->isPoem() ? 'Şiir bilgileri' : 'Yazı bilgileri' }}</p>
                 <ul class="mt-4 space-y-3.5">

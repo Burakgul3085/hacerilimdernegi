@@ -2376,6 +2376,12 @@ html.js .reveal.is-visible .media-zoom {
         grid-template-columns: minmax(0, 1fr) 22rem;
         gap: 4rem;
     }
+
+    .post-rail {
+        position: sticky;
+        align-self: start;
+        z-index: 20;
+    }
 }
 
 .post-cover {
