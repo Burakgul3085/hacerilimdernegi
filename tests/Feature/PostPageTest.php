@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PostPageTest extends TestCase
@@ -80,6 +81,7 @@ class PostPageTest extends TestCase
             ->assertSee('data-url="'.route('posts.show', $post, absolute: true).'"', false)
             ->assertSee('og:type" content="article', false)
             ->assertSee('property="og:image" content="'.$post->coverAbsoluteUrl().'"', false)
+            ->assertSee('property="og:image:alt" content="Web sitemiz yayında"', false)
             ->assertSee('activity-hero-cover', false)
             ->assertSee('activity-cover-img', false)
             ->assertSee('activity-marquee', false)
@@ -87,6 +89,37 @@ class PostPageTest extends TestCase
             ->assertDontSee('object-cover', false)
             ->assertDontSee('aspect-[16/9]', false)
             ->assertDontSee('post-gallery-item', false);
+    }
+
+    public function test_shared_link_uses_that_posts_cover_size_for_whatsapp(): void
+    {
+        if (! function_exists('imagejpeg')) {
+            $this->markTestSkipped('GD jpeg support is unavailable.');
+        }
+
+        $canvas = imagecreatetruecolor(640, 360);
+        ob_start();
+        imagejpeg($canvas);
+        $binary = ob_get_clean();
+        imagedestroy($canvas);
+
+        Storage::disk('public')->put('posts/og-cover.jpg', $binary);
+
+        $post = $this->makePost([
+            'title' => 'Kapaklı yazı',
+            'slug' => 'kapakli-yazi',
+            'image' => 'posts/og-cover.jpg',
+        ]);
+
+        $this->get(route('posts.show', $post))
+            ->assertOk()
+            ->assertSee('property="og:image" content="'.$post->coverAbsoluteUrl().'"', false)
+            ->assertSee('property="og:image:width" content="640"', false)
+            ->assertSee('property="og:image:height" content="360"', false)
+            ->assertSee('property="og:image:type" content="image/jpeg"', false)
+            ->assertSee('property="og:image:alt" content="Kapaklı yazı"', false);
+
+        Storage::disk('public')->delete('posts/og-cover.jpg');
     }
 
     public function test_related_posts_prefer_the_same_type(): void

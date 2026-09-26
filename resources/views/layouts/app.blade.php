@@ -31,10 +31,18 @@
     $siteUrl = rtrim(\App\Support\MailTemplate::publicBaseUrl(), '/');
     $canonical = $siteUrl.request()->getPathInfo();
     $ogImage = \App\Support\SiteSettings::heroImageUrl();
+    $ogImageAlt = $settings['site_name'];
+    $ogImageWidth = null;
+    $ogImageHeight = null;
+    $ogImageMime = null;
     if (isset($post) && $post instanceof \App\Models\Post) {
-        $cover = $post->coverAbsoluteUrl();
-        if (is_string($cover) && $cover !== '') {
-            $ogImage = $cover;
+        $shareImage = $post->openGraphImage();
+        if (is_array($shareImage)) {
+            $ogImage = $shareImage['url'];
+            $ogImageAlt = $post->title;
+            $ogImageWidth = $shareImage['width'];
+            $ogImageHeight = $shareImage['height'];
+            $ogImageMime = $shareImage['mime'];
         }
     }
     if (! str_starts_with($ogImage, 'http://') && ! str_starts_with($ogImage, 'https://')) {
@@ -110,7 +118,17 @@
     <meta property="og:description" content="@yield('description', $settings['tagline'] ?? '')">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:image" content="{{ $ogImage }}">
-    <meta property="og:image:alt" content="{{ $settings['site_name'] }}">
+    @if (str_starts_with($ogImage, 'https://'))
+        <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    @endif
+    @if ($ogImageWidth && $ogImageHeight)
+        <meta property="og:image:width" content="{{ $ogImageWidth }}">
+        <meta property="og:image:height" content="{{ $ogImageHeight }}">
+    @endif
+    @if ($ogImageMime)
+        <meta property="og:image:type" content="{{ $ogImageMime }}">
+    @endif
+    <meta property="og:image:alt" content="{{ $ogImageAlt }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="@yield('title', $settings['site_name'])">
     <meta name="twitter:description" content="@yield('description', $settings['tagline'] ?? '')">

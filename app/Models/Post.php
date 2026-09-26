@@ -278,6 +278,45 @@ class Post extends Model
         return rtrim(MailTemplate::publicBaseUrl(), '/').'/'.ltrim($url, '/');
     }
 
+    /**
+     * WhatsApp ve benzeri önizlemeler görselin adresini ve gerçek ölçüsünü ister.
+     *
+     * @return array{url: string, width: int|null, height: int|null, mime: string|null}|null
+     */
+    public function openGraphImage(): ?array
+    {
+        $url = $this->coverAbsoluteUrl();
+
+        if ($url === null) {
+            return null;
+        }
+
+        $width = null;
+        $height = null;
+        $mime = null;
+
+        if (filled($this->image)) {
+            $path = Storage::disk('public')->path($this->image);
+
+            if (is_file($path)) {
+                $info = @getimagesize($path);
+
+                if (is_array($info)) {
+                    $width = isset($info[0]) && $info[0] > 0 ? $info[0] : null;
+                    $height = isset($info[1]) && $info[1] > 0 ? $info[1] : null;
+                    $mime = is_string($info['mime'] ?? null) ? $info['mime'] : null;
+                }
+            }
+        }
+
+        return [
+            'url' => $url,
+            'width' => $width,
+            'height' => $height,
+            'mime' => $mime,
+        ];
+    }
+
     public function sourceHref(): ?string
     {
         $url = trim((string) $this->source_url);
