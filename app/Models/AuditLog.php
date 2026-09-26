@@ -61,6 +61,9 @@ class AuditLog extends Model
         'author_id' => 'Yazar',
         'category_id' => 'Kategori',
         'email' => 'E-posta',
+        'first_name' => 'Ad',
+        'last_name' => 'Soyad',
+        'hide_name' => 'İsim gizli',
         'role' => 'Rol',
         'caption' => 'Açıklama',
         'path' => 'Dosya',
@@ -192,6 +195,7 @@ class AuditLog extends Model
             EventRegistration::class => 'Program kaydı',
             ContactMessage::class => 'İletişim mesajı',
             NewsletterSubscriber::class => 'E-bülten',
+            PostComment::class => 'Yazı yorumu',
             default => filled($this->model_type) ? class_basename($this->model_type) : 'Kayıt',
         };
     }
@@ -381,7 +385,7 @@ class AuditLog extends Model
             return $resolved;
         }
 
-        if (is_bool($value) || in_array($key, ['is_published', 'registration_open'], true)) {
+        if (is_bool($value) || in_array($key, ['is_published', 'registration_open', 'hide_name'], true)) {
             return in_array($value, [true, 1, '1'], true) ? 'Evet' : 'Hayır';
         }
 
@@ -450,6 +454,7 @@ class AuditLog extends Model
             'author_id' => User::query()->find($id)?->name,
             'event_id' => Event::query()->find($id)?->title,
             'activity_id' => Activity::query()->find($id)?->title,
+            'post_id' => Post::query()->find($id)?->title,
             'media_album_id' => MediaAlbum::query()->find($id)?->title,
             default => null,
         };

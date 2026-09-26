@@ -12,6 +12,7 @@ use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,6 +46,11 @@ class PostsTable
                         ? 'warning'
                         : ($record->submitted_from_public ? 'info' : 'gray')),
                 IconColumn::make('is_published')->label('Yayında')->boolean(),
+                TextColumn::make('pending_comments_count')
+                    ->label('Bekleyen yorum')
+                    ->counts('pendingComments')
+                    ->badge()
+                    ->color(fn (int|string|null $state): string => (int) $state > 0 ? 'warning' : 'gray'),
                 TextColumn::make('published_at')->label('Tarih')->date('d.m.Y'),
             ])
             ->filters([
@@ -66,6 +72,9 @@ class PostsTable
                             default => $query,
                         };
                     }),
+                Filter::make('pending_comments')
+                    ->label('Onay bekleyen yorumu olanlar')
+                    ->query(fn (Builder $query): Builder => $query->whereHas('pendingComments')),
             ])
             ->recordActions([
                 ViewAction::make()->label('Görüntüle'),

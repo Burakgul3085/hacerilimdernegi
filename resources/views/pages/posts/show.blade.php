@@ -50,7 +50,8 @@
 
 <article class="shell py-14 lg:py-20">
     <div class="post-layout">
-        <div class="reveal min-w-0" x-data="{ lightbox: null }" @keydown.escape.window="lightbox = null">
+        <div class="reveal min-w-0">
+        <div x-data="{ lightbox: null }" @keydown.escape.window="lightbox = null">
             @if ($coverUrl)
                 <button type="button"
                         class="activity-hero-cover post-cover rounded-2xl"
@@ -87,6 +88,67 @@
                 </p>
             @endif
 
+            <div x-cloak
+                 x-show="lightbox"
+                 x-on:click.self="lightbox = null"
+                 class="post-lightbox"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-label="Görsel">
+                <img :src="lightbox" alt="{{ $post->title }}">
+            </div>
+        </div>
+
+            <section id="yorumlar" class="mt-14 scroll-mt-28">
+                <div class="mb-6 flex items-center gap-5">
+                    <h2 class="font-display text-2xl text-gold">Yorumlar</h2>
+                    <span class="rule flex-1"></span>
+                </div>
+
+                <x-flash-status context="post-comment" class="mb-6" />
+
+                @if ($comments->isEmpty())
+                    <p class="text-sm leading-relaxed text-muted">Onaylanan yorumlar burada görünür.</p>
+                @else
+                    <ol class="space-y-4">
+                        @foreach ($comments as $comment)
+                            <li class="card p-5">
+                                <p class="font-display text-xl leading-snug text-forest">{{ $comment->publicName() }}</p>
+                                <p class="mt-1 text-[13px] text-muted">{{ $comment->created_at?->timezone('Europe/Istanbul')->translatedFormat('d F Y') }}</p>
+                                <p class="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-muted">{{ $comment->body }}</p>
+                            </li>
+                        @endforeach
+                    </ol>
+                @endif
+
+                <form method="POST" action="{{ route('posts.comments.store', $post) }}" class="card relative mt-8 space-y-5 p-6">
+                    @csrf
+                    <x-honeypot />
+                    <div>
+                        <p class="font-display text-2xl leading-snug text-forest">Yorum yaz</p>
+                        <p class="mt-2 text-sm leading-relaxed text-muted">Yorumunuz yönetici onayından sonra bu yazının altında yayınlanır. İsterseniz adınız sitede görünmez. Onaylandığında e-posta adresinize haber gider.</p>
+                    </div>
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <x-field name="first_name" label="Ad" placeholder="Ad" required autocomplete="given-name" />
+                        <x-field name="last_name" label="Soyad" placeholder="Soyad" required autocomplete="family-name" />
+                    </div>
+
+                    <x-field name="email" type="email" label="E-posta" placeholder="E-posta" required autocomplete="email" />
+                    <x-field name="body" type="textarea" label="Yorum" rows="6" placeholder="Bu yazı hakkındaki düşünceniz" required />
+
+                    <label class="flex items-start gap-3 text-[13px] leading-relaxed text-muted">
+                        <input type="checkbox" name="hide_name" value="1" @checked(old('hide_name'))
+                               class="mt-0.5 h-4 w-4 shrink-0 rounded border-line text-forest focus:ring-gold">
+                        <span>İsmimi sitede gizle</span>
+                    </label>
+
+                    <x-consent />
+
+                    <button type="submit" class="btn btn-solid btn-sm">Gönder</button>
+                </form>
+            </section>
+
             @if ($previous || $next)
                 <nav class="post-pager mt-14" aria-label="Diğer yazılar">
                     @if ($previous)
@@ -106,16 +168,6 @@
                     @endif
                 </nav>
             @endif
-
-            <div x-cloak
-                 x-show="lightbox"
-                 x-on:click.self="lightbox = null"
-                 class="post-lightbox"
-                 role="dialog"
-                 aria-modal="true"
-                 aria-label="Görsel">
-                <img :src="lightbox" alt="{{ $post->title }}">
-            </div>
         </div>
 
         <aside class="reveal space-y-4 lg:sticky lg:top-32 lg:self-start">
@@ -171,7 +223,7 @@
                     </div>
                 </div>
 
-                <a href="{{ route('contact') }}" class="btn btn-solid btn-sm mt-6 w-full">Bu yazı hakkında yazın</a>
+                <a href="#yorumlar" class="btn btn-solid btn-sm mt-6 w-full">Yorum yaz</a>
             </div>
 
             @if ($related->isNotEmpty())

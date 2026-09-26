@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\ProcessPostComment;
 use App\Actions\ProcessVisitorPost;
+use App\Enums\PostCommentStatus;
 use App\Models\Post;
+use App\Models\PostComment;
 use App\Support\FormGuard;
 use App\Support\FormStatus;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -93,7 +97,7 @@ class PostController extends Controller
     {
         abort_unless($post->isVisibleOnSite(), 404);
 
-        $post->load(['author', 'category']);
+        $post->load(['author', 'category', 'approvedComments']);
 
         $related = Post::query()
             ->with('category')
@@ -115,7 +119,93 @@ class PostController extends Controller
             'next' => $this->neighbouringPost($post, previous: false),
             'shareUrl' => $shareUrl,
             'whatsappShareUrl' => 'https://wa.me/?text='.rawurlencode($shareText),
+            'comments' => $post->approvedComments,
         ]);
+    }
+
+    public function storeComment(Request $request, Post $post, ProcessPostComment $process): RedirectResponse
+    {
+        abort_unless($post->isVisibleOnSite(), 404);
+
+        if (FormGuard::isBot($request)) {
+            return $this->commentRedirect($post, 'Yorumunuz alındı. Yayınlanması için yönetici onayı bekleniyor.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => ['required', 'string', 'max:80'],
+            'last_name' => ['required', 'string', 'max:80'],
+            'email' => ['required', 'email', 'max:180'],
+            'body' => ['required', 'string', 'max:2000'],
+            'hide_name' => ['sometimes', 'boolean'],
+            'kvkk_accepted' => ['accepted'],
+        ], [
+            'first_name.required' => 'Ad gerekli.',
+            'last_name.required' => 'Soyad gerekli.',
+            'email.required' => 'E-posta gerekli.',
+            'email.email' => 'Geçerli bir e-posta yazın.',
+            'body.required' => 'Yorum gerekli.',
+            'body.max' => 'Yorum en fazla 2000 karakter olabilir.',
+            'kvkk_accepted.accepted' => 'KVKK aydınlatma metnini kabul etmelisiniz.',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->commentRedirect($post)
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $validator->validated();
+        $firstName = PostComment::plainName($data['first_name']);
+        $lastName = PostComment::plainName($data['last_name']);
+        $body = PostComment::plainBody($data['body']);
+        $errors = [];
+
+        if ($firstName === '') {
+            $errors['first_name'] = 'Ad gerekli.';
+        }
+
+        if ($lastName === '') {
+            $errors['last_name'] = 'Soyad gerekli.';
+        }
+
+        if ($body === '') {
+            $errors['body'] = 'Yorum gerekli.';
+        }
+
+        if ($errors !== []) {
+            return $this->commentRedirect($post)
+                ->withErrors($errors)
+                ->withInput();
+        }
+
+        $comment = $post->comments()->create([
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $data['email'],
+            'body' => $body,
+            'hide_name' => $request->boolean('hide_name'),
+            'status' => PostCommentStatus::Pending,
+            'ip_address' => $request->ip(),
+        ]);
+
+        $process->handle($comment);
+
+        return $this->commentRedirect($post, 'Yorumunuz alındı. Yayınlanması için yönetici onayı bekleniyor.');
+    }
+
+    private function commentRedirect(Post $post, ?string $message = null): RedirectResponse
+    {
+        $redirect = redirect()
+            ->route('posts.show', $post)
+            ->withFragment('yorumlar');
+
+        if ($message === null) {
+            return $redirect;
+        }
+
+        return $redirect
+            ->with('status', $message)
+            ->with('status_context', 'post-comment');
     }
 
     private function neighbouringPost(Post $post, bool $previous): ?Post

@@ -7,6 +7,7 @@ use App\Filament\Resources\Posts\Pages\CreatePost;
 use App\Filament\Resources\Posts\Pages\EditPost;
 use App\Filament\Resources\Posts\Pages\ListPosts;
 use App\Filament\Resources\Posts\Pages\ViewPost;
+use App\Filament\Resources\Posts\RelationManagers\CommentsRelationManager;
 use App\Filament\Resources\Posts\Schemas\PostForm;
 use App\Filament\Resources\Posts\Schemas\PostInfolist;
 use App\Filament\Resources\Posts\Tables\PostsTable;
@@ -62,6 +63,13 @@ class PostResource extends Resource
     public static function table(Table $table): Table
     {
         return PostsTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            CommentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

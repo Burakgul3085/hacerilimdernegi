@@ -8,6 +8,7 @@ use App\Support\MailTemplate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -80,6 +81,21 @@ class Post extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(PostComment::class);
+    }
+
+    public function pendingComments(): HasMany
+    {
+        return $this->comments()->pending();
+    }
+
+    public function approvedComments(): HasMany
+    {
+        return $this->comments()->approved()->oldest();
     }
 
     public function scopePublished(Builder $query): Builder
