@@ -8,7 +8,6 @@ use App\Models\Post;
 use App\Models\PostComment;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -99,7 +98,8 @@ class CommentsRelationManager extends RelationManager
                     ->searchable(['first_name', 'last_name']),
                 TextColumn::make('email')
                     ->label('E-posta')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('body')
                     ->label('Yorum')
                     ->limit(80)
@@ -107,7 +107,8 @@ class CommentsRelationManager extends RelationManager
                     ->searchable(),
                 IconColumn::make('hide_name')
                     ->label('İsim gizli')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->label('Durum')
                     ->badge()
@@ -138,13 +139,16 @@ class CommentsRelationManager extends RelationManager
                         $record->update(['status' => PostCommentStatus::Approved]);
                         $this->notifyApproval($record);
                     }),
-                DeleteAction::make()
+                Action::make('delete')
                     ->label('Sil')
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Yorumu sil')
-                    ->modalDescription('Yorum kalıcı olarak silinir ve siteden kalkar.'),
+                    ->modalDescription('Yorum kalıcı olarak silinir ve siteden kalkar.')
+                    ->modalSubmitActionLabel('Sil')
+                    ->successNotificationTitle('Yorum silindi')
+                    ->action(fn (PostComment $record): bool => (bool) $record->delete()),
                 Action::make('reject')
                     ->label('Reddet')
                     ->icon('heroicon-o-x-mark')
