@@ -2544,6 +2544,39 @@ html.js .reveal.is-visible .media-zoom {
     cursor: zoom-out;
 }
 
+.post-lightbox-navable {
+    padding-inline: 4.5rem;
+}
+
+.post-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    display: flex;
+    height: 3rem;
+    width: 3rem;
+    transform: translateY(-50%);
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgb(255 255 255 / 0.4);
+    background: rgb(255 250 242 / 0.94);
+    color: var(--color-forest);
+    cursor: pointer;
+}
+
+.post-lightbox-nav:hover {
+    background: white;
+}
+
+.post-lightbox-prev {
+    left: 1rem;
+}
+
+.post-lightbox-next {
+    right: 1rem;
+}
+
 .post-lightbox img {
     width: auto;
     height: auto;
@@ -2552,6 +2585,26 @@ html.js .reveal.is-visible .media-zoom {
     object-fit: contain;
     object-position: center;
     border-radius: 1rem;
+    cursor: default;
+}
+
+@media (max-width: 640px) {
+    .post-lightbox-navable {
+        padding-inline: 3.25rem;
+    }
+
+    .post-lightbox-nav {
+        height: 2.5rem;
+        width: 2.5rem;
+    }
+
+    .post-lightbox-prev {
+        left: 0.4rem;
+    }
+
+    .post-lightbox-next {
+        right: 0.4rem;
+    }
 }
 
 .prose-hacer {

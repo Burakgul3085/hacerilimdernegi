@@ -20,7 +20,21 @@
 @endphp
 
 @if ($photos !== [])
-    <div {{ $attributes->class('activity-marquee') }} x-data="{ lightbox: null }" @keydown.escape.window="lightbox = null">
+    <div {{ $attributes->class('activity-marquee') }}
+         x-data="{
+            photos: {{ \Illuminate\Support\Js::from(array_column($photos, 'url')) }},
+            index: null,
+            open(photoIndex) { this.index = Number(photoIndex) },
+            close() { this.index = null },
+            step(direction) {
+                if (this.index === null || this.photos.length < 2) return
+                const count = this.photos.length
+                this.index = (this.index + direction + count) % count
+            },
+         }"
+         @keydown.escape.window="close()"
+         @keydown.left.window="step(-1)"
+         @keydown.right.window="step(1)">
         <div class="activity-marquee-viewport" aria-label="{{ $alt }} galerisi">
             <div class="activity-marquee-track">
                 @foreach ($strip as $index => $item)
@@ -30,8 +44,7 @@
                     @endphp
                     <button type="button"
                             class="activity-marquee-item"
-                            data-src="{{ $item['url'] }}"
-                            x-on:click="lightbox = $el.dataset.src"
+                            x-on:click="open({{ $photoIndex }})"
                             @if ($isClone) tabindex="-1" aria-hidden="true" @endif>
                         <img src="{{ $item['url'] }}"
                              alt="{{ $isClone ? '' : $alt.' görseli '.($photoIndex + 1) }}"
@@ -44,13 +57,27 @@
         </div>
 
         <div x-cloak
-             x-show="lightbox"
-             x-on:click.self="lightbox = null"
-             class="post-lightbox"
+             x-show="index !== null"
+             x-on:click.self="close()"
+             class="post-lightbox post-lightbox-navable"
              role="dialog"
              aria-modal="true"
              aria-label="Görsel">
-            <img :src="lightbox" alt="{{ $alt }}">
+            <button type="button"
+                    class="post-lightbox-nav post-lightbox-prev"
+                    x-show="photos.length > 1"
+                    x-on:click="step(-1)"
+                    aria-label="Önceki görsel">
+                <x-ui.icon name="chevron-right" class="h-5 w-5 rotate-180" />
+            </button>
+            <img :src="index === null ? '' : photos[index]" alt="{{ $alt }}">
+            <button type="button"
+                    class="post-lightbox-nav post-lightbox-next"
+                    x-show="photos.length > 1"
+                    x-on:click="step(1)"
+                    aria-label="Sonraki görsel">
+                <x-ui.icon name="chevron-right" class="h-5 w-5" />
+            </button>
         </div>
     </div>
 @endif
