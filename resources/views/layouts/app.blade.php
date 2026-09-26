@@ -44,7 +44,7 @@
     }
     $shareImage = null;
     $usingLogo = false;
-    if (request()->routeIs('social')) {
+    if (request()->routeIs('home', 'social')) {
         $shareImage = \App\Support\OpenGraphImage::logo();
         $usingLogo = true;
     } elseif ($shareRecord !== null) {

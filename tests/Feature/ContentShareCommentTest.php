@@ -119,6 +119,14 @@ class ContentShareCommentTest extends TestCase
         $this->assertSame($child->id, PostComment::query()->firstOrFail()->commentable_id);
     }
 
+    public function test_home_share_uses_the_association_logo(): void
+    {
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('property="og:image" content="'.OpenGraphImage::logo()['url'].'"', false)
+            ->assertSee('images/og-logo.jpg', false);
+    }
+
     public function test_vitrine_share_uses_the_logo_and_has_no_comments(): void
     {
         $this->get(route('social'))
