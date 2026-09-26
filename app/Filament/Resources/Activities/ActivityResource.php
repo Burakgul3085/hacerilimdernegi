@@ -8,6 +8,7 @@ use App\Filament\Resources\Activities\Pages\EditActivity;
 use App\Filament\Resources\Activities\Pages\ListActivities;
 use App\Filament\Resources\Activities\Schemas\ActivityForm;
 use App\Filament\Resources\Activities\Tables\ActivitiesTable;
+use App\Filament\Resources\Posts\RelationManagers\CommentsRelationManager;
 use App\Models\Activity;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -47,6 +48,13 @@ class ActivityResource extends Resource
     public static function table(Table $table): Table
     {
         return ActivitiesTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            CommentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\SubmitContentComment;
 use App\Models\Announcement;
+use App\Support\ShareLinks;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AnnouncementController extends Controller
@@ -33,17 +37,21 @@ class AnnouncementController extends Controller
             ->limit(3)
             ->get();
 
-        $shareUrl = route('announcements.show', $announcement, absolute: true);
-        $shareText = $announcement->title.' — '.$shareUrl;
+        $announcement->load('approvedComments');
 
         return view('pages.announcements.show', [
             'announcement' => $announcement,
             'related' => $related,
             'previous' => $this->neighbouringAnnouncement($announcement, previous: true),
             'next' => $this->neighbouringAnnouncement($announcement, previous: false),
-            'shareUrl' => $shareUrl,
-            'whatsappShareUrl' => 'https://wa.me/?text='.rawurlencode($shareText),
+            ...ShareLinks::for($announcement->title, route('announcements.show', $announcement, absolute: true)),
+            'comments' => $announcement->approvedComments,
         ]);
+    }
+
+    public function storeComment(Request $request, Announcement $announcement, SubmitContentComment $submit): RedirectResponse
+    {
+        return $submit->handle($request, $announcement);
     }
 
     private function neighbouringAnnouncement(Announcement $announcement, bool $previous): ?Announcement

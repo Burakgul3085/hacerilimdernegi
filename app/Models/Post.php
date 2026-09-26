@@ -4,11 +4,12 @@ namespace App\Models;
 
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasContentGallery;
+use App\Models\Concerns\HasModeratedComments;
 use App\Support\MailTemplate;
+use App\Support\OpenGraphImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -17,6 +18,7 @@ class Post extends Model
 {
     use Auditable;
     use HasContentGallery;
+    use HasModeratedComments;
     use Notifiable;
 
     protected $fillable = [
@@ -81,21 +83,6 @@ class Post extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
-    }
-
-    public function comments(): HasMany
-    {
-        return $this->hasMany(PostComment::class);
-    }
-
-    public function pendingComments(): HasMany
-    {
-        return $this->comments()->pending();
-    }
-
-    public function approvedComments(): HasMany
-    {
-        return $this->comments()->approved()->oldest();
     }
 
     public function scopePublished(Builder $query): Builder
@@ -285,36 +272,7 @@ class Post extends Model
      */
     public function openGraphImage(): ?array
     {
-        $url = $this->coverAbsoluteUrl();
-
-        if ($url === null) {
-            return null;
-        }
-
-        $width = null;
-        $height = null;
-        $mime = null;
-
-        if (filled($this->image)) {
-            $path = Storage::disk('public')->path($this->image);
-
-            if (is_file($path)) {
-                $info = @getimagesize($path);
-
-                if (is_array($info)) {
-                    $width = isset($info[0]) && $info[0] > 0 ? $info[0] : null;
-                    $height = isset($info[1]) && $info[1] > 0 ? $info[1] : null;
-                    $mime = is_string($info['mime'] ?? null) ? $info['mime'] : null;
-                }
-            }
-        }
-
-        return [
-            'url' => $url,
-            'width' => $width,
-            'height' => $height,
-            'mime' => $mime,
-        ];
+        return OpenGraphImage::fromStoragePath(is_string($this->image) ? $this->image : null);
     }
 
     public function sourceHref(): ?string

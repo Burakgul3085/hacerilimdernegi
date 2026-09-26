@@ -28,6 +28,12 @@
     @endif
 </x-page-header>
 
+<section class="shell pt-10">
+    <div class="card ml-auto max-w-md p-6">
+        <x-share-actions :share-url="$shareUrl" :whatsapp-share-url="$whatsappShareUrl" />
+    </div>
+</section>
+
 <section class="vitrine-board shell py-12 lg:py-16" x-data="{ openIndex: null }" @keydown.escape.window="openIndex = null">
     @if ($posts !== [])
         <div class="reveal mb-8 flex items-end justify-between gap-4 border-b border-line pb-5">

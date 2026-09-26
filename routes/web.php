@@ -26,6 +26,9 @@ foreach (CorporatePages::prettyRoutes() as $slug => $name) {
 }
 Route::get('/faaliyetler', [ActivityController::class, 'index'])->name('activities.index');
 Route::get('/faaliyetler/{activity:slug}', [ActivityController::class, 'show'])->name('activities.show');
+Route::post('/faaliyetler/{activity:slug}/yorumlar', [ActivityController::class, 'storeComment'])
+    ->middleware('throttle:forms')
+    ->name('activities.comments.store');
 Route::get('/faaliyetler/{activity:slug}/kayit', [ActivityController::class, 'registerForm'])->name('activities.register.form');
 Route::post('/faaliyetler/{activity:slug}/kayit', [ActivityController::class, 'register'])
     ->middleware('throttle:forms')
@@ -48,9 +51,18 @@ Route::post('/yazilar/{post:slug}/yorumlar', [PostController::class, 'storeComme
     ->name('posts.comments.store');
 Route::get('/duyurular', [AnnouncementController::class, 'index'])->name('announcements.index');
 Route::get('/duyurular/{announcement:slug}', [AnnouncementController::class, 'show'])->name('announcements.show');
+Route::post('/duyurular/{announcement:slug}/yorumlar', [AnnouncementController::class, 'storeComment'])
+    ->middleware('throttle:forms')
+    ->name('announcements.comments.store');
 Route::get('/medya', [MediaController::class, 'index'])->name('media.index');
 Route::get('/medya/{album:slug}', [MediaController::class, 'show'])->name('media.show');
 Route::get('/medya/{album:slug}/{child}', [MediaController::class, 'showChild'])->name('media.children.show');
+Route::post('/medya/{album:slug}/yorumlar', [MediaController::class, 'storeComment'])
+    ->middleware('throttle:forms')
+    ->name('media.comments.store');
+Route::post('/medya/{album:slug}/{child}/yorumlar', [MediaController::class, 'storeChildComment'])
+    ->middleware('throttle:forms')
+    ->name('media.children.comments.store');
 Route::get('/vitrin', [FormController::class, 'social'])->name('social');
 Route::permanentRedirect('/seckiler', '/vitrin');
 Route::permanentRedirect('/sosyal', '/vitrin');

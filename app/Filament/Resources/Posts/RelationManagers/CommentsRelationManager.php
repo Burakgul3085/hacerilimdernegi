@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Posts\RelationManagers;
 
 use App\Actions\NotifyPostCommentApproved;
 use App\Enums\PostCommentStatus;
-use App\Models\Post;
 use App\Models\PostComment;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -36,7 +35,7 @@ class CommentsRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        if (! $ownerRecord instanceof Post) {
+        if (! method_exists($ownerRecord, 'pendingComments')) {
             return null;
         }
 

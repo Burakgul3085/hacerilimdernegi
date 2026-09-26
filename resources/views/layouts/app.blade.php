@@ -35,15 +35,31 @@
     $ogImageWidth = null;
     $ogImageHeight = null;
     $ogImageMime = null;
-    if (isset($post) && $post instanceof \App\Models\Post) {
-        $shareImage = $post->openGraphImage();
-        if (is_array($shareImage)) {
-            $ogImage = $shareImage['url'];
-            $ogImageAlt = $post->title;
-            $ogImageWidth = $shareImage['width'];
-            $ogImageHeight = $shareImage['height'];
-            $ogImageMime = $shareImage['mime'];
+    $shareRecord = null;
+    foreach (['post', 'activity', 'announcement', 'album'] as $shareKey) {
+        if (isset(${$shareKey}) && is_object(${$shareKey}) && method_exists(${$shareKey}, 'openGraphImage')) {
+            $shareRecord = ${$shareKey};
+            break;
         }
+    }
+    $shareImage = null;
+    $usingLogo = false;
+    if (request()->routeIs('social')) {
+        $shareImage = \App\Support\OpenGraphImage::logo();
+        $usingLogo = true;
+    } elseif ($shareRecord !== null) {
+        $shareImage = $shareRecord->openGraphImage();
+        if ($shareImage === null) {
+            $shareImage = \App\Support\OpenGraphImage::logo();
+            $usingLogo = true;
+        }
+    }
+    if (is_array($shareImage)) {
+        $ogImage = $shareImage['url'];
+        $ogImageAlt = $usingLogo ? $settings['site_name'] : ($shareRecord->title ?? $settings['site_name']);
+        $ogImageWidth = $shareImage['width'];
+        $ogImageHeight = $shareImage['height'];
+        $ogImageMime = $shareImage['mime'];
     }
     if (! str_starts_with($ogImage, 'http://') && ! str_starts_with($ogImage, 'https://')) {
         $ogImage = $siteUrl.'/'.ltrim($ogImage, '/');

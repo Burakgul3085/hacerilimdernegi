@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasContentGallery;
+use App\Models\Concerns\HasModeratedComments;
+use App\Models\Concerns\ProvidesShareCover;
 use Database\Factories\AnnouncementFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,6 +20,8 @@ class Announcement extends Model
 
     use HasContentGallery;
     use HasFactory;
+    use HasModeratedComments;
+    use ProvidesShareCover;
 
     protected $fillable = [
         'title',
@@ -114,5 +118,10 @@ class Announcement extends Model
         }
 
         return Storage::disk('public')->url($this->image);
+    }
+
+    public function shareCoverPath(): ?string
+    {
+        return is_string($this->image) && $this->image !== '' ? $this->image : null;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\ProcessEventRegistration;
+use App\Actions\SubmitContentComment;
 use App\Enums\ActivityStatus;
 use App\Enums\ApplicationStatus;
 use App\Models\Activity;
@@ -10,6 +11,7 @@ use App\Models\EventRegistration;
 use App\Support\FormGuard;
 use App\Support\FormStatus;
 use App\Support\RegistrationForm;
+use App\Support\ShareLinks;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,7 +47,7 @@ class ActivityController extends Controller
     {
         abort_unless($activity->is_published, 404);
 
-        $activity->load('sessions');
+        $activity->load(['sessions', 'approvedComments']);
 
         $related = Activity::query()
             ->published()
@@ -61,7 +63,14 @@ class ActivityController extends Controller
             'upcomingSessions' => $activity->upcomingSessions(),
             'pastSessions' => $activity->pastSessions(),
             'related' => $related,
+            ...ShareLinks::for($activity->title, route('activities.show', $activity, absolute: true)),
+            'comments' => $activity->approvedComments,
         ]);
+    }
+
+    public function storeComment(Request $request, Activity $activity, SubmitContentComment $submit): RedirectResponse
+    {
+        return $submit->handle($request, $activity);
     }
 
     public function registerForm(Activity $activity): View

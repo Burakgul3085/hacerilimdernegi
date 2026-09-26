@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\ActivityStatus;
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasContentGallery;
+use App\Models\Concerns\HasModeratedComments;
+use App\Models\Concerns\ProvidesShareCover;
 use App\Support\RegistrationExportPlan;
 use App\Support\RegistrationForm;
 use Database\Factories\ActivityFactory;
@@ -23,6 +25,8 @@ class Activity extends Model
 
     use HasContentGallery;
     use HasFactory;
+    use HasModeratedComments;
+    use ProvidesShareCover;
 
     protected $fillable = [
         'title', 'slug', 'excerpt', 'cadence', 'description', 'highlights', 'image', 'gallery', 'status', 'sort_order', 'is_published', 'registration_open', 'registration_fields', 'excel_columns', 'excel_archived_questions',
@@ -218,5 +222,10 @@ class Activity extends Model
     public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderByDesc('sort_order')->orderBy('title');
+    }
+
+    public function shareCoverPath(): ?string
+    {
+        return is_string($this->image) && $this->image !== '' ? $this->image : null;
     }
 }

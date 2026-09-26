@@ -195,7 +195,7 @@ class AuditLog extends Model
             EventRegistration::class => 'Program kaydı',
             ContactMessage::class => 'İletişim mesajı',
             NewsletterSubscriber::class => 'E-bülten',
-            PostComment::class => 'Yazı yorumu',
+            PostComment::class => 'Yorum',
             default => filled($this->model_type) ? class_basename($this->model_type) : 'Kayıt',
         };
     }

@@ -55,7 +55,10 @@ class AnnouncementPageTest extends TestCase
             ->assertSee('activity-marquee-item', false)
             ->assertDontSee('post-gallery-item', false)
             ->assertSee('Bağlantıyı kopyala')
-            ->assertSee('https://wa.me/?text=', false);
+            ->assertSee('https://wa.me/?text=', false)
+            ->assertSee('Yorum yaz')
+            ->assertSee('href="#yorumlar"', false)
+            ->assertDontSee('Bu duyuru hakkında yazın');
     }
 
     public function test_unpublished_announcement_returns_404(): void

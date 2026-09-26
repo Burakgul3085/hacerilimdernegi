@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\SubmitContentComment;
 use App\Models\MediaAlbum;
 use App\Models\MediaItem;
+use App\Support\ShareLinks;
 use App\Support\UploadRules;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -41,11 +44,29 @@ class MediaController extends Controller
         return $this->present($request, $nested);
     }
 
+    public function storeComment(Request $request, MediaAlbum $album, SubmitContentComment $submit): RedirectResponse
+    {
+        return $submit->handle($request, $album);
+    }
+
+    public function storeChildComment(Request $request, MediaAlbum $album, string $child, SubmitContentComment $submit): RedirectResponse
+    {
+        abort_unless($album->is_published && $album->parent_id === null, 404);
+
+        $nested = MediaAlbum::query()
+            ->published()
+            ->where('parent_id', $album->id)
+            ->where('slug', $child)
+            ->firstOrFail();
+
+        return $submit->handle($request, $nested);
+    }
+
     private function present(Request $request, MediaAlbum $album): View
     {
         abort_unless($album->isVisibleOnSite(), 404);
 
-        $album->load('parent');
+        $album->load(['parent', 'approvedComments']);
 
         $query = mb_substr(trim($request->string('q')->toString()), 0, 80);
         $type = $request->string('tur')->toString();
@@ -75,6 +96,11 @@ class MediaController extends Controller
             'query' => $query,
             'type' => $type,
             'groups' => $groups,
+            ...ShareLinks::for($album->title, $album->publicUrl()),
+            'comments' => $album->approvedComments,
+            'commentAction' => $album->parent_id !== null && $album->parent !== null
+                ? route('media.children.comments.store', ['album' => $album->parent, 'child' => $album->slug])
+                : route('media.comments.store', $album),
         ]);
     }
 

@@ -8,6 +8,7 @@ use App\Filament\Resources\MediaAlbums\Pages\EditMediaAlbum;
 use App\Filament\Resources\MediaAlbums\Pages\ListMediaAlbums;
 use App\Filament\Resources\MediaAlbums\Schemas\MediaAlbumForm;
 use App\Filament\Resources\MediaAlbums\Tables\MediaAlbumsTable;
+use App\Filament\Resources\Posts\RelationManagers\CommentsRelationManager;
 use App\Models\MediaAlbum;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -45,6 +46,13 @@ class MediaAlbumResource extends Resource
     public static function table(Table $table): Table
     {
         return MediaAlbumsTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            CommentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

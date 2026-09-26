@@ -105,7 +105,7 @@
                     <span class="rule flex-1"></span>
                 </div>
 
-                <x-flash-status context="post-comment" class="mb-6" />
+                <x-flash-status context="content-comment" class="mb-6" />
 
                 @if ($comments->isEmpty())
                     <p class="text-sm leading-relaxed text-muted">Onaylanan yorumlar burada görünür.</p>

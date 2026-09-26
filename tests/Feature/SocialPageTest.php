@@ -28,7 +28,7 @@ class SocialPageTest extends TestCase
             ->assertSee('Resmî hesap')
             ->assertSee('Seçilen paylaşımlar')
             ->assertSee('2 paylaşım')
-            ->assertSee('Instagram hesabından seçilen kareler ve kısa videolar, sitede vitrin olarak durur.')
+            ->assertSee('Ânlık paylaşımlar, duyurular ve daha fazlası...')
             ->assertSee('https://www.instagram.com/p/AbC123xyz/embed/', false)
             ->assertSee('https://www.instagram.com/p/AbC123xyz/embed/captioned/', false)
             ->assertSee('https://www.instagram.com/reel/ReelsCode99/', false)

@@ -41,7 +41,8 @@
 
 <article class="shell py-14 lg:py-20">
     <div class="post-layout">
-        <div class="reveal min-w-0" x-data="{ lightbox: null }" x-on:keydown.escape.window="lightbox = null">
+        <div class="reveal min-w-0">
+            <div x-data="{ lightbox: null }" x-on:keydown.escape.window="lightbox = null">
             @if ($coverUrl)
                 <button type="button"
                         class="activity-hero-cover post-cover rounded-2xl"
@@ -88,6 +89,14 @@
                  aria-label="Görsel">
                 <img :src="lightbox" alt="{{ $announcement->title }}">
             </div>
+            </div>
+
+            <x-comment-thread
+                :comments="$comments"
+                :action="route('announcements.comments.store', $announcement)"
+                place="bu duyurunun"
+                placeholder="Bu duyuru hakkındaki düşünceniz"
+            />
         </div>
 
         <aside class="reveal space-y-4 lg:sticky lg:top-32 lg:self-start">
@@ -99,42 +108,12 @@
                     <li><x-meta icon="document">Duyuru</x-meta></li>
                 </ul>
 
-                <div class="mt-6 border-t border-line pt-5" x-data="{ copied: false }">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">Paylaş</p>
-                    <div class="post-share mt-3">
-                        <a href="{{ $whatsappShareUrl }}"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="btn btn-outline btn-sm">
-                            <x-ui.icon name="whatsapp" class="h-4 w-4" />
-                            WhatsApp
-                        </a>
-                        <button type="button"
-                                class="btn btn-outline btn-sm"
-                                data-url="{{ $shareUrl }}"
-                                x-on:click="
-                                    const value = $el.dataset.url ?? '';
-                                    if (! value || ! navigator.clipboard?.writeText) {
-                                        return;
-                                    }
-                                    navigator.clipboard.writeText(value).then(() => {
-                                        copied = true;
-                                        window.setTimeout(() => copied = false, 1800);
-                                    }).catch(() => {});
-                                ">
-                            <span class="inline-flex items-center gap-1.5" x-show="! copied">
-                                <x-ui.icon name="clipboard" class="h-4 w-4" />
-                                Bağlantıyı kopyala
-                            </span>
-                            <span class="inline-flex items-center gap-1.5" x-cloak x-show="copied">
-                                <x-ui.icon name="check" class="h-4 w-4" />
-                                Kopyalandı
-                            </span>
-                        </button>
-                    </div>
-                </div>
-
-                <a href="{{ route('contact') }}" class="btn btn-solid btn-sm mt-6 w-full">Bu duyuru hakkında yazın</a>
+                <x-share-actions
+                    class="mt-6 border-t border-line pt-5"
+                    :share-url="$shareUrl"
+                    :whatsapp-share-url="$whatsappShareUrl"
+                    with-comment
+                />
             </div>
 
             @if ($related->isNotEmpty())

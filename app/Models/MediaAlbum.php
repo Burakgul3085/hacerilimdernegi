@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasModeratedComments;
+use App\Models\Concerns\ProvidesShareCover;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +14,8 @@ use Illuminate\Support\Str;
 class MediaAlbum extends Model
 {
     use Auditable;
+    use HasModeratedComments;
+    use ProvidesShareCover;
 
     protected $fillable = ['parent_id', 'activity_id', 'title', 'slug', 'description', 'cover', 'is_published'];
 
@@ -129,6 +133,11 @@ class MediaAlbum extends Model
         }
 
         return route('media.show', $this);
+    }
+
+    public function shareCoverPath(): ?string
+    {
+        return is_string($this->cover) && $this->cover !== '' ? $this->cover : null;
     }
 
     public static function uniqueSlug(string $title, int|string|null $ignoreId = null): string

@@ -28,23 +28,24 @@ class PostCommentReceivedForAdmin extends Notification implements SendsViaPhpMai
 
     public function toPhpMailer(object $notifiable): array
     {
-        $comment = $this->comment->loadMissing('post');
-        $post = $comment->post;
+        $comment = $this->comment->loadMissing(['post', 'commentable']);
+        $subject = $comment->subject();
         $recipient = app(PhpMailerClient::class)->otpRecipient(
             trim((string) SiteSettings::get('mailer_username', '')),
         );
         $siteName = (string) SiteSettings::get('site_name', config('app.name'));
         $name = e($comment->fullName());
         $email = e($comment->email);
-        $title = e($post?->title ?? 'Yazı');
+        $kind = e($comment->kindLabel());
+        $title = e($subject?->title ?? $comment->kindLabel());
         $visibility = $comment->hide_name
             ? 'İsim sitede gizli kalacak.'
             : 'İsim sitede görünecek.';
         $excerpt = e(Str::limit($comment->body, 280));
-        $panelUrl = rtrim(MailTemplate::publicBaseUrl(), '/').'/yonetim/posts/'.$comment->post_id.'/edit';
+        $panelUrl = $comment->panelUrl();
 
         $text = "{$siteName} sitesinden yeni yorum\n\n"
-            .'Yazı: '.($post?->title ?? '—')."\n"
+            .$comment->kindLabel().': '.($subject?->title ?? '—')."\n"
             ."Ad: {$comment->fullName()}\n"
             ."E-posta: {$comment->email}\n"
             ."{$visibility}\n\n"
@@ -53,7 +54,7 @@ class PostCommentReceivedForAdmin extends Notification implements SendsViaPhpMai
         $details = <<<HTML
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-family:'Segoe UI',Arial,sans-serif;font-size:14px;color:#3a3733;">
                 <tr>
-                    <td style="padding:0 0 10px;width:88px;color:#8a7a62;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;">Yazı</td>
+                    <td style="padding:0 0 10px;width:88px;color:#8a7a62;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;">{$kind}</td>
                     <td style="padding:0 0 10px;color:#161513;">{$title}</td>
                 </tr>
                 <tr>
@@ -73,20 +74,20 @@ class PostCommentReceivedForAdmin extends Notification implements SendsViaPhpMai
 
         $html = MailTemplate::render([
             'title' => 'Yeni yorum',
-            'preheader' => $comment->fullName().' bir yazıya yorum yazdı.',
+            'preheader' => $comment->fullName().' bir yorum yazdı.',
             'eyebrow' => 'Yönetim bildirimi',
-            'intro' => '<p style="margin:0;">Kalemim\'İZ sayfasından yeni bir yorum alındı. Yayınlamak için panelden onaylayın.</p>',
+            'intro' => '<p style="margin:0;">'.e($comment->sectionLabel()).' sayfasından yeni bir yorum alındı. Yayınlamak için panelden onaylayın.</p>',
             'highlight' => $details,
             'body' => '<p style="margin:0 0 8px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8a7a62;">Yorum</p>'
                 .'<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:15px;line-height:1.75;color:#3a3733;">'.$excerpt.'</div>',
-            'closing' => 'Onaylamak için yönetim panelindeki <strong>Kalemim\'İZ</strong> bölümünde ilgili yazıyı açın.',
-            'cta_label' => 'Yazıyı aç',
+            'closing' => 'Onaylamak için yönetim panelindeki <strong>'.e($comment->sectionLabel()).'</strong> bölümünde ilgili kaydı açın.',
+            'cta_label' => 'Kaydı aç',
             'cta_url' => $panelUrl,
         ]);
 
         return [
             'to' => [$recipient],
-            'subject' => 'Yeni yorum: '.($post?->title ?? 'Kalemim\'İZ'),
+            'subject' => 'Yeni yorum: '.($subject?->title ?? $comment->sectionLabel()),
             'html' => $html,
             'text' => $text,
             'reply_to' => $comment->email,

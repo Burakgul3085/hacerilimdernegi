@@ -33,9 +33,23 @@
             @if (filled($activity->description))
                 <div class="prose-hacer mt-10">{!! $activity->description !!}</div>
             @endif
+
+            <x-comment-thread
+                :comments="$comments"
+                :action="route('activities.comments.store', $activity)"
+                place="bu faaliyetin"
+                placeholder="Bu faaliyet hakkındaki düşünceniz"
+            />
         </div>
 
         <aside class="reveal reveal-right space-y-4 lg:sticky lg:top-32 lg:self-start">
+            <div class="card p-6">
+                <x-share-actions
+                    :share-url="$shareUrl"
+                    :whatsapp-share-url="$whatsappShareUrl"
+                    with-comment
+                />
+            </div>
             @if ($nextSession)
                 <article class="activity-next">
                     <p class="eyebrow">Sonraki oturum</p>

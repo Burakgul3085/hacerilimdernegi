@@ -19,7 +19,7 @@ class ProcessPostComment
 
     public function handle(PostComment $comment): void
     {
-        $comment->loadMissing('post');
+        $comment->loadMissing(['post', 'commentable']);
 
         if (! $this->mailer->isConfigured()) {
             report(new \RuntimeException('Yorum kaydedildi ancak mailer ayarları eksik.'));

@@ -8,6 +8,7 @@ use App\Filament\Resources\Announcements\Pages\EditAnnouncement;
 use App\Filament\Resources\Announcements\Pages\ListAnnouncements;
 use App\Filament\Resources\Announcements\Schemas\AnnouncementForm;
 use App\Filament\Resources\Announcements\Tables\AnnouncementsTable;
+use App\Filament\Resources\Posts\RelationManagers\CommentsRelationManager;
 use App\Models\Announcement;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -47,6 +48,13 @@ class AnnouncementResource extends Resource
     public static function table(Table $table): Table
     {
         return AnnouncementsTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            CommentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

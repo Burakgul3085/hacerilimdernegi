@@ -11,6 +11,7 @@ use App\Models\NewsletterSubscriber;
 use App\Support\FormGuard;
 use App\Support\FormStatus;
 use App\Support\InstagramMedia;
+use App\Support\ShareLinks;
 use App\Support\SiteSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -134,6 +135,7 @@ class FormController extends Controller
             'profileUrl' => $profileUrl,
             'profileUsername' => $profileUrl ? trim((string) parse_url($profileUrl, PHP_URL_PATH), '/') : null,
             'intro' => SiteSettings::socialIntro(),
+            ...ShareLinks::for('Vitrin', route('social', absolute: true)),
         ]);
     }
 
