@@ -6,16 +6,16 @@
 
 <div {{ $attributes }} x-data="{ copied: false }">
     <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">Paylaş</p>
-    <div class="post-share mt-3">
+    <div class="mt-4 flex flex-col gap-2">
         <a href="{{ $whatsappShareUrl }}"
            target="_blank"
            rel="noopener noreferrer"
-           class="btn btn-outline btn-sm">
+           class="btn btn-outline btn-sm w-full bg-transparent">
             <x-ui.icon name="whatsapp" class="h-4 w-4" />
             WhatsApp
         </a>
         <button type="button"
-                class="btn btn-outline btn-sm"
+                class="btn btn-outline btn-sm w-full bg-transparent"
                 data-url="{{ $shareUrl }}"
                 x-on:click="
                     const value = $el.dataset.url ?? '';
@@ -36,8 +36,8 @@
                 Kopyalandı
             </span>
         </button>
+        @if ($withComment)
+            <a href="#yorumlar" class="btn btn-solid btn-sm w-full">Yorum yaz</a>
+        @endif
     </div>
-    @if ($withComment)
-        <a href="#yorumlar" class="btn btn-solid btn-sm mt-6 w-full">Yorum yaz</a>
-    @endif
 </div>
