@@ -45,7 +45,15 @@
     :eyebrow="$isCollection ? 'Koleksiyon' : 'Albüm'"
     :title="$album->title"
     :lead="$album->description"
-    :breadcrumbs="$breadcrumbs" />
+    :breadcrumbs="$breadcrumbs">
+    <div class="card w-full max-w-sm p-6">
+        <x-share-actions
+            :share-url="$shareUrl"
+            :whatsapp-share-url="$whatsappShareUrl"
+            with-comment
+        />
+    </div>
+</x-page-header>
 
 <section class="shell py-12 lg:py-16" x-data="{ open: false, src: '', caption: '' }">
     @if ($isCollection)
@@ -201,21 +209,12 @@
 </section>
 
 <section class="shell pb-16">
-    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start">
-        <x-comment-thread
-            :comments="$comments"
-            :action="$commentAction"
-            place="bu albümün"
-            placeholder="Bu albüm hakkındaki düşünceniz"
-        />
-        <div class="card p-6 lg:sticky lg:top-32">
-            <x-share-actions
-                :share-url="$shareUrl"
-                :whatsapp-share-url="$whatsappShareUrl"
-                with-comment
-            />
-        </div>
-    </div>
+    <x-comment-thread
+        :comments="$comments"
+        :action="$commentAction"
+        place="bu albümün"
+        placeholder="Bu albüm hakkındaki düşünceniz"
+    />
 </section>
 
 @endsection

@@ -126,6 +126,7 @@ class ContentShareCommentTest extends TestCase
             ->assertSee('https://wa.me/?text=', false)
             ->assertSee('Bağlantıyı kopyala')
             ->assertSee('property="og:image" content="'.OpenGraphImage::logo()['url'].'"', false)
+            ->assertSee('images/og-logo.jpg', false)
             ->assertDontSee('Yorum yaz')
             ->assertDontSee('id="yorumlar"', false);
     }

@@ -36,23 +36,14 @@ final class OpenGraphImage
 
     /**
      * Kapak yokken ve vitrin sayfasında kullanılan dernek logosu.
+     * Üst menüdeki işaret değil, paylaşım için ayrılmış tam logo.
      *
      * @return array{url: string, width: int|null, height: int|null, mime: string|null}
      */
     public static function logo(): array
     {
-        $stored = SiteSettings::get('logo');
-
-        if (is_string($stored) && $stored !== '') {
-            $image = self::fromStoragePath($stored);
-
-            if (is_array($image)) {
-                return $image;
-            }
-        }
-
-        $url = asset('images/logo-mark.png');
-        [$width, $height, $mime] = self::measure(public_path('images/logo-mark.png'));
+        $url = asset('images/og-logo.jpg');
+        [$width, $height, $mime] = self::measure(public_path('images/og-logo.jpg'));
 
         return [
             'url' => $url,
