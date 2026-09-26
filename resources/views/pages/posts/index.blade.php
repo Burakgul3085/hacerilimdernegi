@@ -82,13 +82,13 @@
                     <div class="grain flex flex-col justify-center bg-cream px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
                         <p class="eyebrow">Katılın</p>
                         <p class="mt-3 font-display text-3xl leading-[1.15] text-forest sm:text-4xl">Siz de yazın veya şiir gönderin</p>
-                        <p class="mt-4 max-w-md text-sm leading-relaxed text-muted">Metniniz yönetime ulaşır; onaylandıktan sonra bu sayfada yayımlanır. Gönderimde ve onayda e-posta ile bilgilendirilirsiniz.</p>
+                        <p class="mt-4 max-w-md text-sm leading-relaxed text-muted">Yazınızı veya şiirinizi bizimle paylaşın. Size e-posta ile dönüş yaparız.</p>
                     </div>
                     <div class="flex flex-col justify-center gap-4 border-t border-line px-6 py-8 sm:px-8 lg:border-t-0 lg:border-l lg:px-10 lg:py-10">
                         <ul class="space-y-3">
                             <li><x-meta icon="check">Yazı veya şiir seçerek gönderin</x-meta></li>
-                            <li><x-meta icon="check">Anında alındı e-postası</x-meta></li>
-                            <li><x-meta icon="check">Onaylanınca sitede yayın</x-meta></li>
+                            <li><x-meta icon="check">Size e-posta ile dönüş yapılır</x-meta></li>
+                            <li><x-meta icon="check">Metninizi özenle okuruz</x-meta></li>
                         </ul>
                         <button type="button" class="btn btn-solid mt-2 w-fit" x-on:click="openForm()">
                             Formu aç
@@ -128,7 +128,7 @@
                 <div class="min-w-0 pr-2">
                     <p class="eyebrow">Gönderi</p>
                     <h2 id="posts-submit-title" class="mt-1 font-display text-2xl leading-snug text-forest sm:text-3xl">Yazı veya şiir gönder</h2>
-                    <p class="mt-2 text-sm leading-relaxed text-muted">Onay sonrası Kalemim'İZ sayfasında yayınlanır.</p>
+                    <p class="mt-2 text-sm leading-relaxed text-muted">Metninizi bizimle paylaşın. Size e-posta ile dönüş yaparız.</p>
                 </div>
                 <button type="button"
                         class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-forest transition hover:border-gold hover:text-gold"

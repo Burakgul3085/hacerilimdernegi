@@ -69,7 +69,7 @@
                     <x-ui.icon name="mail" class="h-6 w-6" />
                 </span>
                 <p class="mt-5 font-display text-3xl leading-snug text-forest">E-posta ile yazın</p>
-                <p class="mt-3 text-sm leading-relaxed text-muted">Soru, öneri ve iş birliği talepleriniz yönetim paneline düşer; size e-posta ile dönüş yapılır.</p>
+                <p class="mt-3 text-sm leading-relaxed text-muted">Bize yazın. Sorunuzu, önerinizi veya iş birliği talebinizi okur, size e-posta ile dönüş yaparız.</p>
             </div>
 
             <form method="POST" action="{{ route('contact.store') }}" class="relative space-y-5 p-5 sm:p-8 lg:p-10">

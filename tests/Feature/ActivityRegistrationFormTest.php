@@ -25,6 +25,7 @@ class ActivityRegistrationFormTest extends TestCase
         $this->get(route('activities.register.form', $activity))
             ->assertOk()
             ->assertSee('Katılım başvurusu')
+            ->assertSee('Formu doldurduktan bir süre sonra sizinle iletişime geçilecektir.')
             ->assertSee('Yaş')
             ->assertSee('Şehir')
             ->assertSee('Gaziantep')
@@ -38,6 +39,9 @@ class ActivityRegistrationFormTest extends TestCase
 
         $this->get(route('activities.show', $activity))
             ->assertOk()
+            ->assertSee('Formu doldurduktan bir süre sonra sizinle iletişime geçilecektir.')
+            ->assertSee('Düşüncenizi bizimle paylaşın.')
+            ->assertDontSee('yönetici onayından')
             ->assertSee('Yaş')
             ->assertSee('Şehir');
     }

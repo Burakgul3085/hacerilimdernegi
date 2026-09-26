@@ -40,6 +40,8 @@ class PostSubmissionTest extends TestCase
             ->assertSee("Kalemim'İZ")
             ->assertSee('Yazı veya şiir gönder')
             ->assertSee('Formu aç')
+            ->assertSee('Size e-posta ile dönüş yaparız.')
+            ->assertDontSee('onaylandıktan sonra')
             ->assertSee('Şiirler')
             ->assertSee('id="gonder"', false)
             ->assertSee('role="dialog"', false)

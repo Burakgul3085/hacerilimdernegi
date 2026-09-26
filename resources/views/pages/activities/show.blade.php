@@ -130,6 +130,7 @@
             :action="route('activities.register', $activity)"
             context="activity"
             :fields="$activity->registrationFieldDefinitions()"
+            lead="Formu doldurduktan bir süre sonra sizinle iletişime geçilecektir."
         />
     @endif
 

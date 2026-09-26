@@ -28,6 +28,8 @@ class ContactWhatsappFormTest extends TestCase
         $this->get(route('contact'))
             ->assertOk()
             ->assertSee('E-posta ile yazın')
+            ->assertSee('size e-posta ile dönüş yaparız')
+            ->assertDontSee('yönetim paneline')
             ->assertDontSee('WhatsApp ile yazın')
             ->assertDontSee(route('contact.whatsapp', absolute: false), false);
     }

@@ -19,7 +19,7 @@
                     <x-ui.icon name="users" class="h-7 w-7" />
                 </span>
                 <p class="mt-6 font-display text-4xl leading-[1.15] text-forest">{{ $settings['membership_card_title'] }}</p>
-                <p class="mt-4 text-sm leading-relaxed text-muted">{{ $settings['membership_card_text'] }}</p>
+                <p class="mt-4 text-sm leading-relaxed text-muted">Aramıza katılmak için formu doldurmanız yeterli. Size e-posta ile dönüş yaparız.</p>
 
                 <ul class="mt-8 space-y-3 border-t border-line pt-6">
                     <li><x-meta icon="check">Derslere ve sohbetlere düzenli katılım</x-meta></li>

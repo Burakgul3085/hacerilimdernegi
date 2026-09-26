@@ -35,6 +35,7 @@ class FlashStatusTest extends TestCase
             ->get('/uyelik')
             ->assertSeeInOrder([
                 'Üyelik / gönüllü',
+                'Aramıza katılmak için formu doldurmanız yeterli.',
                 'form-status-membership',
                 'Başvurunuz iletildi',
                 'Ad soyad',

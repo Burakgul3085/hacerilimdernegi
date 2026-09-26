@@ -108,7 +108,7 @@
                 <x-flash-status context="content-comment" class="mb-6" />
 
                 @if ($comments->isEmpty())
-                    <p class="text-sm leading-relaxed text-muted">Onaylanan yorumlar burada görünür.</p>
+                    <p class="text-sm leading-relaxed text-muted">Henüz yorum yok. İlk düşünceyi siz paylaşın.</p>
                 @else
                     <ol class="space-y-4">
                         @foreach ($comments as $comment)
@@ -126,7 +126,7 @@
                     <x-honeypot />
                     <div>
                         <p class="font-display text-2xl leading-snug text-forest">Yorum yaz</p>
-                        <p class="mt-2 text-sm leading-relaxed text-muted">Yorumunuz yönetici onayından sonra bu yazının altında yayınlanır. İsterseniz adınız sitede görünmez. Onaylandığında e-posta adresinize haber gider.</p>
+                        <p class="mt-2 text-sm leading-relaxed text-muted">Düşüncenizi bizimle paylaşın. İsterseniz adınız sitede görünmez. Size e-posta ile dönüş yapılır.</p>
                     </div>
 
                     <div class="grid gap-5 sm:grid-cols-2">

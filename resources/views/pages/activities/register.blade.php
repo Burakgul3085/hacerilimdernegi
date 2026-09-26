@@ -8,7 +8,7 @@
 <x-page-header
     eyebrow="Katılım"
     :title="$activity->title"
-    lead="Formu doldurun, dernek yönetimi sizinle iletişime geçsin."
+    lead="Formu doldurduktan bir süre sonra sizinle iletişime geçilecektir."
     :breadcrumbs="[
         ['label' => 'Faaliyetler', 'url' => route('activities.index')],
         ['label' => $activity->title, 'url' => route('activities.show', $activity)],
@@ -22,7 +22,7 @@
         context="activity"
         :fields="$activity->registrationFieldDefinitions()"
         title="Katılım başvurusu"
-        :lead="'“'.$activity->title.'” için başvurunuzu gönderin.'"
+        lead="Formu doldurduktan bir süre sonra sizinle iletişime geçilecektir."
     />
 </section>
 
