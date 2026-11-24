@@ -63,6 +63,7 @@ class ManageSettings extends Page
         }
 
         $settings['bank_details_are_demo'] = ($settings['bank_details_are_demo'] ?? '1') === '1';
+        $settings['membership_enabled'] = SiteSettings::membershipIsEnabled();
         $settings['mailer_password'] = '';
         $settings['mailer_host_fixed'] = PhpMailerClient::HOST;
         $settings['mailer_port_fixed'] = (string) PhpMailerClient::PORT;
@@ -201,6 +202,13 @@ class ManageSettings extends Page
                         TextInput::make('nav_cta_label')->label('Buton yazısı')->maxLength(40)
                             ->helperText('Boş bırakılırsa koyu buton gizlenir.'),
                         TextInput::make('nav_cta_url')->label('Buton bağlantısı')->maxLength(255),
+                    ]),
+
+                Section::make('Üyelik')
+                    ->schema([
+                        Toggle::make('membership_enabled')
+                            ->label('Üyelik aktif')
+                            ->helperText('Kapalıyken üyelik bağlantısı menüden ve alt bilgiden kalkar, /uyelik sayfası ana sayfaya yönlendirilir.'),
                     ]),
             ]);
     }

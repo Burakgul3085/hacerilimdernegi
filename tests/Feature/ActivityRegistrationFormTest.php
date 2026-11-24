@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\EventRegistrationReceivedForAdmin;
 use App\Support\RegistrationForm;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -76,6 +77,42 @@ class ActivityRegistrationFormTest extends TestCase
         ], $registration->answers);
         $this->assertStringContainsString('Yaş: 28', (string) $registration->notes);
         $this->assertStringContainsString('Şehir: Gaziantep', (string) $registration->notes);
+    }
+
+    public function test_same_email_cannot_register_twice_for_the_same_activity(): void
+    {
+        $activity = $this->makeActivityWithFields();
+
+        $this->postRegistration($activity, 'ayse@example.com')->assertSessionHas('status');
+        $this->postRegistration($activity, '  AYSE@example.com ')
+            ->assertSessionHas('status', EventRegistration::ALREADY_REGISTERED_MESSAGE);
+
+        $this->assertSame(1, EventRegistration::query()->where('activity_id', $activity->id)->count());
+    }
+
+    public function test_rejected_applicant_and_other_people_can_still_register(): void
+    {
+        $activity = $this->makeActivityWithFields();
+
+        $this->postRegistration($activity, 'ayse@example.com');
+        EventRegistration::query()->update(['status' => ApplicationStatus::Rejected]);
+
+        $this->postRegistration($activity, 'ayse@example.com')
+            ->assertSessionHas('status', 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.');
+        $this->postRegistration($activity, 'fatma@example.com')
+            ->assertSessionHas('status', 'Katılım başvurunuz alındı. Size de bir onay e-postası gönderdik.');
+
+        $this->assertSame(3, EventRegistration::query()->where('activity_id', $activity->id)->count());
+    }
+
+    public function test_registration_form_locks_the_submit_button_after_the_first_click(): void
+    {
+        $activity = $this->makeActivityWithFields();
+
+        $this->get(route('activities.register.form', $activity))
+            ->assertOk()
+            ->assertSee('x-bind:disabled="submitting"', false)
+            ->assertSee('Gönderiliyor…');
     }
 
     public function test_missing_required_custom_field_is_rejected(): void
@@ -257,6 +294,17 @@ class ActivityRegistrationFormTest extends TestCase
         $this->assertSame(['Gaziantep', 'İstanbul'], $fields[0]['options']);
         $this->assertArrayHasKey('help', $fields[0]);
         $this->assertArrayHasKey('placeholder', $fields[0]);
+    }
+
+    private function postRegistration(Activity $activity, string $email): TestResponse
+    {
+        return $this->from(route('activities.register.form', $activity))
+            ->post(route('activities.register', $activity), [
+                'name' => 'Ayşe Yılmaz',
+                'email' => $email,
+                'custom' => ['yas' => '28', 'sehir' => 'Gaziantep'],
+                'kvkk_accepted' => '1',
+            ]);
     }
 
     private function makeActivityWithFields(): Activity

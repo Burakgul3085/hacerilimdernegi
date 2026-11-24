@@ -54,13 +54,19 @@ class ProgramController extends Controller
             'kvkk_accepted' => ['accepted'],
         ]);
 
-        $registration = EventRegistration::query()->create([
-            ...$data,
-            'program_id' => $program->id,
-            'activity_id' => $program->activity_id,
-            'kvkk_accepted' => true,
-            'status' => ApplicationStatus::Pending,
-        ]);
+        $registration = EventRegistration::createUnlessAlreadyRegistered(
+            ['program_id' => $program->id],
+            [
+                ...$data,
+                'activity_id' => $program->activity_id,
+                'kvkk_accepted' => true,
+                'status' => ApplicationStatus::Pending,
+            ],
+        );
+
+        if ($registration === null) {
+            return FormStatus::redirect(EventRegistration::ALREADY_REGISTERED_MESSAGE, 'program');
+        }
 
         $this->processEventRegistration->handle($registration);
 

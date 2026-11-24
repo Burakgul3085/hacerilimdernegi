@@ -11,12 +11,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class EventRegistration extends Model
 {
     use Auditable, Notifiable;
+
+    public const ALREADY_REGISTERED_MESSAGE = 'Bu e-posta adresiyle zaten başvurunuz bulunuyor. Size e-posta ile dönüş yapacağız.';
 
     protected $fillable = [
         'event_id', 'program_id', 'activity_id', 'name', 'email', 'phone', 'notes', 'answers', 'kvkk_accepted', 'status', 'replied_at',
@@ -215,6 +218,33 @@ class EventRegistration extends Model
     public function replies(): HasMany
     {
         return $this->hasMany(EventRegistrationReply::class)->latest('sent_at');
+    }
+
+    /**
+     * Aynı hedefe aynı e-postayla bekleyen veya onaylı başvuru yoksa kaydı oluşturur.
+     * Art arda gelen istekler kilitle sıraya alınır; tekrar başvuruda null döner.
+     *
+     * @param  array{activity_id?: int|null, program_id?: int|null, event_id?: int|null}  $target
+     * @param  array<string, mixed>  $attributes
+     */
+    public static function createUnlessAlreadyRegistered(array $target, array $attributes): ?self
+    {
+        $email = mb_strtolower(trim((string) $attributes['email']));
+        $lockKey = 'event-registration:'.md5(json_encode($target).'|'.$email);
+
+        return Cache::lock($lockKey, 10)->block(5, function () use ($target, $attributes, $email): ?self {
+            $alreadyRegistered = static::query()
+                ->where($target)
+                ->whereRaw('LOWER(TRIM(email)) = ?', [$email])
+                ->where('status', '!=', ApplicationStatus::Rejected)
+                ->exists();
+
+            if ($alreadyRegistered) {
+                return null;
+            }
+
+            return static::query()->create([...$attributes, ...$target]);
+        });
     }
 
     public function routeNotificationForMail(): string

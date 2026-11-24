@@ -94,16 +94,22 @@ class ActivityController extends Controller
         $data = $request->validate(RegistrationForm::validationRules($fields));
         $answers = RegistrationForm::collectAnswers($fields, $data);
 
-        $registration = EventRegistration::query()->create([
-            'activity_id' => $activity->id,
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'notes' => RegistrationForm::notesSummary($answers),
-            'answers' => $answers === [] ? null : $answers,
-            'kvkk_accepted' => true,
-            'status' => ApplicationStatus::Pending,
-        ]);
+        $registration = EventRegistration::createUnlessAlreadyRegistered(
+            ['activity_id' => $activity->id, 'program_id' => null, 'event_id' => null],
+            [
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+                'notes' => RegistrationForm::notesSummary($answers),
+                'answers' => $answers === [] ? null : $answers,
+                'kvkk_accepted' => true,
+                'status' => ApplicationStatus::Pending,
+            ],
+        );
+
+        if ($registration === null) {
+            return FormStatus::redirect(EventRegistration::ALREADY_REGISTERED_MESSAGE, 'activity');
+        }
 
         $this->processEventRegistration->handle($registration);
 

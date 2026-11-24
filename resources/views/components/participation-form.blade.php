@@ -24,7 +24,14 @@
             <p class="mt-3 text-sm leading-relaxed text-muted">{{ $lead }}</p>
         </div>
 
-        <form method="POST" action="{{ $action }}" class="relative space-y-5 p-5 sm:p-8 lg:p-10">
+        <form
+            method="POST"
+            action="{{ $action }}"
+            class="relative space-y-5 p-5 sm:p-8 lg:p-10"
+            x-data="{ submitting: false }"
+            x-on:submit="submitting ? $event.preventDefault() : (submitting = true)"
+            x-on:pageshow.window="submitting = false"
+        >
             @csrf
             <x-honeypot />
             <x-flash-status :context="$context" />
@@ -118,9 +125,9 @@
 
             <x-consent />
 
-            <button type="submit" class="btn btn-solid">
-                Başvuruyu gönder
-                <x-ui.icon name="arrow-right" class="h-4 w-4" />
+            <button type="submit" class="btn btn-solid disabled:cursor-wait disabled:opacity-60" x-bind:disabled="submitting">
+                <span x-text="submitting ? 'Gönderiliyor…' : 'Başvuruyu gönder'">Başvuruyu gönder</span>
+                <x-ui.icon name="arrow-right" class="h-4 w-4" x-show="! submitting" />
             </button>
         </form>
     </div>

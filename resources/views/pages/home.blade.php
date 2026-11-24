@@ -57,7 +57,7 @@
                         <x-ui.icon name="arrow-right" class="h-4 w-4" />
                     </a>
                 @endif
-                @if (filled($settings['hero_secondary_label']))
+                @if (filled($settings['hero_secondary_label']) && (\App\Support\SiteSettings::membershipIsEnabled() || ! (blank($settings['hero_secondary_url']) || \App\Support\SiteSettings::isMembershipUrl($settings['hero_secondary_url']))))
                     <a href="{{ $settings['hero_secondary_url'] ?: route('membership') }}" class="btn btn-outline">
                         {{ $settings['hero_secondary_label'] }}
                     </a>

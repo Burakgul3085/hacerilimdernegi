@@ -19,13 +19,21 @@ use Illuminate\View\View;
 
 class FormController extends Controller
 {
-    public function membership(): View
+    public function membership(): View|RedirectResponse
     {
+        if (! SiteSettings::membershipIsEnabled()) {
+            return redirect()->route('home');
+        }
+
         return view('pages.membership');
     }
 
     public function storeMembership(Request $request): RedirectResponse
     {
+        if (! SiteSettings::membershipIsEnabled()) {
+            return redirect()->route('home');
+        }
+
         if (FormGuard::isBot($request)) {
             return FormStatus::redirect('Başvurunuz iletildi. Size de bir onay e-postası gönderdik.', 'membership');
         }

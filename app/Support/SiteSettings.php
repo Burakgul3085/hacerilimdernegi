@@ -125,6 +125,7 @@ class SiteSettings
             'activity_join_closed_text' => 'Bu hat için kayıt şu an kapalı.',
             'activity_join_completed_text' => 'Bu hat tamamlandı.',
 
+            'membership_enabled' => '1',
             'membership_card_title' => 'Birlikte daha güçlüyüz',
             'membership_card_text' => 'İlim, kültür ve kardeşlik çalışmalarında sen de yerini al.',
 
@@ -236,12 +237,66 @@ class SiteSettings
 
         $items = static::ensureAnnouncementsNavItem($items);
 
+        if (! static::membershipIsEnabled()) {
+            $items = static::withoutMembershipLinks($items);
+        }
+
         array_unshift($items, [
             'label' => 'Ana sayfa',
             'url' => '/',
         ]);
 
         return $items;
+    }
+
+    /**
+     * Yönetim panelindeki "Üyelik aktif" anahtarının durumu.
+     */
+    public static function membershipIsEnabled(): bool
+    {
+        return ((string) static::get('membership_enabled', '1')) === '1';
+    }
+
+    /**
+     * Bağlantının üyelik sayfasına gidip gitmediğini söyler.
+     */
+    public static function isMembershipUrl(?string $url): bool
+    {
+        $path = rtrim((string) parse_url(trim((string) $url), PHP_URL_PATH), '/');
+
+        return $path === '/uyelik';
+    }
+
+    /**
+     * Üyelik pasifken menüden üyelik bağlantılarını (alt başlıklar dahil) çıkarır.
+     *
+     * @param  list<array{label: string, url: string, children?: list<array{label: string, url: string}>}>  $items
+     * @return list<array{label: string, url: string, children?: list<array{label: string, url: string}>}>
+     */
+    private static function withoutMembershipLinks(array $items): array
+    {
+        $filtered = [];
+
+        foreach ($items as $item) {
+            if (isset($item['children'])) {
+                $item['children'] = array_values(array_filter(
+                    $item['children'],
+                    fn (array $child): bool => ! static::isMembershipUrl($child['url']),
+                ));
+
+                if ($item['children'] === []) {
+                    unset($item['children']);
+                }
+            }
+
+            if (static::isMembershipUrl($item['url']) && ! isset($item['children'])) {
+                continue;
+            }
+
+            $filtered[] = $item;
+        }
+
+        return $filtered;
     }
 
     /**

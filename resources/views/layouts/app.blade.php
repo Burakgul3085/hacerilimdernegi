@@ -386,6 +386,7 @@
                         </ul>
                     </div>
 
+                    @if (\App\Support\SiteSettings::membershipIsEnabled())
                     <div>
                         <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Gönüllü ol</p>
                         <h2 class="mt-3 font-display text-3xl text-cream">{{ $settings['membership_card_title'] }}</h2>
@@ -397,6 +398,7 @@
                             <x-ui.icon name="arrow-right" class="h-4 w-4" />
                         </a>
                     </div>
+                    @endif
                 </div>
 
                 <div class="mt-10 border-t border-white/10 pt-8">
