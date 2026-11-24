@@ -70,6 +70,7 @@ class AuditLogsTable
                         'created' => 'success',
                         'updated' => 'warning',
                         'deleted' => 'danger',
+                        'shared' => 'info',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (AuditLog $record): string => $record->actionLabel()),
@@ -81,6 +82,8 @@ class AuditLogsTable
                         'created' => 'Ekledi',
                         'updated' => 'Güncelledi',
                         'deleted' => 'Sildi',
+                        'exported' => 'Excel indirdi',
+                        'shared' => 'WhatsApp’ta paylaştı',
                     ]),
                 SelectFilter::make('model_type')
                     ->label('Bölüm')

@@ -6,7 +6,9 @@ use App\Actions\ExportRegistrationSpreadsheetCsv;
 use App\Actions\PrintRegistrationSpreadsheet;
 use App\Actions\SaveRegistrationSpreadsheet;
 use App\Enums\ApplicationStatus;
+use App\Filament\Resources\RegistrationSpreadsheets\Concerns\RevokesSpreadsheetShareLinks;
 use App\Filament\Resources\RegistrationSpreadsheets\RegistrationSpreadsheetResource;
+use App\Filament\Resources\RegistrationSpreadsheets\ShareSpreadsheetAction;
 use App\Models\RegistrationSpreadsheet;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -20,6 +22,8 @@ use Illuminate\Support\Facades\Auth;
  */
 class EditRegistrationSpreadsheet extends EditRecord
 {
+    use RevokesSpreadsheetShareLinks;
+
     protected static string $resource = RegistrationSpreadsheetResource::class;
 
     /**
@@ -61,6 +65,7 @@ class EditRegistrationSpreadsheet extends EditRecord
                 ->action(function (ExportRegistrationSpreadsheetCsv $export) {
                     return $export->download($this->getRecord(), $this->grid);
                 }),
+            ShareSpreadsheetAction::make(),
             DeleteAction::make(),
         ];
     }

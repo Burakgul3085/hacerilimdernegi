@@ -172,6 +172,7 @@ class AuditLog extends Model
             'updated' => 'Güncelledi',
             'deleted' => 'Sildi',
             'exported' => 'Excel indirdi',
+            'shared' => 'WhatsApp’ta paylaştı',
             default => (string) $this->action,
         };
     }
@@ -196,6 +197,7 @@ class AuditLog extends Model
             ContactMessage::class => 'İletişim mesajı',
             NewsletterSubscriber::class => 'E-bülten',
             PostComment::class => 'Yorum',
+            RegistrationSpreadsheet::class => 'E-tablo',
             default => filled($this->model_type) ? class_basename($this->model_type) : 'Kayıt',
         };
     }
@@ -228,6 +230,7 @@ class AuditLog extends Model
             'updated' => 'güncelledi',
             'deleted' => 'sildi',
             'exported' => 'Excel olarak indirdi',
+            'shared' => 'WhatsApp’ta paylaştı',
             default => (string) $this->action,
         };
 
@@ -253,6 +256,10 @@ class AuditLog extends Model
             NewsletterSubscriber::class => 'e-bülten kaydını',
             default => 'kaydını',
         };
+
+        if ($this->action === 'shared') {
+            return $who.' «'.$label.'» e-tablosunu WhatsApp’ta paylaştı.';
+        }
 
         if ($this->action === 'exported') {
             return $who.' «'.$label.'» başvurularını Excel olarak indirdi.';

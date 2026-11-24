@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Admin\RegistrationPrintController;
+use App\Http\Controllers\Admin\SpreadsheetShareFileController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FormController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SeoController;
+use App\Http\Controllers\SpreadsheetShareController;
 use App\Support\CorporatePages;
 use Illuminate\Support\Facades\Route;
 
@@ -80,8 +82,19 @@ Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::redirect('/yasal/{type}', '/', 301)->whereIn('type', ['kvkk', 'gizlilik', 'cerezler']);
 Route::get('/sayfa/{slug}', [PageController::class, 'show'])->name('pages.show');
 
+Route::get('/paylasim/e-tablo/{token}', [SpreadsheetShareController::class, 'show'])
+    ->where('token', '[A-Za-z0-9]{48}')
+    ->middleware('throttle:search')
+    ->name('spreadsheet-share.show');
+Route::post('/paylasim/e-tablo/{token}', [SpreadsheetShareController::class, 'download'])
+    ->where('token', '[A-Za-z0-9]{48}')
+    ->middleware('throttle:search')
+    ->name('spreadsheet-share.download');
+
 Route::middleware('auth')->prefix('yonetim')->group(function () {
     Route::get('/yazdir/basvurular/{token}', RegistrationPrintController::class)
         ->whereUuid('token')
         ->name('admin.registrations.print');
+    Route::get('/e-tablolar/{spreadsheet}/paylasim-dosyasi', SpreadsheetShareFileController::class)
+        ->name('admin.spreadsheets.share-file');
 });

@@ -40,6 +40,11 @@ class RegistrationSpreadsheet extends Model
         return $this->belongsTo(Activity::class);
     }
 
+    public function shareLinks(): HasMany
+    {
+        return $this->hasMany(RegistrationSpreadsheetShareLink::class)->latest();
+    }
+
     public function rows(): HasMany
     {
         return $this->hasMany(RegistrationSpreadsheetRow::class)->orderBy('sort_order')->orderBy('id');

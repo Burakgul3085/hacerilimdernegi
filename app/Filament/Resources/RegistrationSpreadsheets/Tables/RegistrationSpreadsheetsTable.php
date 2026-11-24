@@ -5,6 +5,7 @@ namespace App\Filament\Resources\RegistrationSpreadsheets\Tables;
 use App\Actions\ExportRegistrationSpreadsheetCsv;
 use App\Actions\PrintRegistrationSpreadsheet;
 use App\Filament\Resources\RegistrationSpreadsheets\RegistrationSpreadsheetResource;
+use App\Filament\Resources\RegistrationSpreadsheets\ShareSpreadsheetAction;
 use App\Models\RegistrationSpreadsheet;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -65,6 +66,7 @@ class RegistrationSpreadsheetsTable
                     ->action(function (RegistrationSpreadsheet $record, ExportRegistrationSpreadsheetCsv $export) {
                         return $export->download($record);
                     }),
+                ShareSpreadsheetAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
