@@ -30,6 +30,9 @@ class Activity extends Model
 
     protected $fillable = [
         'title', 'slug', 'excerpt', 'cadence', 'description', 'highlights', 'image', 'gallery', 'status', 'sort_order', 'is_published', 'registration_open', 'registration_fields', 'excel_columns', 'excel_archived_questions',
+        'approval_mail_enabled', 'approval_mail_subject', 'approval_mail_body', 'approval_mail_button_label', 'approval_mail_button_url',
+        'rejection_mail_enabled', 'rejection_mail_subject', 'rejection_mail_body', 'rejection_mail_button_label', 'rejection_mail_button_url',
+        'whatsapp_group_enabled', 'whatsapp_group_url', 'whatsapp_group_in_approval', 'whatsapp_group_in_rejection',
     ];
 
     protected function casts(): array
@@ -44,6 +47,11 @@ class Activity extends Model
             'sort_order' => 'integer',
             'is_published' => 'boolean',
             'registration_open' => 'boolean',
+            'approval_mail_enabled' => 'boolean',
+            'rejection_mail_enabled' => 'boolean',
+            'whatsapp_group_enabled' => 'boolean',
+            'whatsapp_group_in_approval' => 'boolean',
+            'whatsapp_group_in_rejection' => 'boolean',
         ];
     }
 

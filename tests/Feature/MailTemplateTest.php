@@ -40,7 +40,7 @@ class MailTemplateTest extends TestCase
         $this->assertStringContainsString('Şehitkamil / Gaziantep', $html);
         $this->assertStringContainsString('hacerilimvekulturdernegi.org', $html);
         $this->assertStringContainsString('cid:hacer_mail_logo', $html);
-        $this->assertStringContainsString('width="48"', $html);
+        $this->assertStringContainsString('width="64"', $html);
         $this->assertMatchesRegularExpression('/#8[Aa]7[Aa]62/', $html);
         $this->assertArrayHasKey('hacer_mail_logo', MailTemplate::embeddedImages());
     }
@@ -80,9 +80,9 @@ class MailTemplateTest extends TestCase
 
         $this->assertStringContainsString('Mesajınız bize ulaştı', $html);
         $this->assertStringContainsString('Merhaba Ayşe', $html);
-        $this->assertStringContainsString('width="48"', $html);
+        $this->assertStringContainsString('width="64"', $html);
         $this->assertStringContainsString('border-radius:50%', $html);
-        $this->assertStringContainsString('max-width:520px', $html);
+        $this->assertStringContainsString('max-width:600px', $html);
         $this->assertStringContainsString('Bizi takip edin', $html);
         $this->assertStringContainsString('cid:hacer_mail_telegram', $html);
     }

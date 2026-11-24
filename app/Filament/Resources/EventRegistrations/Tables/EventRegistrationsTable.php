@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EventRegistrations\Tables;
 
 use App\Enums\ApplicationStatus;
+use App\Filament\Resources\EventRegistrations\RegistrationDecisionActions;
 use App\Models\EventRegistration;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -57,6 +58,13 @@ class EventRegistrationsTable
                         ApplicationStatus::Rejected => 'danger',
                         default => 'warning',
                     }),
+                TextColumn::make('decision_mail_state')
+                    ->label('E-posta')
+                    ->badge()
+                    ->state(fn (EventRegistration $record): string => $record->decisionMailLabel() ?? '—')
+                    ->color(fn (EventRegistration $record): string => $record->decisionMailColor())
+                    ->description(fn (EventRegistration $record): ?string => $record->decision_mail_at?->format('d.m.Y H:i'))
+                    ->toggleable(),
                 TextColumn::make('replied_at')
                     ->label('Yanıt')
                     ->formatStateUsing(fn ($state): string => $state ? 'Yanıtlandı' : 'Bekliyor')
@@ -89,12 +97,16 @@ class EventRegistrationsTable
                     ),
             ])
             ->recordActions([
+                RegistrationDecisionActions::decide(ApplicationStatus::Approved)->iconButton()->tooltip('Onayla'),
+                RegistrationDecisionActions::decide(ApplicationStatus::Rejected)->iconButton()->tooltip('Reddet'),
                 EditAction::make()
                     ->label('Dosyayı aç')
                     ->icon('heroicon-o-folder-open'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    RegistrationDecisionActions::bulkDecide(ApplicationStatus::Approved),
+                    RegistrationDecisionActions::bulkDecide(ApplicationStatus::Rejected),
                     DeleteBulkAction::make()->label('Seçilenleri sil'),
                 ]),
             ])

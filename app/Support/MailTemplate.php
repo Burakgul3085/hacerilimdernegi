@@ -19,6 +19,9 @@ final class MailTemplate
      *     closing?: string|null,
      *     cta_label?: string|null,
      *     cta_url?: string|null,
+     *     subject_card?: array{label?: string, title: string, badge?: string|null, tone?: string}|null,
+     *     buttons?: list<array{label: string, url: string}>,
+     *     whatsapp?: array{url: string, title: string, text?: string|null}|null,
      * }  $content
      */
     public static function render(array $content): string
@@ -57,7 +60,39 @@ final class MailTemplate
             'closing' => $content['closing'] ?? null,
             'ctaLabel' => $content['cta_label'] ?? null,
             'ctaUrl' => $content['cta_url'] ?? null,
+            'subjectCard' => $content['subject_card'] ?? null,
+            'buttons' => $content['buttons'] ?? [],
+            'whatsapp' => $content['whatsapp'] ?? null,
         ])->render();
+    }
+
+    /**
+     * Gömülü (cid:) görselleri tarayıcı önizlemesinde görünsün diye herkese açık adreslerle değiştirir.
+     */
+    public static function forBrowser(string $html): string
+    {
+        $replacements = ['cid:hacer_mail_logo' => self::logoPublicUrl()];
+
+        foreach (['telegram', 'whatsapp', 'twitter', 'instagram', 'youtube', 'facebook'] as $key) {
+            $replacements['cid:hacer_mail_'.$key] = asset("images/mail/{$key}.png");
+        }
+
+        return strtr($html, $replacements);
+    }
+
+    private static function logoPublicUrl(): string
+    {
+        $configured = trim((string) SiteSettings::get('logo', ''));
+
+        if ($configured !== '' && is_file(storage_path('app/public/'.ltrim($configured, '/')))) {
+            return asset('storage/'.ltrim($configured, '/'));
+        }
+
+        if ($configured !== '' && is_file(public_path(ltrim($configured, '/')))) {
+            return asset(ltrim($configured, '/'));
+        }
+
+        return asset('images/mail/logo.png');
     }
 
     /**

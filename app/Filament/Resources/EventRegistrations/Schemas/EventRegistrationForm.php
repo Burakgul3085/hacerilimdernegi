@@ -5,7 +5,6 @@ namespace App\Filament\Resources\EventRegistrations\Schemas;
 use App\Enums\ApplicationStatus;
 use App\Filament\Support\RegistrationAnswerHtml;
 use App\Models\EventRegistration;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
@@ -52,13 +51,22 @@ class EventRegistrationForm
                                 ->state(fn (?EventRegistration $record): string => $record?->subjectTitle() ?: '—')
                                 ->weight('font-medium')
                                 ->columnSpanFull(),
-                            Select::make('status')
+                            TextEntry::make('status')
                                 ->label('Durum')
-                                ->options(collect(ApplicationStatus::cases())->mapWithKeys(
-                                    fn (ApplicationStatus $status): array => [$status->value => $status->label()],
-                                ))
-                                ->native(false)
-                                ->helperText('Başvuru durumunu buradan güncelleyin.'),
+                                ->badge()
+                                ->formatStateUsing(fn (?ApplicationStatus $state): string => $state?->label() ?? '—')
+                                ->color(fn (?ApplicationStatus $state): string => match ($state) {
+                                    ApplicationStatus::Approved => 'success',
+                                    ApplicationStatus::Rejected => 'danger',
+                                    default => 'warning',
+                                })
+                                ->helperText('Üstteki “Onayla” veya “Reddet” butonlarıyla değiştirin.'),
+                            TextEntry::make('decision_mail')
+                                ->label('Karar e-postası')
+                                ->badge()
+                                ->state(fn (?EventRegistration $record): string => $record?->decisionMailLabel() ?? 'Gönderilmedi')
+                                ->color(fn (?EventRegistration $record): string => $record?->decisionMailColor() ?? 'gray')
+                                ->helperText(fn (?EventRegistration $record): ?string => $record?->decision_mail_at?->translatedFormat('d F Y, H:i')),
                             TextEntry::make('reply_status')
                                 ->label('Yanıt durumu')
                                 ->badge()

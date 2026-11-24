@@ -129,6 +129,8 @@ class ActivityForm
                             }),
                     ]),
 
+                DecisionMailSection::make(),
+
                 Section::make('Metin')
                     ->schema([
                         ContentUploads::withEditorUploads(

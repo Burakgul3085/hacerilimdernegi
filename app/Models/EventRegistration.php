@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ApplicationStatus;
+use App\Enums\DecisionMailState;
 use App\Models\Concerns\Auditable;
 use App\Support\MailTemplate;
 use App\Support\RegistrationForm;
@@ -23,6 +24,7 @@ class EventRegistration extends Model
 
     protected $fillable = [
         'event_id', 'program_id', 'activity_id', 'name', 'email', 'phone', 'notes', 'answers', 'kvkk_accepted', 'status', 'replied_at',
+        'decision_mail_status', 'decision_mail_state', 'decision_mail_at',
     ];
 
     protected function casts(): array
@@ -32,6 +34,9 @@ class EventRegistration extends Model
             'kvkk_accepted' => 'boolean',
             'status' => ApplicationStatus::class,
             'replied_at' => 'datetime',
+            'decision_mail_status' => ApplicationStatus::class,
+            'decision_mail_state' => DecisionMailState::class,
+            'decision_mail_at' => 'datetime',
         ];
     }
 
@@ -245,6 +250,34 @@ class EventRegistration extends Model
 
             return static::query()->create([...$attributes, ...$target]);
         });
+    }
+
+    /**
+     * Karar e-postasının panelde gösterilecek kısa durumu; e-posta yoksa null.
+     */
+    public function decisionMailLabel(): ?string
+    {
+        if ($this->decision_mail_state === null || $this->decision_mail_status === null) {
+            return null;
+        }
+
+        $kind = $this->decision_mail_status === ApplicationStatus::Approved ? 'Onay' : 'Ret';
+
+        return match ($this->decision_mail_state) {
+            DecisionMailState::Queued => "{$kind} e-postası gönderiliyor",
+            DecisionMailState::Sent => "{$kind} e-postası gönderildi",
+            DecisionMailState::Failed => "{$kind} e-postası gönderilemedi",
+        };
+    }
+
+    public function decisionMailColor(): string
+    {
+        return match ($this->decision_mail_state) {
+            DecisionMailState::Sent => 'success',
+            DecisionMailState::Failed => 'danger',
+            DecisionMailState::Queued => 'info',
+            default => 'gray',
+        };
     }
 
     public function routeNotificationForMail(): string

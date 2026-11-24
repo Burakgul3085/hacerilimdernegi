@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\EventRegistrations\Pages;
 
 use App\Actions\ReplyToEventRegistration;
+use App\Enums\ApplicationStatus;
 use App\Filament\Resources\EventRegistrations\EventRegistrationResource;
+use App\Filament\Resources\EventRegistrations\RegistrationDecisionActions;
 use App\Models\EventRegistration;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -62,7 +64,12 @@ class EditEventRegistration extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        $refresh = fn () => $this->getRecord()->refresh();
+
         return [
+            RegistrationDecisionActions::decide(ApplicationStatus::Approved, $refresh),
+            RegistrationDecisionActions::decide(ApplicationStatus::Rejected, $refresh),
+            RegistrationDecisionActions::resend($refresh),
             Action::make('reply')
                 ->label('Yanıtla')
                 ->icon('heroicon-o-paper-airplane')
@@ -112,7 +119,6 @@ class EditEventRegistration extends EditRecord
     protected function getFormActions(): array
     {
         return [
-            $this->getSaveFormAction()->label('Durumu kaydet'),
             $this->getCancelFormAction()->label('Listeye dön'),
         ];
     }
