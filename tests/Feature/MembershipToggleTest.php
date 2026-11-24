@@ -41,7 +41,8 @@ class MembershipToggleTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertDontSee('/uyelik', false)
-            ->assertDontSee('Üyelik / gönüllülük formu');
+            ->assertDontSee('Üyelik / gönüllülük formu')
+            ->assertSee('xl:flex-1 xl:justify-evenly', false);
 
         $this->get('/uyelik')->assertRedirect(route('home'));
     }

@@ -275,7 +275,7 @@
                     <img src="{{ $logoUrl }}" alt="{{ $settings['site_name'] }}" class="h-12 w-auto max-w-[10.5rem] object-contain sm:h-14 sm:max-w-[220px] lg:h-[3.75rem] lg:max-w-[240px]">
                 </a>
 
-                <nav class="hidden items-center gap-7 xl:flex xl:gap-8" aria-label="Ana menü">
+                <nav class="hidden items-center gap-7 xl:flex xl:flex-1 xl:justify-evenly xl:gap-8" aria-label="Ana menü">
                     <x-site-nav-items :items="$navItems" variant="desktop" />
                 </nav>
 
