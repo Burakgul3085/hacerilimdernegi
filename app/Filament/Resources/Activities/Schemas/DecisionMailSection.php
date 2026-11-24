@@ -16,8 +16,8 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
@@ -40,30 +40,30 @@ class DecisionMailSection
         'whatsapp_group_enabled', 'whatsapp_group_url', 'whatsapp_group_in_approval', 'whatsapp_group_in_rejection',
     ];
 
-    public static function make(): Section
+    public static function tab(): Tab
     {
-        return Section::make('Başvuru e-postaları')
-            ->description('Başvuru onaylandığında veya reddedildiğinde kişiye otomatik giden e-postalar. Her e-posta “Merhaba” ve kişinin adıyla başlar, faaliyetin adı da üstte görünür; sizin yalnızca mesajı yazmanız yeterli.')
+        return Tab::make('Başvuru e-postaları')
             ->icon(Heroicon::OutlinedEnvelope)
-            ->columnSpanFull()
             ->schema([
-                Tabs::make('decisionMails')
-                    ->tabs([
-                        self::mailTab(ApplicationStatus::Approved),
-                        self::mailTab(ApplicationStatus::Rejected),
-                        self::whatsappTab(),
-                    ]),
+                Text::make('Başvuru onaylandığında veya reddedildiğinde kişiye otomatik giden e-postalar. Her e-posta “Merhaba” ve kişinin adıyla başlar, faaliyetin adı da üstte görünür; sizin yalnızca mesajı yazmanız yeterli.')
+                    ->color('gray'),
+                self::mailSection(ApplicationStatus::Approved),
+                self::mailSection(ApplicationStatus::Rejected),
+                self::whatsappSection(),
             ]);
     }
 
-    private static function mailTab(ApplicationStatus $status): Tab
+    private static function mailSection(ApplicationStatus $status): Section
     {
         $prefix = DecisionMail::prefix($status);
         $approved = $status === ApplicationStatus::Approved;
         $noun = $approved ? 'Onay' : 'Ret';
 
-        return Tab::make("{$noun} e-postası")
+        return Section::make("{$noun} e-postası")
+            ->description($approved ? 'Başvurusu onaylanan kişiye gider.' : 'Başvurusu kabul edilemeyen kişiye gider.')
             ->icon($approved ? Heroicon::OutlinedCheckBadge : Heroicon::OutlinedEnvelopeOpen)
+            ->iconColor($approved ? 'success' : 'gray')
+            ->collapsible()
             ->schema([
                 Toggle::make("{$prefix}_mail_enabled")
                     ->label("{$noun} e-postası gönderilsin")
@@ -134,10 +134,13 @@ class DecisionMailSection
             ]);
     }
 
-    private static function whatsappTab(): Tab
+    private static function whatsappSection(): Section
     {
-        return Tab::make('WhatsApp grubu')
+        return Section::make('WhatsApp grubu')
+            ->description('Grup bağlantısı e-postaların altında yeşil bir kart olarak görünür.')
             ->icon(Heroicon::OutlinedChatBubbleLeftRight)
+            ->iconColor('success')
+            ->collapsible()
             ->schema([
                 Toggle::make('whatsapp_group_enabled')
                     ->label('WhatsApp grup bağlantısı e-postalarda görünsün')
