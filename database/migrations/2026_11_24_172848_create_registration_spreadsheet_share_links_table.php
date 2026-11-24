@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('registration_spreadsheet_share_links', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('registration_spreadsheet_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('registration_spreadsheet_id')->constrained(indexName: 'rs_share_links_spreadsheet_fk')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained(indexName: 'rs_share_links_user_fk')->nullOnDelete();
             $table->string('token_hash', 64)->unique();
             $table->timestamp('expires_at');
             $table->boolean('single_use')->default(false);
