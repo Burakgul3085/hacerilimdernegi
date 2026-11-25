@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\PostComment;
 use App\Notifications\Channels\PhpMailerChannel;
 use App\Notifications\Contracts\SendsViaPhpMailer;
+use App\Support\MailSalutation;
 use App\Support\MailTemplate;
 use App\Support\SiteSettings;
 use Illuminate\Notifications\Notification;
@@ -29,26 +30,25 @@ class PostCommentAcknowledged extends Notification implements SendsViaPhpMailer
         $comment = $this->comment->loadMissing(['post', 'commentable']);
         $subject = $comment->subject();
         $siteName = (string) SiteSettings::get('site_name', 'Hâcer İlim ve Kültür Derneği');
-        $name = e($comment->fullName());
         $title = e($subject?->title ?? $comment->kindLabel());
         $pageUrl = $comment->pageUrl();
         $place = $comment->placePhrase();
 
-        $text = "Merhaba {$comment->fullName()},\n\n"
+        $text = MailSalutation::greetingText($comment->fullName())."\n\n"
             ."“{$subject?->title}” başlıklı {$place} için yazdığınız yorum {$siteName}'ne ulaşmıştır. "
             ."Yönetici onayından sonra {$place} altında yayınlanır.\n\n"
-            ."Saygılarımızla,\n{$siteName}";
+            .MailSalutation::closingText();
 
         $html = MailTemplate::render([
             'title' => 'Yorumunuz alındı',
             'preheader' => 'Yorumunuz yönetici onayından sonra yayınlanır.',
             'eyebrow' => $comment->sectionLabel(),
-            'greeting' => "Merhaba {$name},",
+            'greeting' => MailSalutation::greetingHtml($comment->fullName()),
             'intro' => '<p style="margin:0;">Yorumunuz <strong style="color:#161513;">'.e($siteName).'</strong>\'ne ulaşmıştır. Yönetici onayından sonra '.e($place).' altında yayınlanır.</p>',
             'highlight' => '<p style="margin:0 0 6px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#8a7a62;">'.e($comment->kindLabel()).'</p>'
                 .'<p style="margin:0;font-family:Georgia,\'Times New Roman\',serif;font-size:16px;line-height:1.4;color:#161513;">'.$title.'</p>',
             'body' => '<p style="margin:0;">Bu otomatik bir bilgilendirmedir. Onaylandığında size yeniden yazılır.</p>',
-            'closing' => 'Saygılarımızla,<br><strong>'.e($siteName).'</strong>',
+            'closing' => MailSalutation::closingHtml(),
             'cta_label' => 'Sayfayı aç',
             'cta_url' => $pageUrl,
         ]);

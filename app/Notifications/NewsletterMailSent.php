@@ -5,8 +5,8 @@ namespace App\Notifications;
 use App\Models\NewsletterSubscriber;
 use App\Notifications\Channels\PhpMailerChannel;
 use App\Notifications\Contracts\SendsViaPhpMailer;
+use App\Support\MailSalutation;
 use App\Support\MailTemplate;
-use App\Support\SiteSettings;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
@@ -31,18 +31,17 @@ class NewsletterMailSent extends Notification implements SendsViaPhpMailer
     public function toPhpMailer(object $notifiable): array
     {
         /** @var NewsletterSubscriber $notifiable */
-        $siteName = (string) SiteSettings::get('site_name', 'Hâcer İlim ve Kültür Derneği');
         $safeBody = nl2br(e($this->mailBody));
 
         $text = "{$this->mailBody}\n\n"
-            ."Saygılarımızla,\n{$siteName}";
+            .MailSalutation::closingText();
 
         $html = MailTemplate::render([
             'title' => $this->mailSubject,
             'preheader' => Str::limit(strip_tags($this->mailBody), 90),
             'eyebrow' => 'E-bülten',
             'highlight' => '<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:15px;line-height:1.75;color:#161513;">'.$safeBody.'</div>',
-            'closing' => 'Saygılarımızla,<br><strong>'.e($siteName).'</strong>',
+            'closing' => MailSalutation::closingHtml(),
             'cta_label' => 'Web sitemizi ziyaret edin',
             'cta_url' => MailTemplate::publicBaseUrl().'/',
         ]);

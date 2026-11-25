@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Setting;
 use App\Support\Icons;
 use App\Support\InstagramMedia;
+use App\Support\MailSalutation;
 use App\Support\PhpMailerClient;
 use App\Support\SiteSettings;
 use App\Support\UploadRules;
@@ -24,6 +25,8 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use UnitEnum;
@@ -487,6 +490,40 @@ class ManageSettings extends Page
         return Tab::make('Mailer')
             ->icon(Heroicon::OutlinedEnvelope)
             ->schema([
+                Section::make('Mail hitabı ve kapanışı')
+                    ->description('Sitenin gönderdiği bütün e-postalarda geçerlidir. Kişinin adı ve dernek adı otomatik eklenir; burada yalnızca kelimeleri seçersiniz.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('mail_greeting')
+                            ->label('Hitap')
+                            ->placeholder(MailSalutation::DEFAULT_GREETING)
+                            ->helperText('Örn. Merhaba, Selamünaleyküm, Kıymetli. İsim buraya yazılmaz, otomatik eklenir.')
+                            ->maxLength(MailSalutation::MAX_LENGTH)
+                            ->live(onBlur: true)
+                            ->dehydrateStateUsing(fn (?string $state): string => MailSalutation::clean((string) $state)),
+                        TextInput::make('mail_closing')
+                            ->label('Kapanış')
+                            ->placeholder(MailSalutation::DEFAULT_CLOSING)
+                            ->helperText('Örn. Saygılarımızla, Selametle, Sevgilerimizle. Altına dernek adı otomatik eklenir.')
+                            ->maxLength(MailSalutation::MAX_LENGTH)
+                            ->live(onBlur: true)
+                            ->dehydrateStateUsing(fn (?string $state): string => MailSalutation::clean((string) $state)),
+                        Select::make('mail_greeting_name')
+                            ->label('Hitapta isim')
+                            ->options([
+                                MailSalutation::NAME_FULL => 'Ad soyad (Burak Gül)',
+                                MailSalutation::NAME_FIRST => 'Yalnızca ad (Burak)',
+                            ])
+                            ->default(MailSalutation::NAME_FULL)
+                            ->native(false)
+                            ->selectablePlaceholder(false)
+                            ->live(),
+                        Text::make(fn (Get $get): string => 'Önizleme: '.MailSalutation::preview(
+                            $get('mail_greeting'),
+                            $get('mail_closing'),
+                            $get('mail_greeting_name'),
+                        ))->columnSpanFull(),
+                    ]),
                 Section::make('SMTP / PHPMailer')
                     ->description('Yönetim paneli giriş doğrulama kodları PHPMailer ile Gmail üzerinden gönderilir. Sunucu, port ve şifreleme sabittir; yalnızca hesap bilgilerini girin.')
                     ->columns(2)

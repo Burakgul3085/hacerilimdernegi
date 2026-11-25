@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\AdminCalendarEntry;
 use App\Notifications\Channels\PhpMailerChannel;
 use App\Notifications\Contracts\SendsViaPhpMailer;
+use App\Support\MailSalutation;
 use App\Support\MailTemplate;
 use App\Support\SiteSettings;
 use Illuminate\Notifications\Notification;
@@ -58,7 +59,7 @@ class AdminCalendarReminder extends Notification implements SendsViaPhpMailer
             'title' => 'Takvim hatırlatması',
             'preheader' => $entry->title.' · '.$when,
             'eyebrow' => 'Takvimim',
-            'greeting' => 'Merhaba'.(isset($notifiable->name) ? ' '.e((string) $notifiable->name) : '').',',
+            'greeting' => MailSalutation::greetingHtml(isset($notifiable->name) ? (string) $notifiable->name : null),
             'intro' => $intro,
             'highlight' => '<p style="margin:0;font-family:Georgia,\'Times New Roman\',serif;font-size:20px;font-weight:700;color:#161513;">'.e($entry->title).'</p>'
                 .'<p style="margin:8px 0 0;font-family:\'Segoe UI\',Arial,sans-serif;font-size:14px;color:#6b6560;">'.e($when).'</p>'
@@ -68,7 +69,7 @@ class AdminCalendarReminder extends Notification implements SendsViaPhpMailer
             'body' => $description
                 ? '<p style="margin:0;">'.$description.'</p>'
                 : '<p style="margin:0;">Detay için panellerinizdeki takvimi açabilirsiniz.</p>',
-            'closing' => 'Saygılarımızla,<br><strong>'.$siteName.'</strong>',
+            'closing' => MailSalutation::closingHtml(),
             'cta_label' => 'Takvimimde aç',
             'cta_url' => $calendarUrl,
         ]);

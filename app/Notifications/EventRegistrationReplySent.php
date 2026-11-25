@@ -6,6 +6,7 @@ use App\Models\EventRegistration;
 use App\Models\EventRegistrationReply;
 use App\Notifications\Channels\PhpMailerChannel;
 use App\Notifications\Contracts\SendsViaPhpMailer;
+use App\Support\MailSalutation;
 use App\Support\MailTemplate;
 use App\Support\SiteSettings;
 use Illuminate\Notifications\Notification;
@@ -33,27 +34,26 @@ class EventRegistrationReplySent extends Notification implements SendsViaPhpMail
     {
         $siteName = (string) SiteSettings::get('site_name', 'Hâcer İlim ve Kültür Derneği');
         $programTitle = $this->registration->subjectTitle();
-        $name = e($this->registration->name);
         $programTitleHtml = e($programTitle);
         $body = nl2br(e($this->reply->body));
         $original = e($this->registration->originalSubmissionSummary());
 
-        $text = "Merhaba {$this->registration->name},\n\n"
+        $text = MailSalutation::greetingText($this->registration->name)."\n\n"
             ."{$siteName} olarak «{$programTitle}» programı başvurunuza yanıtımız:\n\n"
             ."{$this->reply->body}\n\n"
             ."—\nBaşvurunuzdan:\n".$this->registration->originalSubmissionSummary()."\n\n"
-            ."Saygılarımızla,\n{$siteName}";
+            .MailSalutation::closingText();
 
         $html = MailTemplate::render([
             'title' => 'Program başvurunuza yanıt',
             'preheader' => Str::limit(strip_tags($this->reply->body), 90),
             'eyebrow' => 'Program yanıtı',
-            'greeting' => "Merhaba {$name},",
+            'greeting' => MailSalutation::greetingHtml($this->registration->name),
             'intro' => '<p style="margin:0;"><strong style="color:#161513;">'.$siteName.'</strong> olarak <strong style="color:#161513;">'.$programTitleHtml.'</strong> programı başvurunuza yanıtımız aşağıdadır.</p>',
             'highlight' => '<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:15px;line-height:1.75;color:#161513;">'.$body.'</div>',
             'body' => '<p style="margin:0 0 8px;font-family:\'Segoe UI\',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#8a7a62;">Başvurunuzdan</p>'
                 .'<p style="margin:0;font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;line-height:1.7;color:#6b6560;white-space:pre-wrap;">'.$original.'</p>',
-            'closing' => 'Saygılarımızla,<br><strong>'.$siteName.'</strong>',
+            'closing' => MailSalutation::closingHtml(),
             'cta_label' => 'Web sitemizi ziyaret edin',
             'cta_url' => MailTemplate::publicBaseUrl().'/',
         ]);

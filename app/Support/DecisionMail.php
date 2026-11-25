@@ -104,7 +104,6 @@ final class DecisionMail
      */
     public static function compose(array $settings, ApplicationStatus $status, string $recipientName, string $activityTitle): array
     {
-        $siteName = (string) SiteSettings::get('site_name', 'Hâcer İlim ve Kültür Derneği');
         $approved = $status === ApplicationStatus::Approved;
         $title = $approved ? 'Başvurunuz onaylandı' : 'Başvurunuz hakkında';
         $bodyHtml = MailRichText::toEmailHtml($settings['body']);
@@ -121,7 +120,7 @@ final class DecisionMail
                 ? "«{$activityTitle}» için katılımınız onaylandı."
                 : "«{$activityTitle}» başvurunuzla ilgili bilgilendirme.",
             'eyebrow' => $approved ? 'Katılım onayı' : 'Başvuru sonucu',
-            'greeting' => 'Merhaba '.e($recipientName).',',
+            'greeting' => MailSalutation::greetingHtml($recipientName),
             'subject_card' => [
                 'label' => 'Faaliyet',
                 'title' => $activityTitle,
@@ -137,11 +136,11 @@ final class DecisionMail
                     ? 'Program duyuruları, ders saatleri ve hatırlatmalar bu grupta paylaşılır.'
                     : 'Yeni programlarımızdan ve duyurularımızdan ilk siz haberdar olun.',
             ] : null,
-            'closing' => 'Saygılarımızla,<br><strong>'.e($siteName).'</strong>',
+            'closing' => MailSalutation::closingHtml(),
         ]);
 
         $textParts = [
-            "Merhaba {$recipientName},",
+            MailSalutation::greetingText($recipientName),
             "{$title} — {$activityTitle}",
             MailRichText::toPlainText($bodyHtml),
         ];
@@ -154,7 +153,7 @@ final class DecisionMail
             $textParts[] = 'WhatsApp grubumuz: '.$settings['whatsapp_url'];
         }
 
-        $textParts[] = "Saygılarımızla,\n{$siteName}";
+        $textParts[] = MailSalutation::closingText();
 
         return [
             'subject' => $settings['subject'],

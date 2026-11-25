@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Notifications\Channels\PhpMailerChannel;
 use App\Notifications\Contracts\SendsViaPhpMailer;
+use App\Support\MailSalutation;
 use App\Support\MailTemplate;
 use App\Support\PhpMailerClient;
 use App\Support\SiteSettings;
@@ -35,10 +36,10 @@ class AdminPasswordResetLink extends Notification implements SendsViaPhpMailer
             'title' => 'Şifrenizi yenileyin',
             'preheader' => 'Yönetim paneli şifre sıfırlama bağlantısı.',
             'eyebrow' => 'Güvenlik',
-            'greeting' => 'Merhaba,',
+            'greeting' => MailSalutation::greetingHtml(),
             'intro' => '<p style="margin:0;">'.$siteName.' yönetim paneli için bir şifre sıfırlama isteği aldık. Yeni şifrenizi belirlemek için aşağıdaki düğmeyi kullanın.</p>',
             'body' => '<p style="margin:0;">Bu bağlantı '.$minutes.' dakika geçerlidir. İsteği siz yapmadıysanız bu iletiyi yok sayın; mevcut şifreniz değişmez.</p>',
-            'closing' => 'Saygılarımızla,<br><strong>'.$siteName.'</strong>',
+            'closing' => MailSalutation::closingHtml(),
             'cta_label' => 'Şifreyi yenile',
             'cta_url' => $this->url,
         ]);

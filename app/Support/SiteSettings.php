@@ -142,6 +142,10 @@ class SiteSettings
             'mailer_password' => '',
             'mailer_from_name' => 'Hâcer İlim Yönetim',
             'mailer_otp_to' => '',
+
+            'mail_greeting' => MailSalutation::DEFAULT_GREETING,
+            'mail_closing' => MailSalutation::DEFAULT_CLOSING,
+            'mail_greeting_name' => MailSalutation::NAME_FULL,
         ];
     }
 

@@ -45,7 +45,7 @@ class DecisionMailSection
         return Tab::make('Başvuru e-postaları')
             ->icon(Heroicon::OutlinedEnvelope)
             ->schema([
-                Text::make('Başvuru onaylandığında veya reddedildiğinde kişiye otomatik giden e-postalar. Her e-posta “Merhaba” ve kişinin adıyla başlar, faaliyetin adı da üstte görünür; sizin yalnızca mesajı yazmanız yeterli.')
+                Text::make('Başvuru onaylandığında veya reddedildiğinde kişiye otomatik giden e-postalar. Her e-posta Site ayarları → Mailer sekmesindeki hitapla (örn. “Merhaba”) ve kişinin adıyla başlar, faaliyetin adı da üstte görünür; sizin yalnızca mesajı yazmanız yeterli.')
                     ->color('gray'),
                 self::mailSection(ApplicationStatus::Approved),
                 self::mailSection(ApplicationStatus::Rejected),

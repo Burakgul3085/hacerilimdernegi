@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Notifications\Channels\PhpMailerChannel;
 use App\Notifications\Contracts\SendsViaPhpMailer;
+use App\Support\MailSalutation;
 use App\Support\MailTemplate;
 use App\Support\PhpMailerClient;
 use App\Support\SiteSettings;
@@ -44,12 +45,12 @@ class AdminLoginVerificationCode extends Notification implements SendsViaPhpMail
             'title' => 'Doğrulama kodunuz',
             'preheader' => "Yönetim paneli kodu: {$this->code}",
             'eyebrow' => 'Güvenli giriş',
-            'greeting' => 'Merhaba,',
+            'greeting' => MailSalutation::greetingHtml(),
             'intro' => '<p style="margin:0;">'.$siteName.' yönetim paneline giriş için tek kullanımlık doğrulama kodunuz aşağıdadır.</p>',
             'highlight' => '<p style="margin:0;text-align:center;font-family:Georgia,\'Times New Roman\',serif;font-size:28px;letter-spacing:0.42em;font-weight:700;color:#161513;">'.$code.'</p>'
                 .'<p style="margin:10px 0 0;text-align:center;font-family:\'Segoe UI\',Arial,sans-serif;font-size:12px;color:#6b6560;">'.$minutes.' dakika geçerlidir</p>',
             'body' => '<p style="margin:0;">Bu kodu kimseyle paylaşmayın. Bu isteği siz yapmadıysanız şifrenizi değiştirin ve bu iletiyi dikkate almayın.</p>',
-            'closing' => 'Saygılarımızla,<br><strong>'.$siteName.'</strong>',
+            'closing' => MailSalutation::closingHtml(),
         ]);
 
         return [
